@@ -1,6 +1,6 @@
 /* BALKAN-SERVERS shared auth — sign up / sign in (email + password), used by every page. */
 (function () {
-  const API = "https://balkan-backend.vercel.app";
+  const API = "https://balkan-backend.onrender.com";
   const KEY = "balkanAuth";
   const validSteam = (s) => /^STEAM_[0-5]:[01]:\d+$/i.test((s || "").trim());
   const validEmail = (s) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test((s || "").trim());
