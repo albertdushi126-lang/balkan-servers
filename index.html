@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BALKAN-SERVERS · Zombie CSO</title>
+<meta name="description" content="BALKAN-SERVERS — premium Zombie CSO server. Buy VIP, knives, skins & boosts. Applies in-game after map change." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<!-- ============================================================= -->
+<!--  CONFIG — edit these values (prices, payment links, server)   -->
+<!-- ============================================================= -->
+<script>
+const CONFIG = {
+  serverName : "BALKAN-SERVERS",
+  tagline    : "Zombie CSO · Balkan · since 2013",
+  serverIP   : "31.57.151.143:27015",     // game server (steam connect)
+  discord    : "#",                        // <-- put your Discord invite link
+  currency   : "€",
+
+  // Where the "Buy" buttons send the player. Fill these in once you have accounts.
+  payments : {
+    paypal : "https://paypal.me/YOURNAME",         // PayPal.me link
+    card   : "#",                                   // Stripe Payment Link
+    crypto : "#"                                    // NOWPayments / Coinbase Commerce link
+  },
+
+  // Store catalogue
+  store : [
+    { id:"vip",      cat:"VIP",    name:"VIP Rank",            price:5,  icon:"fa-crown",        desc:"VIP menu, special model, aura, extra HP & weapons. (flag access)", featured:true },
+    { id:"vip3",     cat:"VIP",    name:"VIP Knife — Hammer",  price:3,  icon:"fa-hammer",       desc:"Unlock the exclusive Hammer melee for your account." },
+    { id:"knife_mc", cat:"Knife",  name:"VIP Knife — Master",  price:3,  icon:"fa-khanda",       desc:"Master Combat knife skin, account-bound." },
+    { id:"skins",    cat:"Skins",  name:"Skin Pack",           price:4,  icon:"fa-spray-can",    desc:"Weapon skin set for your loadout." },
+    { id:"money",    cat:"Boost",  name:"Money Pack — 300k",   price:3,  icon:"fa-coins",        desc:"Top your in-game balance to the 300,000 cap." },
+    { id:"level",    cat:"Boost",  name:"Level Boost — 30",    price:5,  icon:"fa-arrow-up-9-1", desc:"Jump straight to the max level (30)." },
+    { id:"tesla",    cat:"Zombie", name:"Zombie Class — Tesla",price:2,  icon:"fa-bolt",         desc:"Unlock the Tesla zombie class for your account." }
+  ]
+};
+</script>
+
+<style>
+:root{
+  --bg:#08090b; --bg2:#0d0f13; --panel:#13161c; --panel2:#1a1e26;
+  --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14);
+  --txt:#eef0f3; --dim:#9aa0ac;
+  --red:#e3342f; --red-d:#b3231f; --gold:#e8b54a; --green:#2fbf71; --blue:#3b82f6;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);overflow-x:hidden;line-height:1.6}
+h1,h2,h3,.display{font-family:'Oswald',sans-serif;letter-spacing:.5px;text-transform:uppercase}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1160px;margin:0 auto;padding:0 22px}
+.accent{color:var(--red)}
+.gold{color:var(--gold)}
+.btn{display:inline-flex;align-items:center;gap:9px;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:1px;
+  font-size:15px;padding:13px 24px;border-radius:8px;border:0;cursor:pointer;transition:.18s;background:var(--panel2);color:var(--txt);border:1px solid var(--line2)}
+.btn:hover{transform:translateY(-2px)}
+.btn-red{background:var(--red);color:#fff;border:0;box-shadow:0 8px 24px rgba(227,52,47,.3)}
+.btn-red:hover{background:var(--red-d)}
+.btn-gold{background:var(--gold);color:#241a02;border:0;box-shadow:0 8px 24px rgba(232,181,74,.28)}
+.btn-green{background:var(--green);color:#06200f;border:0}
+.btn-ghost{background:transparent}
+
+/* ---------- INTRO (video + Balkan ad overlay) ---------- */
+#intro{position:fixed;inset:0;z-index:9999;background:#000;overflow:hidden;transition:opacity .8s ease}
+#intro.gone{opacity:0;pointer-events:none}
+#introVid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+#intro::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(rgba(0,0,0,0) 0 2px,rgba(0,0,0,.14) 2px 3px);pointer-events:none;z-index:5}
+#intro .vig{position:absolute;inset:0;box-shadow:inset 0 0 220px 80px rgba(0,0,0,.8);pointer-events:none;z-index:2}
+.intro-tag{position:absolute;top:20px;left:22px;z-index:6;color:#fff;font-size:12px;letter-spacing:2px;display:flex;align-items:center;gap:7px;font-family:'Oswald'}
+.intro-tag b{width:9px;height:9px;border-radius:50%;background:var(--red);display:inline-block;animation:pulse 1s infinite}
+.intro-skip{position:absolute;top:18px;right:22px;z-index:6;font-family:'Oswald';letter-spacing:1px;padding:8px 16px;border:1px solid rgba(255,255,255,.3);background:rgba(0,0,0,.45);color:#fff;border-radius:7px;cursor:pointer;font-size:13px;text-transform:uppercase}
+.intro-sound{position:absolute;top:18px;right:120px;z-index:6;width:40px;height:38px;border-radius:7px;border:1px solid rgba(255,255,255,.3);background:rgba(0,0,0,.45);color:#fff;cursor:pointer;font-size:14px}
+.ad-top{position:absolute;top:48px;left:22px;z-index:6;opacity:0;animation:adIn .8s ease .4s forwards}
+.ad-logo{font-family:'Oswald';font-weight:700;font-size:clamp(22px,3.4vw,34px);letter-spacing:1px;color:#fff;text-shadow:0 2px 18px rgba(0,0,0,.85)}
+.ad-logo i{color:var(--red)}
+.ad-bottom{position:absolute;left:0;right:0;bottom:66px;z-index:6;text-align:center;opacity:0;animation:adUp 1s ease 1.3s forwards;padding:0 16px}
+.ad-cta{font-family:'Oswald';font-weight:700;font-size:clamp(26px,5.4vw,56px);letter-spacing:3px;color:#fff;text-shadow:2px 0 var(--red),0 3px 26px rgba(0,0,0,.92)}
+.ad-ip{margin-top:10px;font-family:'Oswald';letter-spacing:2px;font-size:clamp(14px,2.2vw,21px);color:var(--gold);text-shadow:0 2px 14px rgba(0,0,0,.92)}
+.intro-bar{position:absolute;left:22px;right:22px;bottom:22px;z-index:6}
+.intro-bar .t{display:flex;justify-content:space-between;color:#dfe2e8;font-size:11px;margin-bottom:6px;font-family:'Oswald';letter-spacing:1px;text-transform:uppercase}
+.intro-bar .track{height:4px;border-radius:3px;background:rgba(255,255,255,.18);overflow:hidden}
+.intro-bar .fill{height:100%;width:0;background:var(--red);transition:width .25s linear}
+@keyframes adIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+@keyframes adUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ---------- NAV ---------- */
+header{position:sticky;top:0;z-index:100;background:rgba(8,9,11,.82);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+nav{display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo{display:flex;align-items:center;gap:10px;font-family:'Oswald';font-weight:700;font-size:21px;letter-spacing:1px}
+.logo i{color:var(--red);font-size:24px}
+.nav-links{display:flex;align-items:center;gap:26px}
+.nav-links a{color:var(--dim);font-size:14px;font-weight:500;transition:.15s}
+.nav-links a:hover{color:var(--txt)}
+.nav-cta{display:flex;gap:10px;align-items:center}
+.burger{display:none;font-size:22px;background:none;border:0;color:var(--txt);cursor:pointer}
+
+/* ---------- HERO ---------- */
+.hero{position:relative;text-align:center;padding:90px 0 80px;background:radial-gradient(1100px 480px at 50% -10%,rgba(227,52,47,.13),transparent 70%)}
+.hero .status{display:inline-flex;align-items:center;gap:9px;padding:6px 14px;border-radius:30px;background:rgba(47,191,113,.1);border:1px solid rgba(47,191,113,.4);color:#5fe09b;font-size:13px;margin-bottom:22px}
+.hero .status .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);animation:pulse 1.6s infinite}
+.hero h1{font-size:clamp(46px,9vw,96px);line-height:.95;font-weight:700}
+.hero .sub{color:var(--dim);font-size:16px;margin-top:14px;letter-spacing:.5px}
+.hero .cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:32px}
+.hero .ip{margin-top:20px;font-family:'Oswald';letter-spacing:1px;color:var(--dim);font-size:14px;cursor:pointer}
+.hero .ip b{color:var(--txt)}
+.hero .ip:hover b{color:var(--gold)}
+
+/* ---------- SECTIONS ---------- */
+section{padding:70px 0}
+.shead{text-align:center;margin-bottom:46px}
+.shead .k{color:var(--red);font-family:'Oswald';letter-spacing:3px;font-size:13px}
+.shead h2{font-size:clamp(30px,5vw,44px);margin-top:6px}
+.shead p{color:var(--dim);margin-top:10px;max-width:560px;margin-left:auto;margin-right:auto}
+
+/* store */
+.filters{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:34px}
+.filters button{font-family:'Oswald';letter-spacing:1px;font-size:13px;text-transform:uppercase;padding:9px 18px;border-radius:30px;border:1px solid var(--line2);background:var(--panel);color:var(--dim);cursor:pointer;transition:.15s}
+.filters button.active,.filters button:hover{background:var(--red);color:#fff;border-color:var(--red)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px;transition:.18s;position:relative;overflow:hidden}
+.card:hover{transform:translateY(-4px);border-color:var(--line2)}
+.card.feat{border-color:rgba(232,181,74,.5)}
+.card .badge{position:absolute;top:14px;right:14px;font-family:'Oswald';letter-spacing:1px;font-size:11px;background:var(--gold);color:#241a02;padding:3px 10px;border-radius:20px}
+.card .ic{width:54px;height:54px;border-radius:12px;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--gold);margin-bottom:16px}
+.card h3{font-size:20px;font-weight:600}
+.card .ctag{font-family:'Oswald';letter-spacing:1px;font-size:11px;color:var(--red);margin-bottom:6px}
+.card p{color:var(--dim);font-size:14px;margin:8px 0 18px;min-height:42px}
+.card .row{display:flex;align-items:center;justify-content:space-between}
+.card .price{font-family:'Oswald';font-size:26px;font-weight:700}
+.card .price small{font-size:14px;color:var(--dim);font-weight:500}
+
+/* how */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:18px}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px;text-align:center}
+.step .n{width:44px;height:44px;border-radius:50%;background:var(--red);color:#fff;font-family:'Oswald';font-weight:700;font-size:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.step h3{font-size:17px;font-weight:600;margin-bottom:6px}
+.step p{color:var(--dim);font-size:14px}
+.note{margin-top:26px;text-align:center;color:var(--gold);font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px}
+
+/* footer */
+footer{border-top:1px solid var(--line);padding:40px 0;margin-top:30px}
+.foot{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:18px}
+.foot .pay{display:flex;align-items:center;gap:14px;color:var(--dim);font-size:24px}
+.foot .pay i:hover{color:var(--txt)}
+.foot small{color:var(--dim)}
+
+/* modal */
+.modal{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:20px}
+.modal.open{display:flex}
+.sheet{background:var(--panel);border:1px solid var(--line2);border-radius:16px;width:100%;max-width:440px;padding:28px;position:relative}
+.sheet .x{position:absolute;top:16px;right:18px;background:none;border:0;color:var(--dim);font-size:20px;cursor:pointer}
+.sheet .x:hover{color:var(--txt)}
+.sheet .item{display:flex;align-items:center;gap:14px;padding-bottom:18px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.sheet .item .ic{width:48px;height:48px;border-radius:10px;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--gold)}
+.sheet .item h3{font-size:19px}
+.sheet .item .p{color:var(--gold);font-family:'Oswald';font-size:20px;font-weight:700}
+.field label{display:block;font-size:13px;color:var(--dim);margin-bottom:7px;font-weight:500}
+.field input{width:100%;padding:12px 14px;border-radius:9px;background:var(--bg2);border:1px solid var(--line2);color:var(--txt);font-family:'Inter';font-size:15px;outline:none}
+.field input:focus{border-color:var(--red)}
+.field .help{font-size:12px;color:var(--dim);margin-top:7px}
+.field .help a{color:var(--blue)}
+.pays{display:grid;gap:10px;margin-top:20px}
+.pays .pbtn{display:flex;align-items:center;justify-content:center;gap:10px;padding:13px;border-radius:9px;border:0;cursor:pointer;font-family:'Oswald';letter-spacing:1px;text-transform:uppercase;font-size:14px;transition:.15s}
+.pays .pbtn:hover{transform:translateY(-2px)}
+.pp-paypal{background:#0070ba;color:#fff}.pp-card{background:#635bff;color:#fff}.pp-crypto{background:#f7931a;color:#fff}
+.pays .pbtn.disabled{opacity:.45;cursor:not-allowed;transform:none}
+.sheet .after{margin-top:16px;font-size:12.5px;color:var(--dim);text-align:center;display:flex;gap:7px;justify-content:center;align-items:center}
+.err{color:var(--red);font-size:13px;margin-top:8px;display:none}
+
+@media(max-width:760px){
+  .nav-links{display:none} .burger{display:block}
+  .nav-links.open{display:flex;position:absolute;top:64px;left:0;right:0;flex-direction:column;background:var(--bg2);padding:18px 22px;gap:16px;border-bottom:1px solid var(--line)}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= INTRO ================= -->
+<div id="intro">
+  <video id="introVid" autoplay muted playsinline onended="skipIntro()" onerror="skipIntro()">
+    <source src="assets/intro.mp4" type="video/mp4">
+  </video>
+  <div class="intro-tag"><b></b> BALKAN-SERVERS</div>
+  <button class="intro-sound" id="sndBtn" onclick="toggleSound()" title="Sound"><i class="fa-solid fa-volume-xmark"></i></button>
+  <button class="intro-skip" onclick="skipIntro()">SKIP ▶</button>
+  <div class="ad-top"><span class="ad-logo"><i class="fa-solid fa-skull"></i> BALKAN<span class="accent">SERVERS</span></span></div>
+  <div class="ad-bottom">
+    <div class="ad-cta">JOIN THE ZOMBIE CSO</div>
+    <div class="ad-ip" id="adIp"></div>
+  </div>
+  <div class="intro-scene" style="display:none">
+    <svg width="300" height="320" viewBox="0 0 300 320" aria-label="Zombie">
+      <path d="M30 320 Q30 215 100 195 L200 195 Q270 215 270 320 Z" fill="#0c110d"/>
+      <rect x="122" y="160" width="56" height="55" fill="#313d2c"/>
+      <path d="M150 38 C96 38 80 84 82 124 C84 165 106 206 150 211 C194 206 216 165 218 124 C220 84 204 38 150 38 Z" fill="#465639"/>
+      <path d="M150 211 C106 206 84 165 82 124 C96 156 112 180 150 186 Z" fill="#35422d" opacity=".75"/>
+      <path d="M150 48 C122 48 102 70 100 100 C124 78 176 78 200 100 C198 70 178 48 150 48 Z" fill="#5a6c4b" opacity=".55"/>
+      <path d="M100 102 Q124 93 146 104 M154 104 Q176 93 200 102" stroke="#1f261a" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <ellipse cx="123" cy="120" rx="23" ry="16" fill="#0b0f08"/><ellipse cx="177" cy="120" rx="23" ry="16" fill="#0b0f08"/>
+      <circle class="eye" cx="123" cy="120" r="7" fill="#ff2f2f"/><circle class="eye" cx="177" cy="120" r="7" fill="#ff2f2f"/>
+      <path d="M150 128 L141 154 Q150 160 159 154 Z" fill="#0d110a"/>
+      <path d="M112 170 Q150 159 188 170 Q181 202 150 205 Q119 202 112 170 Z" fill="#070905"/>
+      <path d="M116 171 L125 187 L134 172 L143 188 L150 172 L157 188 L166 172 L175 187 L184 171 L184 168 L116 168 Z" fill="#cdc5ab"/>
+      <path d="M122 203 L130 191 L139 202 L147 192 L155 202 L163 192 L172 202 L180 192 L184 200 L184 205 L122 205 Z" fill="#b8b097"/>
+      <path d="M150 205 Q145 224 150 236 Q155 224 150 205 Z" fill="#7d1414"/>
+      <path d="M194 142 l16 -7 M194 149 l16 -7 M194 156 l16 -7" stroke="#1d241a" stroke-width="2.5"/>
+    </svg>
+  </div>
+  <div class="vig"></div>
+  <div class="intro-bar"><div class="t"><span>balkan-servers · ad</span><span id="vidTime">0:00</span></div><div class="track"><div class="fill" id="vidFill"></div></div></div>
+</div>
+
+<!-- ================= NAV ================= -->
+<header>
+  <div class="wrap"><nav>
+    <a class="logo" href="#top"><i class="fa-solid fa-skull"></i> BALKAN<span class="accent">SERVERS</span></a>
+    <div class="nav-links" id="navLinks">
+      <a href="#store">Store</a><a href="#how">How it works</a><a href="#" id="discordLink"><i class="fa-brands fa-discord"></i> Discord</a>
+    </div>
+    <div class="nav-cta">
+      <button class="btn btn-green" onclick="connect()"><i class="fa-solid fa-play"></i> Connect</button>
+      <button class="burger" onclick="document.getElementById('navLinks').classList.toggle('open')"><i class="fa-solid fa-bars"></i></button>
+    </div>
+  </nav></div>
+</header>
+
+<!-- ================= HERO ================= -->
+<div id="top"></div>
+<div class="hero"><div class="wrap">
+  <div class="status"><span class="dot"></span> <span id="statusTxt">Server online</span></div>
+  <h1>BALKAN<span class="accent">SERVERS</span></h1>
+  <p class="sub" id="tagline"></p>
+  <div class="cta">
+    <button class="btn btn-green" onclick="connect()"><i class="fa-solid fa-play"></i> Connect now</button>
+    <a class="btn btn-gold" href="#store"><i class="fa-solid fa-crown"></i> VIP Store</a>
+  </div>
+  <div class="ip" onclick="copyIP()"><i class="fa-solid fa-server"></i> <b id="ipTxt"></b> &nbsp;<span style="opacity:.6">(click to copy)</span></div>
+</div></div>
+
+<!-- ================= STORE ================= -->
+<section id="store"><div class="wrap">
+  <div class="shead"><div class="k">PAYWALL · INSTANT</div><h2>VIP Store</h2>
+    <p>Pick a perk, enter your SteamID, pay with PayPal / Card / Crypto. It applies in-game <b class="gold">after the next map change</b>.</p></div>
+  <div class="filters" id="filters"></div>
+  <div class="grid" id="grid"></div>
+</div></section>
+
+<!-- ================= HOW ================= -->
+<section id="how" style="background:var(--bg2)"><div class="wrap">
+  <div class="shead"><div class="k">3 STEPS</div><h2>How it works</h2></div>
+  <div class="steps">
+    <div class="step"><div class="n">1</div><h3>Pick & SteamID</h3><p>Choose an item and enter your SteamID so we know who to reward.</p></div>
+    <div class="step"><div class="n">2</div><h3>Pay securely</h3><p>PayPal, credit card (Stripe) or crypto — hosted, secure checkout.</p></div>
+    <div class="step"><div class="n">3</div><h3>Play</h3><p>Your privilege is granted on the server and activates after the next map change.</p></div>
+  </div>
+  <div class="note"><i class="fa-solid fa-bolt"></i> Applies automatically after map change · no manual steps for you</div>
+</div></section>
+
+<!-- ================= FOOTER ================= -->
+<footer><div class="wrap"><div class="foot">
+  <a class="logo" href="#top"><i class="fa-solid fa-skull"></i> BALKAN<span class="accent">SERVERS</span></a>
+  <div class="pay"><span style="font-size:13px">Secure checkout</span>
+    <i class="fa-brands fa-paypal"></i><i class="fa-brands fa-cc-stripe"></i><i class="fa-brands fa-bitcoin"></i><i class="fa-brands fa-cc-visa"></i></div>
+  <small>© 2026 BALKAN-SERVERS · Zombie CSO</small>
+</div></div></footer>
+
+<!-- ================= CHECKOUT MODAL ================= -->
+<div class="modal" id="modal">
+  <div class="sheet">
+    <button class="x" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+    <div class="item"><div class="ic"><i id="mIcon" class="fa-solid fa-crown"></i></div>
+      <div style="flex:1"><h3 id="mName">VIP Rank</h3><div class="ctag" id="mCat">VIP</div></div>
+      <div class="p" id="mPrice">€5</div></div>
+    <div class="field">
+      <label>Your SteamID</label>
+      <input id="steamid" placeholder="STEAM_0:1:666166430" autocomplete="off" />
+      <div class="help">In-game console: type <b>status</b>, or <a href="https://steamid.io" target="_blank" rel="noopener">steamid.io</a>. Format: <b>STEAM_0:X:XXXXXXX</b></div>
+      <div class="err" id="err">Please enter a valid SteamID (STEAM_0:1:1234567).</div>
+    </div>
+    <div class="pays">
+      <button class="pbtn pp-paypal" onclick="pay('paypal')"><i class="fa-brands fa-paypal"></i> Pay with PayPal</button>
+      <button class="pbtn pp-card"   onclick="pay('card')"><i class="fa-solid fa-credit-card"></i> Pay with Card</button>
+      <button class="pbtn pp-crypto" onclick="pay('crypto')"><i class="fa-brands fa-bitcoin"></i> Pay with Crypto</button>
+    </div>
+    <div class="after"><i class="fa-solid fa-shield-halved"></i> After paying, your reward applies in-game after the next map change.</div>
+  </div>
+</div>
+
+<script>
+/* ---------- render from CONFIG ---------- */
+document.getElementById('tagline').textContent = CONFIG.tagline;
+document.getElementById('ipTxt').textContent = CONFIG.serverIP;
+document.getElementById('discordLink').href = CONFIG.discord;
+let activeCat = "All";
+const cats = ["All", ...new Set(CONFIG.store.map(i=>i.cat))];
+
+function renderFilters(){
+  document.getElementById('filters').innerHTML = cats.map(c=>
+    `<button class="${c===activeCat?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+}
+function setCat(c){ activeCat=c; renderFilters(); renderGrid(); }
+function renderGrid(){
+  const items = CONFIG.store.filter(i=> activeCat==="All" || i.cat===activeCat);
+  document.getElementById('grid').innerHTML = items.map(i=>`
+    <div class="card ${i.featured?'feat':''}">
+      ${i.featured?'<span class="badge">Most popular</span>':''}
+      <div class="ic"><i class="fa-solid ${i.icon}"></i></div>
+      <div class="ctag">${i.cat}</div>
+      <h3>${i.name}</h3><p>${i.desc}</p>
+      <div class="row"><div class="price">${CONFIG.currency}${i.price}</div>
+        <button class="btn btn-red" onclick="openModal('${i.id}')">Buy</button></div>
+    </div>`).join('');
+}
+
+/* ---------- checkout ---------- */
+let current=null;
+function openModal(id){
+  current = CONFIG.store.find(i=>i.id===id);
+  document.getElementById('mName').textContent=current.name;
+  document.getElementById('mCat').textContent=current.cat;
+  document.getElementById('mPrice').textContent=CONFIG.currency+current.price;
+  document.getElementById('mIcon').className='fa-solid '+current.icon;
+  // disable payment methods that aren't configured yet
+  [['paypal','pp-paypal'],['card','pp-card'],['crypto','pp-crypto']].forEach(([k,cls])=>{
+    const b=document.querySelector('.'+cls);
+    const ok = CONFIG.payments[k] && CONFIG.payments[k]!=="#";
+    b.classList.toggle('disabled', !ok);
+  });
+  document.getElementById('err').style.display='none';
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+function validSteam(s){ return /^STEAM_[0-5]:[01]:\d+$/i.test(s.trim()); }
+function pay(method){
+  const sid=document.getElementById('steamid').value.trim();
+  if(!validSteam(sid)){ document.getElementById('err').style.display='block'; return; }
+  const url = CONFIG.payments[method];
+  if(!url || url==="#"){ alert('This payment method is not set up yet. Edit CONFIG.payments.'+method); return; }
+  // pass item + steamid as a reference where the processor supports it
+  const ref = encodeURIComponent(current.id+'|'+sid);
+  let go = url;
+  if(method==='paypal') go = url + (url.includes('paypal.me')? '/'+current.price : '') ;
+  else if(method==='card') go = url + (url.includes('?')?'&':'?') + 'client_reference_id='+ref;
+  else go = url;
+  // remember the order locally so you can reconcile manually until the webhook is live
+  try{ localStorage.setItem('lastOrder', JSON.stringify({item:current.id,price:current.price,steamid:sid,method,ts:Date.now()})); }catch(e){}
+  window.open(go,'_blank','noopener');
+  closeModal();
+}
+
+/* ---------- connect / ip ---------- */
+function connect(){ window.location.href='steam://connect/'+CONFIG.serverIP; }
+function copyIP(){ navigator.clipboard.writeText(CONFIG.serverIP).then(()=>{
+  const t=document.getElementById('ipTxt'); const o=t.textContent; t.textContent='Copied!'; setTimeout(()=>t.textContent=o,1200); }); }
+
+/* ---------- intro (video + Balkan ad) ---------- */
+function skipIntro(){ const v=document.getElementById('introVid'); if(v){try{v.pause();}catch(e){}} document.getElementById('intro').classList.add('gone'); }
+function toggleSound(){
+  const v=document.getElementById('introVid'), b=document.getElementById('sndBtn');
+  v.muted=!v.muted; b.innerHTML = v.muted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
+  if(!v.muted){ try{ v.play(); }catch(e){} }
+}
+(function(){
+  const ip=document.getElementById('adIp'); if(ip) ip.innerHTML='<i class="fa-solid fa-server"></i> connect '+CONFIG.serverIP;
+  const vid=document.getElementById('introVid');
+  if(sessionStorage.getItem('introSeen')){ skipIntro(); return; }
+  sessionStorage.setItem('introSeen','1');
+  vid.addEventListener('timeupdate',function(){
+    if(vid.duration){ document.getElementById('vidFill').style.width=(vid.currentTime/vid.duration*100)+'%';
+      const r=Math.max(0,Math.round(vid.duration-vid.currentTime)); document.getElementById('vidTime').textContent='0:'+String(r).padStart(2,'0'); }
+  });
+  vid.play().catch(function(){});
+  setTimeout(function(){ if(vid.readyState<2) skipIntro(); },4500);
+})();
+
+renderFilters(); renderGrid();
+</script>
+</body>
+</html>
