@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Zombie Classes · BALKAN-SERVERS</title>
+<meta name="description" content="BALKAN-SERVERS Zombie CSO — every zombie class: model, abilities and stats." />
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="assets/auth.js"></script>
+
+<script>
+const WIKI = {
+  // zombie classes — stats & abilities pulled from the server source
+  classes: [
+    { id:"fast", name:"Fast", zid:0, img:null, hp:1750, speed:265, gravity:0.69, knockback:0.49,
+      role:"The nimble runner — fastest of all, but light on its feet.",
+      ab:{ name:"No special ability", key:"Passive", icon:"fa-person-running",
+        desc:"Pure speed & agility. The lowest gravity of any class (0.69) means it jumps the highest — great for flanking and chasing." } },
+    { id:"stamper", name:"Stamper", zid:1, img:"assets/wiki/zclass_stamper.png", hp:2800, speed:235, gravity:0.77, knockback:0.40,
+      role:"The trapper — locks humans down with a coffin.",
+      ab:{ name:"Coffin Stamp", key:"Mouse 2", icon:"fa-box-archive",
+        desc:"Summons a coffin that FREEZES humans within 200 units for 5s and slows them. It detonates after 10s (or when destroyed), dealing damage + a huge 700 knockback to everyone nearby." } },
+    { id:"healer", name:"Healer", zid:2, img:"assets/wiki/zclass_healer.png", hp:2000, speed:235, gravity:0.91, knockback:0.37,
+      role:"The support — keeps the horde alive.",
+      ab:{ name:"Healing Aura", key:"Mouse 2", icon:"fa-kit-medical",
+        desc:"Heals nearby allied zombies within 200 units for 300 HP each (costs mana, ~1s cooldown). A team Healer can make the zombies almost unkillable." } },
+    { id:"heavy", name:"Heavy", zid:3, img:null, hp:5500, speed:235, gravity:0.85, knockback:0.25,
+      role:"The tank — 5500 HP and barely flinches.",
+      ab:{ name:"Blinding Counter", key:"Passive", icon:"fa-eye-slash",
+        desc:"10% chance when hit to BLIND the attacker for 4s — and they can't damage the Heavy again for 30s. The toughest class in the game; bullets barely push it back." } },
+    { id:"hunter", name:"Hunter", zid:4, img:"assets/wiki/zclass_hunter.png", hp:2200, speed:235, gravity:0.79, knockback:0.43,
+      role:"The chaser — closes the gap in a blink.",
+      ab:{ name:"Speed Boost", key:"Mouse 2", icon:"fa-gauge-high",
+        desc:"Sprints at 500 speed for 3 seconds (20s cooldown, 10 uses/round). Nobody outruns a charging Hunter." } },
+    { id:"sirens", name:"Sirens", zid:5, img:"assets/wiki/zclass_sirens.png", hp:2300, speed:240, gravity:0.80, knockback:0.40,
+      role:"The screamer — area control + slow.",
+      ab:{ name:"Siren Scream", key:"Hold USE", icon:"fa-volume-high",
+        desc:"A piercing scream — 3 damage/tick to all humans within 250 units for 3s, halving their speed and shaking their screen (30s cooldown, 10/round)." } },
+    { id:"tesla", name:"Tesla", zid:6, img:"assets/wiki/zclass_tesla.png", hp:3500, speed:220, gravity:0.88, knockback:0.50,
+      role:"The electric artillery — orbs that trap from range.",
+      ab:{ name:"Energy Balls", key:"Mouse 2", icon:"fa-bolt",
+        desc:"Charge & hurl up to 5 electric orbs/round. They explode and TRAP humans (can't move or shoot) for ~5s, ~20 dmg + knockback (15s cooldown). A VIP favourite." } },
+    { id:"deimos", name:"Deimos", zid:7, img:"assets/wiki/zclass_deimos.png", hp:null, speed:null, gravity:null, knockback:null,
+      role:"The boss-tier freezer.",
+      ab:{ name:"Freezing Projectile", key:"Mouse 2", icon:"fa-snowflake",
+        desc:"Launches a freezing projectile that forces humans to DROP their weapon and freezes them for 3s (10–30 freeze damage, 7s cooldown, 20 uses/round)." } }
+  ],
+  // knives shown in player profiles
+  knives: [
+    { id:"combat", name:"Combat",  img:"assets/wiki/knife_combat.webp", note:"The default melee. Reliable, balanced." },
+    { id:"strong", name:"Strong",  img:"assets/wiki/knife_strong.webp", note:"A heavy machete — bigger hits." },
+    { id:"axe",    name:"Axe",     img:"assets/wiki/knife_axe.webp",    note:"A hooked axe — wide swing." },
+    { id:"hammer", name:"Hammer",  img:"assets/wiki/knife_hammer.png",  note:"VIP knife — huge damage, knockback & a higher, floatier jump (gravity)." , vip:true },
+    { id:"master", name:"Master",  img:"assets/wiki/knife_master.webp", note:"Master combat knife — premium skin." }
+  ]
+};
+</script>
+
+<style>
+:root{
+  --bg:#070809;--bg2:#0c0e12;--panel:#12151b;--panel2:#191d25;
+  --line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.15);
+  --txt:#eef0f3;--dim:#9aa0ac;
+  --red:#e3342f;--red-d:#b3231f;--gold:#e8b54a;--green:#2fbf71;--blue:#3b82f6;--purple:#8b5cf6;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);overflow-x:hidden;line-height:1.6}
+h1,h2,h3,h4{font-family:'Oswald',sans-serif;letter-spacing:.5px;text-transform:uppercase;font-weight:700}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+.gold{color:var(--gold)}.accent{color:var(--red)}
+.btn{display:inline-flex;align-items:center;gap:9px;font-family:'Oswald';text-transform:uppercase;letter-spacing:1px;font-size:15px;padding:12px 22px;border-radius:8px;border:1px solid var(--line2);cursor:pointer;transition:.18s;background:var(--panel2);color:var(--txt)}
+.btn:hover{transform:translateY(-2px)}
+.btn-green{background:var(--green);color:#06200f;border:0}.btn-ghost{background:transparent}
+
+header{position:sticky;top:0;z-index:100;background:rgba(7,8,9,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+nav{display:flex;align-items:center;justify-content:space-between;height:64px;gap:12px}
+.logo{display:flex;align-items:center;gap:10px;font-family:'Oswald';font-weight:700;font-size:21px;letter-spacing:1px}.logo i{color:var(--red);font-size:24px}
+.nav-links{display:flex;align-items:center;gap:22px}
+.nav-links a{color:var(--dim);font-size:14px;font-weight:500}.nav-links a:hover{color:var(--txt)}
+.nav-cta{display:flex;gap:8px;align-items:center}
+
+.phead{padding:42px 0 8px}
+.phead .k{color:var(--red);font-family:'Oswald';letter-spacing:3px;font-size:13px}
+.phead h1{font-size:clamp(32px,5.5vw,56px);margin-top:4px}
+.phead p{color:var(--dim);margin-top:6px;max-width:640px}
+
+section{padding:26px 0}
+.shead{margin:14px 0 18px}
+.shead .k{color:var(--gold);font-family:'Oswald';letter-spacing:2px;font-size:12px}
+.shead h2{font-size:clamp(24px,4vw,34px)}
+
+.cls-grid{display:grid;gap:16px}
+.cls{display:grid;grid-template-columns:200px 1fr;gap:0;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.cls .pic{background:radial-gradient(120% 100% at 50% 0,rgba(227,52,47,.12),#0a0b0e);display:flex;align-items:flex-end;justify-content:center;position:relative;min-height:230px;padding:14px}
+.cls .pic img{max-height:210px;max-width:100%;object-fit:contain;filter:drop-shadow(0 12px 26px rgba(0,0,0,.6))}
+.cls .pic .ph{font-size:64px;color:var(--line2)}
+.cls .pic .zid{position:absolute;top:12px;left:12px;font-family:'Oswald';letter-spacing:1px;font-size:11px;background:var(--panel2);color:var(--dim);padding:3px 9px;border-radius:20px}
+.cls .info{padding:22px 24px}
+.cls .info h3{font-size:26px;display:flex;align-items:center;gap:10px}
+.cls .info .role{color:var(--dim);font-size:14px;margin:4px 0 14px}
+.stats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.stat{background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:7px 12px;min-width:84px}
+.stat .l{font-size:10px;color:var(--dim);font-family:'Oswald';letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;gap:5px}
+.stat .v{font-family:'Oswald';font-size:18px;margin-top:1px}
+.stat.hp .v{color:var(--red)}
+.ability{background:linear-gradient(110deg,rgba(232,181,74,.08),transparent);border:1px solid var(--line);border-radius:12px;padding:15px;display:flex;gap:14px;align-items:flex-start}
+.ability .ic{width:46px;height:46px;flex:0 0 46px;border-radius:11px;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--gold)}
+.ability h4{font-size:16px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.ability .key{font-family:'Oswald';letter-spacing:.5px;font-size:10px;background:var(--red);color:#fff;padding:2px 8px;border-radius:5px;text-transform:uppercase}
+.ability p{color:var(--dim);font-size:13.5px;margin-top:5px}
+
+.kn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.kn{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px;text-align:center}
+.kn .kp{height:84px;display:flex;align-items:center;justify-content:center;margin-bottom:8px}
+.kn .kp img{max-height:84px;max-width:100%;object-fit:contain}
+.kn h4{font-size:17px}.kn h4 .vipt{font-size:10px;background:var(--gold);color:#241a02;border-radius:5px;padding:1px 6px;vertical-align:middle;margin-left:5px;font-family:'Oswald'}
+.kn p{color:var(--dim);font-size:12.5px;margin-top:4px}
+
+.miss{margin-top:14px;font-size:13px;color:var(--dim);background:var(--panel);border:1px dashed var(--line2);border-radius:10px;padding:12px 14px}
+footer{border-top:1px solid var(--line);padding:30px 0;margin-top:30px}.foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--dim);font-size:13px}
+@media(max-width:680px){.nav-links{display:none}.cls{grid-template-columns:1fr}.cls .pic{min-height:200px}}
+</style>
+</head>
+<body>
+
+<header><div class="wrap"><nav>
+  <a class="logo" href="index.html"><i class="fa-solid fa-skull"></i> BALKAN<span class="accent">SERVERS</span></a>
+  <div class="nav-links">
+    <a href="index.html">Home</a><a href="players.html">Stats</a><a href="classes.html" class="gold">Classes</a><a href="store.html">Store</a>
+  </div>
+  <div class="nav-cta"><span id="balkanAuthUI" style="display:flex;gap:8px;align-items:center"></span>
+    <button class="btn btn-green" onclick="window.location.href='steam://connect/31.57.151.143:27015'"><i class="fa-solid fa-play"></i> Connect</button></div>
+</nav></div></header>
+
+<div class="wrap">
+  <div class="phead"><div class="k">WIKI</div><h1>Zombie <span class="gold">Classes</span></h1>
+    <p>Every zombie class on BALKAN-SERVERS — its model, special ability and stats. Pick your class in-game from the zombie-class menu.</p></div>
+</div>
+
+<div class="wrap">
+  <section><div class="shead"><div class="k">8 CLASSES</div><h2>The horde</h2></div>
+    <div class="cls-grid" id="clsGrid"></div>
+    <div class="miss" id="clsMiss"></div>
+  </section>
+
+  <section><div class="shead"><div class="k">MELEE</div><h2>Knives</h2></div>
+    <div class="kn-grid" id="knGrid"></div>
+  </section>
+</div>
+
+<footer><div class="wrap"><div class="foot">
+  <span>© 2026 BALKAN-SERVERS · Zombie CSO</span>
+  <span><a href="index.html" class="gold">← Back to community</a></span>
+</div></div></footer>
+
+<script>
+const fmt = (n) => (n==null ? '—' : Number(n).toLocaleString('en-US'));
+function statRow(c){
+  return `<div class="stats">
+    <div class="stat hp"><div class="l"><i class="fa-solid fa-heart"></i> HP</div><div class="v">${fmt(c.hp)}</div></div>
+    <div class="stat"><div class="l"><i class="fa-solid fa-gauge-high"></i> Speed</div><div class="v">${fmt(c.speed)}</div></div>
+    <div class="stat"><div class="l"><i class="fa-solid fa-feather"></i> Gravity</div><div class="v">${c.gravity==null?'—':c.gravity}</div></div>
+    <div class="stat"><div class="l"><i class="fa-solid fa-arrows-left-right-to-line"></i> Knockback</div><div class="v">${c.knockback==null?'—':c.knockback}</div></div>
+  </div>`;
+}
+document.getElementById('clsGrid').innerHTML = WIKI.classes.map(c=>`
+  <div class="cls" id="${c.id}">
+    <div class="pic"><span class="zid">CLASS ${c.zid}</span>
+      ${c.img?`<img src="${c.img}" alt="${c.name}">`:`<i class="fa-solid fa-skull ph"></i>`}</div>
+    <div class="info">
+      <h3>${c.name}</h3><div class="role">${c.role}</div>
+      ${statRow(c)}
+      <div class="ability"><div class="ic"><i class="fa-solid ${c.ab.icon}"></i></div>
+        <div><h4>${c.ab.name} <span class="key">${c.ab.key}</span></h4><p>${c.ab.desc}</p></div></div>
+    </div>
+  </div>`).join('');
+
+const missing = WIKI.classes.filter(c=>!c.img).map(c=>c.name);
+document.getElementById('clsMiss').innerHTML = missing.length
+  ? `<i class="fa-solid fa-circle-info"></i> Model images still to add: <b>${missing.join(', ')}</b> — they'll appear here once uploaded.`
+  : '';
+
+document.getElementById('knGrid').innerHTML = WIKI.knives.map(k=>`
+  <div class="kn"><div class="kp"><img src="${k.img}" alt="${k.name}"></div>
+    <h4>${k.name}${k.vip?'<span class="vipt">VIP</span>':''}</h4><p>${k.note}</p></div>`).join('');
+</script>
+</body>
+</html>

@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="assets/auth.js"></script>
 
 <!-- ===================== CONFIG (edit me) ===================== -->
 <script>
@@ -185,11 +186,12 @@ footer{border-top:1px solid var(--line);padding:40px 0;margin-top:20px}
 <header><div class="wrap"><nav>
   <a class="logo" href="#top"><i class="fa-solid fa-skull"></i> BALKAN<span class="accent">SERVERS</span></a>
   <div class="nav-links" id="navLinks">
-    <a href="#news">News</a><a href="#giveaways">Giveaways</a><a href="players.html"><i class="fa-solid fa-ranking-star gold"></i> Stats</a><a href="#apply">Apply</a>
+    <a href="#news">News</a><a href="players.html"><i class="fa-solid fa-ranking-star gold"></i> Stats</a><a href="classes.html"><i class="fa-solid fa-skull"></i> Classes</a><a href="#apply">Apply</a>
     <a href="store.html"><i class="fa-solid fa-crown gold"></i> Store</a>
     <a href="#" id="navDiscord"><i class="fa-brands fa-discord"></i> Discord</a>
   </div>
   <div class="nav-cta">
+    <span id="balkanAuthUI" style="display:flex;gap:8px;align-items:center"></span>
     <button class="btn btn-green" onclick="connect()"><i class="fa-solid fa-play"></i> Connect</button>
     <button class="burger" onclick="document.getElementById('navLinks').classList.toggle('open')"><i class="fa-solid fa-bars"></i></button>
   </div>
@@ -309,24 +311,20 @@ function postDiscord(title, fields, color){
 }
 function submitForm(kind){
   const msg = document.getElementById(kind==='suggestion'?'sg_msg':'ap_msg');
-  let title, fields=[];
+  if(!window.BalkanAuth || !BalkanAuth.isIn()){ setMsg(msg,'Please sign in first to post.',false); window.BalkanAuth && BalkanAuth.open('in'); return; }
+  let message='', label='';
   if(kind==='suggestion'){
-    const name=val('sg_name'), text=val('sg_text');
-    if(!text){ return setMsg(msg,'Write your suggestion first.',false); }
-    title='💡 New suggestion'; fields=[{name:'From',value:name||'anon',inline:true},{name:'Suggestion',value:text}];
+    const text=val('sg_text'); if(!text) return setMsg(msg,'Write your suggestion first.',false);
+    label='Suggestion'; message=text;
   } else {
-    const need=['ap_name','ap_steam','ap_disc','ap_why']; for(const f of need){ if(!val(f)) return setMsg(msg,'Please fill the required fields (name, SteamID, Discord, why).',false); }
-    title='🛡️ Staff application';
-    fields=[{name:'Name',value:val('ap_name'),inline:true},{name:'Age',value:val('ap_age')||'-',inline:true},
-      {name:'SteamID',value:val('ap_steam')},{name:'Discord',value:val('ap_disc'),inline:true},
-      {name:'Hours/day',value:val('ap_hours')||'-',inline:true},{name:'Languages',value:val('ap_lang')||'-'},
-      {name:'Experience',value:val('ap_exp')||'-'},{name:'Why',value:val('ap_why')}];
+    if(!val('ap_why')) return setMsg(msg,'Tell us why we should pick you.',false);
+    label='Staff application';
+    message='Age: '+(val('ap_age')||'-')+' · SteamID: '+(val('ap_steam')||'-')+' · Discord: '+(val('ap_disc')||'-')+' · Hours/day: '+(val('ap_hours')||'-')+' · Languages: '+(val('ap_lang')||'-')+'\nExperience: '+(val('ap_exp')||'-')+'\nWhy: '+val('ap_why');
   }
-  if(!CONFIG.discordWebhook){ return setMsg(msg,'Submissions are not wired yet — set CONFIG.discordWebhook (or join our Discord and post there).',false); }
   setMsg(msg,'Sending…',true);
-  postDiscord(title,fields, kind==='application'?0x3b82f6:0xe3342f).then(ok=>{
-    if(ok){ setMsg(msg,'Sent! Thank you — we got it. 🎉',true); clearForm(kind); }
-    else setMsg(msg,'Could not send. Try again or post in our Discord.',false);
+  BalkanAuth.api('/api/post',{method:'POST',body:{kind:label,message:message}}).then(r=>{
+    if(r.ok){ setMsg(msg,'Sent! Thank you — we got it. 🎉',true); clearForm(kind); }
+    else setMsg(msg,(r.data&&r.data.error)||'Could not send. Try again.',false);
   });
 }
 function val(id){ return (document.getElementById(id).value||'').trim(); }
