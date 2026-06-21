@@ -30,10 +30,11 @@ const CONFIG = {
     {
       id:"vip", cat:"VIP", name:"VIP — TERROR ETA", icon:"fa-crown", featured:true, tiered:true,
       short:"The exclusive TERROR ETA model, the Hammer knife & a stack of perks.",
-      gallery:["assets/vip/terror.png","assets/vip/terror-hammer.png","assets/vip/hammer.png"],
+      gallery:["assets/vip/terror.png","assets/vip/terror-hammer.png","assets/vip/hammer.png","assets/vip/tesla2.png","assets/vip/tesla1.png"],
       perks:[
         { i:"fa-user-ninja", t:"TERROR ETA model", d:"The exclusive VIP player model shown here — only VIPs wear it." },
         { i:"fa-hammer",     t:"VIP Knife — Hammer", d:"The heavy Hammer melee (full details below)." },
+        { i:"fa-bolt",       t:"Tesla zombie class", d:"Turn into the electric Tesla zombie — 3500 HP + energy-ball ability (stats below)." },
         { i:"fa-shield-halved", t:"Random armor 35–100", d:"Fresh random armor every single round." },
         { i:"fa-feather",    t:"Gravity", d:"The Hammer's weight gives you a higher, floatier jump." },
         { i:"fa-gun",        t:"Special guns", d:"Access to VIP-only weapons (rolling out soon)." },
@@ -303,7 +304,8 @@ function vipDetail(it){
         <div class="perks">${perks}</div>
       </div>
     </div>
-    ${hammerBlock()}`;
+    ${hammerBlock()}
+    ${teslaBlock()}`;
 }
 
 function hammerBlock(){
@@ -321,6 +323,25 @@ function hammerBlock(){
       <div class="wstat"><div class="lab"><i class="fa-solid fa-arrows-left-right-to-line"></i> Knockback</div><p>The slam launches zombies away — your #1 tool to peel a horde off a doorway or a teammate.</p></div>
       <div class="wstat"><div class="lab"><i class="fa-solid fa-feather"></i> Gravity</div><p>The Hammer's weight gives a higher, floatier jump. Reach crates &amp; ledges zombies can't, and slam from above.</p></div>
       <div class="wstat"><div class="lab"><i class="fa-solid fa-lightbulb"></i> How to hold it &amp; tips</div><p>Back to a wall, jump to high ground, bait the slam. Don't spam Mouse 2 (it has a cooldown) — mix Mouse 1 to stay safe between slams.</p></div>
+    </div>
+  </div>`;
+}
+
+function teslaBlock(){
+  return `
+  <div class="weapon">
+    <div class="wtop">
+      <div class="wpic"><img src="assets/vip/tesla2.png" alt="Tesla zombie"></div>
+      <div class="whead"><div class="k" style="color:#a78bfa">VIP ZOMBIE CLASS</div><h2>Tesla</h2>
+        <p>A tanky electric zombie that charges and hurls energy balls — they explode and freeze humans where they stand. Pick it from the zombie-class menu once you're VIP.</p></div>
+    </div>
+    <div class="wstats">
+      <div class="wstat"><div class="lab"><i class="fa-solid fa-heart"></i> Health</div><p><b>3500 HP</b> — one of the tankiest classes, soaks a ton of fire before going down.</p></div>
+      <div class="wstat"><div class="lab"><i class="fa-solid fa-bolt"></i> Energy balls</div><p><b>5 per round.</b> Hold <b>Mouse 2</b> with the knife out to charge an orb, then release to launch it.</p></div>
+      <div class="wstat"><div class="lab"><i class="fa-solid fa-snowflake"></i> What it does</div><p>The orb explodes in a blast and <b>traps humans — they can't move or shoot for ~5s</b> (survivors shrug it off). ~20 damage + knockback on hit.</p></div>
+      <div class="wstat"><div class="lab"><i class="fa-solid fa-hourglass-half"></i> Cooldown</div><p>~15s between balls — time your shots. A purple lightning trail marks the orb in flight.</p></div>
+      <div class="wstat"><div class="lab"><i class="fa-solid fa-feather"></i> Gravity</div><p><b>0.88</b> — a touch lower than normal, so the Tesla jumps a little higher and floatier.</p></div>
+      <div class="wstat"><div class="lab"><i class="fa-solid fa-arrows-left-right-to-line"></i> Knockback</div><p><b>0.50</b> — heavy &amp; stable; bullets barely shove it back, perfect for pushing chokepoints.</p></div>
     </div>
   </div>`;
 }
