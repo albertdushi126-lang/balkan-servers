@@ -16,45 +16,28 @@ const CONFIG = {
   tagline    : "Zombie CSO · Balkan · since 2013",
   serverIP   : "31.57.151.143:27015",
   maxSlots   : 32,
-  discord    : "#",                                   // Discord invite link
-  discordWebhook : "",                                // Discord webhook URL -> forms post here (Server Settings > Integrations > Webhooks)
+  discord    : "#",
+  discordWebhook : "",
   currency   : "€",
-  payments : { paypal:"https://paypal.me/YOURNAME", card:"#", crypto:"#" },
 
-  // --- NEWS / CHANGELOG (tag: added | removed | fixed | soon) ---
   news : [
     { date:"Jun 21", tag:"added", title:"FN SCAR (L/H) replaces the F2000", body:"New dual-mode transforming rifle — right-click swaps between close-range L and the 2x H mode. Find it in Extra-Items." },
+    { date:"Jun 21", tag:"added", title:"VIP overhaul — TERROR ETA + Hammer", body:"VIP now gets the exclusive TERROR ETA model, the Hammer knife, random 35–100 armor every round, reserved slot & no high-ping kick. See the Store." },
     { date:"Jun 21", tag:"added", title:"Cart Frag Ex grenade", body:"A heavy frag bomb in Extra-Items: level 5, 1000 damage to zombies, max 2 per round." },
     { date:"Jun 21", tag:"fixed", title:"Saving is back — for real", body:"Money, level, knife and zombie class now persist across map changes (MySQL). VIP menu works again." },
     { date:"Jun 21", tag:"added", title:"7 languages in-game", body:"Type /lang — English, Shqip, Slavic, Romanian, Russian, Turkish, Arabic. Menus & messages translate to your pick." },
-    { date:"Jun 21", tag:"added", title:"More variety", body:"Bots now spawn with different human & zombie models so the server never looks empty or samey." },
     { date:"Soon",   tag:"soon",  title:"Molotov & Supply Boxes", body:"An incendiary Molotov grenade and lootable supply boxes are on the way. Vote on what comes next ↓" }
   ],
-
-  // --- GIVEAWAYS ---
   giveaways : [
     { title:"1 Month VIP",        prize:"Full VIP rank",        ends:"Ends Sunday", how:"Join our Discord & react to the giveaway post." },
     { title:"Custom Knife — Hammer", prize:"Account-bound knife", ends:"3 winners",  how:"Invite 3 friends to the server." },
     { title:"300k Money Pack",    prize:"In-game balance",      ends:"Weekly",      how:"Be in the weekly Top-10 active players." }
   ],
-
-  // --- SUGGESTIONS board (example seeds; real ones go to Discord) ---
   suggestions : [
     { title:"Double XP weekends", votes:31, by:"lluna" },
     { title:"Add a /shop chat command", votes:24, by:"player" },
     { title:"More zombie maps (zm_dust pack)", votes:18, by:"guest" },
     { title:"Anti-camp on roofs", votes:12, by:"guest" }
-  ],
-
-  // --- STORE ---
-  store : [
-    { id:"vip",   cat:"VIP",    name:"VIP Rank",             price:5, icon:"fa-crown",        desc:"VIP menu, special model, aura, extra HP & weapons.", featured:true },
-    { id:"hammer",cat:"Knife",  name:"VIP Knife — Hammer",   price:3, icon:"fa-hammer",       desc:"Exclusive Hammer melee, account-bound." },
-    { id:"master",cat:"Knife",  name:"VIP Knife — Master",   price:3, icon:"fa-khanda",       desc:"Master Combat knife skin." },
-    { id:"skins", cat:"Skins",  name:"Skin Pack",            price:4, icon:"fa-spray-can",    desc:"Weapon skin set for your loadout." },
-    { id:"money", cat:"Boost",  name:"Money Pack — 300k",    price:3, icon:"fa-coins",        desc:"Top your balance to the 300,000 cap." },
-    { id:"level", cat:"Boost",  name:"Level Boost — 30",     price:5, icon:"fa-arrow-up-9-1", desc:"Jump to the max level (30)." },
-    { id:"tesla", cat:"Zombie", name:"Zombie Class — Tesla", price:2, icon:"fa-bolt",         desc:"Unlock the Tesla zombie class." }
   ]
 };
 </script>
@@ -77,12 +60,11 @@ a{color:inherit;text-decoration:none}
 .btn:hover{transform:translateY(-2px)}
 .btn-red{background:var(--red);color:#fff;border:0;box-shadow:0 8px 24px rgba(227,52,47,.3)}.btn-red:hover{background:var(--red-d)}
 .btn-gold{background:var(--gold);color:#241a02;border:0}.btn-green{background:var(--green);color:#06200f;border:0}.btn-disc{background:#5865F2;color:#fff;border:0}
-.btn-ghost{background:transparent}
 .pill{display:inline-flex;align-items:center;gap:6px;font-family:'Oswald';letter-spacing:1px;font-size:11px;text-transform:uppercase;padding:3px 10px;border-radius:20px}
 .t-added{background:rgba(47,191,113,.14);color:#5fe09b}.t-removed{background:rgba(227,52,47,.14);color:#ff8c89}
 .t-fixed{background:rgba(59,130,246,.14);color:#8fb8fb}.t-soon{background:rgba(232,181,74,.14);color:var(--gold)}
 
-/* ---------- INTRO (video + Balkan ad overlay) ---------- */
+/* ---------- INTRO ---------- */
 #intro{position:fixed;inset:0;z-index:9999;background:#000;overflow:hidden;transition:opacity .8s ease}
 #intro.gone{opacity:0;pointer-events:none}
 #introVid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
@@ -120,7 +102,6 @@ nav{display:flex;align-items:center;justify-content:space-between;height:64px}
 .hero h1{font-size:clamp(40px,7vw,82px);line-height:.92}
 .hero .sub{color:var(--dim);font-size:16px;margin-top:12px}
 .hero .cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
-/* live status card */
 .status-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px}
 .status-card .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
 .status-card .live{display:inline-flex;align-items:center;gap:8px;font-family:'Oswald';letter-spacing:1px;font-size:13px;color:#5fe09b}
@@ -131,14 +112,12 @@ nav{display:flex;align-items:center;justify-content:space-between;height:64px}
 .players-bar{height:7px;border-radius:5px;background:var(--panel2);overflow:hidden;margin-top:4px}
 .players-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--green),#1d9e75)}
 
-/* ---------- SECTIONS ---------- */
 section{padding:62px 0}
 .shead{margin-bottom:34px;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:12px}
 .shead .k{color:var(--red);font-family:'Oswald';letter-spacing:3px;font-size:13px}
 .shead h2{font-size:clamp(28px,4.5vw,42px);margin-top:4px}
 .shead .more{color:var(--dim);font-size:14px}
 
-/* news */
 .news-list{display:grid;gap:14px}
 .news-item{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--red);border-radius:0 12px 12px 0;padding:18px 22px;display:flex;gap:18px;align-items:flex-start;transition:.15s}
 .news-item:hover{background:var(--panel2)}
@@ -147,7 +126,6 @@ section{padding:62px 0}
 .news-item h3{font-size:18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .news-item p{color:var(--dim);font-size:14px;margin-top:5px}
 
-/* giveaways */
 .gw-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
 .gw{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px;position:relative;overflow:hidden}
 .gw::before{content:"\f06b";font-family:"Font Awesome 6 Free";font-weight:900;position:absolute;right:-10px;top:-14px;font-size:90px;color:rgba(232,181,74,.06)}
@@ -157,7 +135,6 @@ section{padding:62px 0}
 .gw .how{margin-top:14px;font-size:13px;color:var(--dim);border-top:1px solid var(--line);padding-top:12px}
 .gw .ends{margin-top:12px;display:inline-block;font-family:'Oswald';letter-spacing:1px;font-size:11px;background:var(--panel2);padding:4px 11px;border-radius:20px;color:var(--gold)}
 
-/* suggestions + forms */
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
 .board{display:grid;gap:10px}
 .sug{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:13px 16px}
@@ -174,48 +151,19 @@ section{padding:62px 0}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .fmsg{font-size:13px;margin-top:6px;display:none}.fmsg.ok{color:var(--green);display:block}.fmsg.bad{color:var(--red);display:block}
 
-/* store */
-.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px}
-.filters button{font-family:'Oswald';letter-spacing:1px;font-size:13px;text-transform:uppercase;padding:9px 18px;border-radius:30px;border:1px solid var(--line2);background:var(--panel);color:var(--dim);cursor:pointer;transition:.15s}
-.filters button.active,.filters button:hover{background:var(--red);color:#fff;border-color:var(--red)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:18px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px;transition:.18s;position:relative;overflow:hidden}
-.card:hover{transform:translateY(-4px);border-color:var(--line2)}.card.feat{border-color:rgba(232,181,74,.5)}
-.card .badge{position:absolute;top:14px;right:14px;font-family:'Oswald';letter-spacing:1px;font-size:11px;background:var(--gold);color:#241a02;padding:3px 10px;border-radius:20px}
-.card .ic{width:54px;height:54px;border-radius:12px;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--gold);margin-bottom:16px}
-.card h3{font-size:20px}.card .ctag{font-family:'Oswald';letter-spacing:1px;font-size:11px;color:var(--red);margin-bottom:6px}
-.card p{color:var(--dim);font-size:14px;margin:8px 0 18px;min-height:42px}
-.card .row{display:flex;align-items:center;justify-content:space-between}
-.card .price{font-family:'Oswald';font-size:26px}
-
-/* discord band */
 .disc{background:linear-gradient(120deg,rgba(88,101,242,.16),rgba(227,52,47,.08));border:1px solid var(--line);border-radius:18px;padding:38px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px}
 .disc h2{font-size:clamp(26px,4vw,38px)}.disc p{color:var(--dim);margin-top:6px}
 
-/* footer */
+.store-cta{background:linear-gradient(120deg,rgba(232,181,74,.16),rgba(227,52,47,.1));border:1px solid rgba(232,181,74,.4);border-radius:18px;padding:38px;text-align:center}
+.store-cta h2{font-size:clamp(28px,4.5vw,44px)}.store-cta p{color:var(--dim);margin:8px auto 22px;max-width:560px}
+
 footer{border-top:1px solid var(--line);padding:40px 0;margin-top:20px}
 .foot{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:18px}
 .foot .pay{display:flex;align-items:center;gap:14px;color:var(--dim);font-size:24px}.foot .pay i:hover{color:var(--txt)}
 .foot small{color:var(--dim)}
 
-/* modal */
-.modal{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:20px}
-.modal.open{display:flex}
-.sheet{background:var(--panel);border:1px solid var(--line2);border-radius:16px;width:100%;max-width:440px;padding:28px;position:relative}
-.sheet .x{position:absolute;top:16px;right:18px;background:none;border:0;color:var(--dim);font-size:20px;cursor:pointer}.sheet .x:hover{color:var(--txt)}
-.sheet .item{display:flex;align-items:center;gap:14px;padding-bottom:18px;border-bottom:1px solid var(--line);margin-bottom:18px}
-.sheet .item .ic{width:48px;height:48px;border-radius:10px;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--gold)}
-.sheet .item h3{font-size:19px}.sheet .item .p{color:var(--gold);font-family:'Oswald';font-size:20px}
-.pays{display:grid;gap:10px;margin-top:18px}
-.pays .pbtn{display:flex;align-items:center;justify-content:center;gap:10px;padding:13px;border-radius:9px;border:0;cursor:pointer;font-family:'Oswald';letter-spacing:1px;text-transform:uppercase;font-size:14px;transition:.15s}
-.pays .pbtn:hover{transform:translateY(-2px)}.pp-paypal{background:#0070ba;color:#fff}.pp-card{background:#635bff;color:#fff}.pp-crypto{background:#f7931a;color:#fff}
-.pays .pbtn.disabled{opacity:.45;cursor:not-allowed;transform:none}
-.sheet .after{margin-top:14px;font-size:12.5px;color:var(--dim);text-align:center}
-.err{color:var(--red);font-size:13px;margin-top:8px;display:none}
-
 @media(max-width:860px){.hero-grid,.two-col{grid-template-columns:1fr}.nav-links{display:none}.burger{display:block}
   .nav-links.open{display:flex;position:absolute;top:64px;left:0;right:0;flex-direction:column;background:var(--bg2);padding:18px 22px;gap:16px;border-bottom:1px solid var(--line)}}
-@media(max-width:480px){.frow{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -236,7 +184,8 @@ footer{border-top:1px solid var(--line);padding:40px 0;margin-top:20px}
 <header><div class="wrap"><nav>
   <a class="logo" href="#top"><i class="fa-solid fa-skull"></i> BALKAN<span class="accent">SERVERS</span></a>
   <div class="nav-links" id="navLinks">
-    <a href="#news">News</a><a href="#giveaways">Giveaways</a><a href="#suggest">Suggestions</a><a href="#apply">Apply</a><a href="#store">Store</a>
+    <a href="#news">News</a><a href="#giveaways">Giveaways</a><a href="#suggest">Suggestions</a><a href="#apply">Apply</a>
+    <a href="store.html"><i class="fa-solid fa-crown gold"></i> Store</a>
     <a href="#" id="navDiscord"><i class="fa-brands fa-discord"></i> Discord</a>
   </div>
   <div class="nav-cta">
@@ -253,7 +202,7 @@ footer{border-top:1px solid var(--line);padding:40px 0;margin-top:20px}
     <p class="sub" id="tagline"></p>
     <div class="cta">
       <button class="btn btn-green" onclick="connect()"><i class="fa-solid fa-play"></i> Connect now</button>
-      <a class="btn btn-gold" href="#store"><i class="fa-solid fa-crown"></i> VIP Store</a>
+      <a class="btn btn-gold" href="store.html"><i class="fa-solid fa-crown"></i> VIP Store</a>
       <a class="btn btn-disc" href="#" id="heroDiscord"><i class="fa-brands fa-discord"></i> Discord</a>
     </div>
   </div>
@@ -278,7 +227,7 @@ footer{border-top:1px solid var(--line);padding:40px 0;margin-top:20px}
   <div class="gw-grid" id="gwGrid"></div>
 </div></section>
 
-<!-- ===== SUGGESTIONS + APPLY ===== -->
+<!-- ===== SUGGESTIONS ===== -->
 <section id="suggest"><div class="wrap">
   <div class="shead"><div><div class="k">YOUR VOICE</div><h2>Suggestions</h2></div></div>
   <div class="two-col">
@@ -311,15 +260,15 @@ footer{border-top:1px solid var(--line);padding:40px 0;margin-top:20px}
   </div>
 </div></section>
 
-<!-- ===== STORE ===== -->
-<section id="store"><div class="wrap">
-  <div class="shead"><div><div class="k">PAYWALL · INSTANT</div><h2>VIP Store</h2></div><div class="more">Applies after the next map change</div></div>
-  <div class="filters" id="filters"></div>
-  <div class="grid" id="grid"></div>
-</div></section>
+<!-- ===== STORE CTA ===== -->
+<section><div class="wrap"><div class="store-cta">
+  <h2>Become <span class="gold">VIP</span></h2>
+  <p>The TERROR ETA model, the Hammer knife, random armor every round, reserved slot & more. From €3.</p>
+  <a class="btn btn-gold" href="store.html" style="font-size:17px;padding:15px 30px"><i class="fa-solid fa-crown"></i> Open the Store</a>
+</div></div></section>
 
 <!-- ===== DISCORD BAND ===== -->
-<section><div class="wrap"><div class="disc">
+<section style="padding-top:0"><div class="wrap"><div class="disc">
   <div><h2>Join the community</h2><p>News, giveaways, support & events — all on Discord. Apply for staff, report players, suggest features.</p></div>
   <a class="btn btn-disc" href="#" id="bandDiscord" style="font-size:17px;padding:15px 28px"><i class="fa-brands fa-discord"></i> Join Discord</a>
 </div></div></section>
@@ -331,80 +280,26 @@ footer{border-top:1px solid var(--line);padding:40px 0;margin-top:20px}
   <small>© 2026 BALKAN-SERVERS · Zombie CSO</small>
 </div></div></footer>
 
-<!-- ===== CHECKOUT MODAL ===== -->
-<div class="modal" id="modal"><div class="sheet">
-  <button class="x" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
-  <div class="item"><div class="ic"><i id="mIcon" class="fa-solid fa-crown"></i></div>
-    <div style="flex:1"><h3 id="mName"></h3><div class="ctag" id="mCat"></div></div><div class="p" id="mPrice"></div></div>
-  <div class="field"><label>Your SteamID</label><input id="steamid" placeholder="STEAM_0:1:666166430" autocomplete="off">
-    <div class="err" id="err">Enter a valid SteamID (STEAM_0:1:1234567).</div>
-    <div style="font-size:12px;color:var(--dim);margin-top:7px">In console type <b>status</b>, or use <a href="https://steamid.io" target="_blank" rel="noopener" style="color:var(--blue)">steamid.io</a>.</div></div>
-  <div class="pays">
-    <button class="pbtn pp-paypal" onclick="pay('paypal')"><i class="fa-brands fa-paypal"></i> PayPal</button>
-    <button class="pbtn pp-card" onclick="pay('card')"><i class="fa-solid fa-credit-card"></i> Card</button>
-    <button class="pbtn pp-crypto" onclick="pay('crypto')"><i class="fa-brands fa-bitcoin"></i> Crypto</button>
-  </div>
-  <div class="after"><i class="fa-solid fa-shield-halved"></i> Reward applies in-game after the next map change.</div>
-</div></div>
-
 <script>
-/* ---------- bind config ---------- */
 document.getElementById('tagline').textContent=CONFIG.tagline;
 document.getElementById('stIP').textContent=CONFIG.serverIP;
 ['navDiscord','heroDiscord','bandDiscord'].forEach(id=>document.getElementById(id).href=CONFIG.discord);
 
-/* ---------- news ---------- */
 const tagName={added:'Added',removed:'Removed',fixed:'Fixed',soon:'Coming soon'};
 document.getElementById('newsList').innerHTML=CONFIG.news.map(n=>`
   <div class="news-item ${n.tag}"><div class="date">${n.date}</div>
     <div><h3>${n.title} <span class="pill t-${n.tag}">${tagName[n.tag]}</span></h3><p>${n.body}</p></div></div>`).join('');
 
-/* ---------- giveaways ---------- */
 document.getElementById('gwGrid').innerHTML=CONFIG.giveaways.map(g=>`
   <div class="gw"><div class="tag"><i class="fa-solid fa-gift"></i> GIVEAWAY</div><h3>${g.title}</h3>
     <div class="prize">${g.prize}</div><div class="how"><b>How to enter:</b> ${g.how}</div><span class="ends">${g.ends}</span></div>`).join('');
 
-/* ---------- suggestions board ---------- */
 function renderSug(){ document.getElementById('sugBoard').innerHTML=CONFIG.suggestions.slice().sort((a,b)=>b.votes-a.votes).map((s,i)=>`
   <div class="sug"><div class="vote" onclick="voteSug(${i})"><b>${s.votes}</b><span><i class="fa-solid fa-caret-up"></i> vote</span></div>
     <div class="body"><h4>${s.title}</h4><small>by ${s.by}</small></div></div>`).join(''); }
 function voteSug(i){ const sorted=CONFIG.suggestions.slice().sort((a,b)=>b.votes-a.votes); sorted[i].votes++; renderSug(); }
 renderSug();
 
-/* ---------- store ---------- */
-let activeCat="All"; const cats=["All",...new Set(CONFIG.store.map(i=>i.cat))];
-function renderFilters(){ document.getElementById('filters').innerHTML=cats.map(c=>`<button class="${c===activeCat?'active':''}" onclick="setCat('${c}')">${c}</button>`).join(''); }
-function setCat(c){activeCat=c;renderFilters();renderGrid();}
-function renderGrid(){ const items=CONFIG.store.filter(i=>activeCat==="All"||i.cat===activeCat);
-  document.getElementById('grid').innerHTML=items.map(i=>`
-  <div class="card ${i.featured?'feat':''}">${i.featured?'<span class="badge">Popular</span>':''}
-    <div class="ic"><i class="fa-solid ${i.icon}"></i></div><div class="ctag">${i.cat}</div>
-    <h3>${i.name}</h3><p>${i.desc}</p>
-    <div class="row"><div class="price">${CONFIG.currency}${i.price}</div><button class="btn btn-red" onclick="openModal('${i.id}')">Buy</button></div></div>`).join(''); }
-renderFilters(); renderGrid();
-
-/* ---------- checkout ---------- */
-let current=null;
-function openModal(id){ current=CONFIG.store.find(i=>i.id===id);
-  document.getElementById('mName').textContent=current.name; document.getElementById('mCat').textContent=current.cat;
-  document.getElementById('mPrice').textContent=CONFIG.currency+current.price; document.getElementById('mIcon').className='fa-solid '+current.icon;
-  [['paypal','pp-paypal'],['card','pp-card'],['crypto','pp-crypto']].forEach(([k,cls])=>{
-    document.querySelector('.'+cls).classList.toggle('disabled', !(CONFIG.payments[k]&&CONFIG.payments[k]!=="#")); });
-  document.getElementById('err').style.display='none'; document.getElementById('modal').classList.add('open'); }
-function closeModal(){ document.getElementById('modal').classList.remove('open'); }
-function validSteam(s){ return /^STEAM_[0-5]:[01]:\d+$/i.test((s||'').trim()); }
-function pay(method){ const sid=document.getElementById('steamid').value.trim();
-  if(!validSteam(sid)){ document.getElementById('err').style.display='block'; return; }
-  const url=CONFIG.payments[method]; if(!url||url==="#"){ alert('Payment method not set up yet (CONFIG.payments.'+method+').'); return; }
-  const ref=encodeURIComponent(current.id+'|'+sid); let go=url;
-  if(method==='paypal') go=url+(url.includes('paypal.me')?'/'+current.price:'');
-  else if(method==='card') go=url+(url.includes('?')?'&':'?')+'client_reference_id='+ref;
-  try{localStorage.setItem('lastOrder',JSON.stringify({item:current.id,price:current.price,steamid:sid,method,ts:Date.now()}));}catch(e){}
-  // also notify Discord if a webhook is set
-  postDiscord('🛒 New order', [{name:'Item',value:current.name,inline:true},{name:'Price',value:CONFIG.currency+current.price,inline:true},{name:'SteamID',value:sid},{name:'Method',value:method,inline:true}], 0xe8b54a);
-  window.open(go,'_blank','noopener'); closeModal(); }
-
-/* ---------- forms -> Discord webhook ---------- */
 function postDiscord(title, fields, color){
   if(!CONFIG.discordWebhook) return Promise.resolve(false);
   return fetch(CONFIG.discordWebhook,{method:'POST',headers:{'Content-Type':'application/json'},
@@ -437,11 +332,8 @@ function val(id){ return (document.getElementById(id).value||'').trim(); }
 function setMsg(el,t,ok){ el.textContent=t; el.className='fmsg '+(ok?'ok':'bad'); }
 function clearForm(kind){ const ids=kind==='suggestion'?['sg_name','sg_text']:['ap_name','ap_age','ap_steam','ap_disc','ap_hours','ap_lang','ap_exp','ap_why']; ids.forEach(i=>document.getElementById(i).value=''); }
 
-/* ---------- connect / status ---------- */
 function connect(){ window.location.href='steam://connect/'+CONFIG.serverIP; }
 function copyIP(){ navigator.clipboard.writeText(CONFIG.serverIP).then(()=>{ const t=document.getElementById('stIP'); const o=CONFIG.serverIP; t.textContent='Copied!'; setTimeout(()=>t.textContent=o,1200); }); }
-// Live status: wire a real query API here (e.g. a GameDig/A2S endpoint that returns {players,maxplayers,map}).
-// Until then it shows the server as online with a placeholder.
 function fetchStatus(){
   const demo={players:0,maxplayers:CONFIG.maxSlots,map:'zm_dust_world'};
   document.getElementById('stPlayers').textContent=demo.players+' / '+demo.maxplayers;
@@ -450,7 +342,6 @@ function fetchStatus(){
 }
 fetchStatus();
 
-/* ---------- intro ---------- */
 function skipIntro(){ const v=document.getElementById('introVid'); if(v){try{v.pause();}catch(e){}} document.getElementById('intro').classList.add('gone'); }
 function toggleSound(){ const v=document.getElementById('introVid'),b=document.getElementById('sndBtn'); v.muted=!v.muted;
   b.innerHTML=v.muted?'<i class="fa-solid fa-volume-xmark"></i>':'<i class="fa-solid fa-volume-high"></i>'; if(!v.muted){try{v.play();}catch(e){}} }

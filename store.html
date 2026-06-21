@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Store · BALKAN-SERVERS</title>
+<meta name="description" content="BALKAN-SERVERS VIP store — TERROR ETA model, Hammer knife, perks. From €3." />
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<!-- ===================== STORE CONFIG (edit me) ===================== -->
+<script>
+const CONFIG = {
+  serverIP : "31.57.151.143:27015",
+  discord  : "#",
+  discordWebhook : "",
+  currency : "€",
+  payments : { paypal:"https://paypal.me/YOURNAME", card:"#", crypto:"#" },
+
+  // VIP duration tiers
+  vipTiers : [
+    { id:"vip15", days:15, price:3 },
+    { id:"vip30", days:30, price:7, featured:true },
+    { id:"vip60", days:60, price:12 }
+  ],
+
+  // Store catalogue (VIP is the big featured one; rest are simple)
+  items : [
+    {
+      id:"vip", cat:"VIP", name:"VIP — TERROR ETA", icon:"fa-crown", featured:true, tiered:true,
+      short:"The exclusive TERROR ETA model, the Hammer knife & a stack of perks.",
+      gallery:["assets/vip/terror.png","assets/vip/terror-hammer.png","assets/vip/hammer.png"],
+      perks:[
+        { i:"fa-user-ninja", t:"TERROR ETA model", d:"The exclusive VIP player model shown here — only VIPs wear it." },
+        { i:"fa-hammer",     t:"VIP Knife — Hammer", d:"The heavy Hammer melee (full details below)." },
+        { i:"fa-shield-halved", t:"Random armor 35–100", d:"Fresh random armor every single round." },
+        { i:"fa-feather",    t:"Gravity", d:"The Hammer's weight gives you a higher, floatier jump." },
+        { i:"fa-gun",        t:"Special guns", d:"Access to VIP-only weapons (rolling out soon)." },
+        { i:"fa-wifi",       t:"No high-ping kick", d:"Stay in the game even on a bad connection." },
+        { i:"fa-ticket",     t:"Reserved slot", d:"Always get in — even when the server is full." }
+      ]
+    },
+    { id:"hammer", cat:"Knife", name:"Knife — Hammer", icon:"fa-hammer", price:3, short:"The account-bound Hammer melee — huge damage, knockback & higher jump.", img:"assets/vip/hammer.png" },
+    { id:"skins",  cat:"Skins", name:"Skin Pack",      icon:"fa-spray-can", price:4, short:"A weapon-skin set for your loadout." },
+    { id:"money",  cat:"Boost", name:"Money Pack — 300k", icon:"fa-coins", price:3, short:"Top your in-game balance to the 300,000 cap." },
+    { id:"level",  cat:"Boost", name:"Level Boost — 30",  icon:"fa-arrow-up-9-1", price:5, short:"Jump straight to the max level (30)." },
+    { id:"tesla",  cat:"Zombie", name:"Zombie Class — Tesla", icon:"fa-bolt", price:2, short:"Unlock the Tesla zombie class." }
+  ]
+};
+</script>
+
+<style>
+:root{
+  --bg:#070809;--bg2:#0c0e12;--panel:#12151b;--panel2:#191d25;
+  --line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.15);
+  --txt:#eef0f3;--dim:#9aa0ac;
+  --red:#e3342f;--red-d:#b3231f;--gold:#e8b54a;--green:#2fbf71;--blue:#3b82f6;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);overflow-x:hidden;line-height:1.6}
+h1,h2,h3,h4{font-family:'Oswald',sans-serif;letter-spacing:.5px;text-transform:uppercase;font-weight:700}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+.gold{color:var(--gold)}.accent{color:var(--red)}
+.btn{display:inline-flex;align-items:center;gap:9px;font-family:'Oswald';text-transform:uppercase;letter-spacing:1px;font-size:15px;padding:13px 24px;border-radius:8px;border:1px solid var(--line2);cursor:pointer;transition:.18s;background:var(--panel2);color:var(--txt)}
+.btn:hover{transform:translateY(-2px)}
+.btn-red{background:var(--red);color:#fff;border:0;box-shadow:0 8px 24px rgba(227,52,47,.3)}.btn-red:hover{background:var(--red-d)}
+.btn-gold{background:var(--gold);color:#241a02;border:0}.btn-green{background:var(--green);color:#06200f;border:0}.btn-ghost{background:transparent}
+
+header{position:sticky;top:0;z-index:100;background:rgba(7,8,9,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+nav{display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo{display:flex;align-items:center;gap:10px;font-family:'Oswald';font-weight:700;font-size:21px;letter-spacing:1px}.logo i{color:var(--red);font-size:24px}
+.nav-cta{display:flex;gap:10px;align-items:center}
+
+.phead{padding:46px 0 10px}
+.phead .k{color:var(--gold);font-family:'Oswald';letter-spacing:3px;font-size:13px}
+.phead h1{font-size:clamp(34px,6vw,60px);margin-top:4px}
+.phead p{color:var(--dim);margin-top:8px}
+.note{color:var(--dim);font-size:13px;margin-top:10px}.note i{color:var(--gold)}
+
+/* ----- GRID VIEW ----- */
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin:26px 0}
+.filters button{font-family:'Oswald';letter-spacing:1px;font-size:13px;text-transform:uppercase;padding:9px 18px;border-radius:30px;border:1px solid var(--line2);background:var(--panel);color:var(--dim);cursor:pointer;transition:.15s}
+.filters button.active,.filters button:hover{background:var(--gold);color:#241a02;border-color:var(--gold)}
+
+/* big featured VIP card */
+.vip-feature{display:grid;grid-template-columns:.85fr 1.15fr;gap:0;background:linear-gradient(120deg,rgba(232,181,74,.12),rgba(227,52,47,.08));border:1px solid rgba(232,181,74,.4);border-radius:18px;overflow:hidden;margin-bottom:26px;cursor:pointer;transition:.18s}
+.vip-feature:hover{transform:translateY(-3px);border-color:var(--gold)}
+.vip-feature .pic{background:#0a0b0e center/cover;min-height:300px;display:flex;align-items:flex-end;justify-content:center;position:relative}
+.vip-feature .pic img{height:300px;object-fit:contain;filter:drop-shadow(0 12px 28px rgba(0,0,0,.6))}
+.vip-feature .pic .flag{position:absolute;top:16px;left:16px;font-family:'Oswald';letter-spacing:1px;font-size:12px;background:var(--gold);color:#241a02;padding:4px 12px;border-radius:20px}
+.vip-feature .info{padding:30px}
+.vip-feature .info h2{font-size:clamp(26px,3.4vw,38px)}
+.vip-feature .info .sub{color:var(--dim);margin:8px 0 16px}
+.mini-perks{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.mini-perks span{font-size:12px;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:5px 11px;color:var(--txt)}
+.mini-perks i{color:var(--gold);margin-right:5px}
+.vip-feature .from{font-family:'Oswald';color:var(--dim);font-size:13px}
+.vip-feature .from b{color:var(--gold);font-size:26px;margin-left:6px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px;transition:.18s;cursor:pointer}
+.card:hover{transform:translateY(-4px);border-color:var(--line2)}
+.card .ic{width:54px;height:54px;border-radius:12px;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--gold);margin-bottom:16px}
+.card .ctag{font-family:'Oswald';letter-spacing:1px;font-size:11px;color:var(--red);margin-bottom:6px}
+.card h3{font-size:20px}.card p{color:var(--dim);font-size:14px;margin:8px 0 18px;min-height:42px}
+.card .row{display:flex;align-items:center;justify-content:space-between}
+.card .price{font-family:'Oswald';font-size:26px}
+
+/* ----- DETAIL VIEW ----- */
+#detailView{display:none;padding-bottom:60px}
+.back{display:inline-flex;align-items:center;gap:8px;color:var(--dim);font-family:'Oswald';letter-spacing:1px;font-size:13px;cursor:pointer;margin:24px 0 18px}.back:hover{color:var(--txt)}
+.detail-top{display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:start}
+.gallery .main{background:var(--panel);border:1px solid var(--line);border-radius:16px;height:430px;display:flex;align-items:center;justify-content:center;padding:18px}
+.gallery .main img{max-height:100%;max-width:100%;object-fit:contain;filter:drop-shadow(0 14px 30px rgba(0,0,0,.55))}
+.thumbs{display:flex;gap:10px;margin-top:12px}
+.thumbs div{flex:1;height:88px;background:var(--panel);border:1px solid var(--line);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:6px;transition:.15s}
+.thumbs div.active,.thumbs div:hover{border-color:var(--gold)}
+.thumbs img{max-height:100%;max-width:100%;object-fit:contain}
+.detail-info .cat{font-family:'Oswald';letter-spacing:2px;color:var(--gold);font-size:13px}
+.detail-info h1{font-size:clamp(30px,4.4vw,46px);margin:4px 0 6px}
+.detail-info .lead{color:var(--dim);margin-bottom:20px}
+.perks{display:grid;gap:12px;margin-bottom:24px}
+.perk{display:flex;gap:13px;align-items:flex-start}
+.perk .pi{width:38px;height:38px;flex:0 0 38px;border-radius:10px;background:var(--panel2);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:16px}
+.perk h4{font-size:15px}.perk p{color:var(--dim);font-size:13px}
+
+/* pricing tiers */
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.tier{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 14px;text-align:center;position:relative;transition:.15s}
+.tier.best{border-color:var(--gold);background:linear-gradient(180deg,rgba(232,181,74,.1),transparent)}
+.tier .best-flag{position:absolute;top:-11px;left:50%;transform:translateX(-50%);font-family:'Oswald';letter-spacing:1px;font-size:10px;background:var(--gold);color:#241a02;padding:3px 10px;border-radius:20px}
+.tier .days{font-family:'Oswald';font-size:15px;letter-spacing:1px}
+.tier .price{font-family:'Oswald';font-size:34px;margin:6px 0}
+.tier .per{color:var(--dim);font-size:11px;margin-bottom:14px}
+.tier button{width:100%}
+
+/* single-price buy box */
+.buybox{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.buybox .price{font-family:'Oswald';font-size:36px}
+
+/* hammer description block */
+.weapon{margin-top:46px;background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.weapon .wtop{display:grid;grid-template-columns:1.2fr .8fr;gap:0;align-items:center}
+.weapon .wpic{background:#0a0b0e;padding:26px;display:flex;align-items:center;justify-content:center;min-height:200px}
+.weapon .wpic img{max-width:100%;max-height:200px;object-fit:contain;filter:drop-shadow(0 10px 24px rgba(0,0,0,.5))}
+.weapon .whead{padding:30px}
+.weapon .whead .k{color:var(--red);font-family:'Oswald';letter-spacing:2px;font-size:12px}
+.weapon .whead h2{font-size:clamp(24px,3.4vw,34px);margin:4px 0 8px}
+.weapon .whead p{color:var(--dim);font-size:14px}
+.wstats{display:grid;grid-template-columns:repeat(2,1fr);gap:0;border-top:1px solid var(--line)}
+.wstat{padding:20px 26px;border-top:1px solid var(--line);border-right:1px solid var(--line)}
+.wstat .lab{display:flex;align-items:center;gap:9px;font-family:'Oswald';letter-spacing:1px;font-size:14px;color:var(--gold)}
+.wstat .lab .m{font-size:11px;background:var(--panel2);border:1px solid var(--line2);border-radius:6px;padding:2px 7px;color:var(--txt)}
+.wstat p{color:var(--dim);font-size:13.5px;margin-top:7px}
+@media(max-width:760px){.wstat{border-right:0}}
+
+/* modal */
+.modal{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:20px}
+.modal.open{display:flex}
+.sheet{background:var(--panel);border:1px solid var(--line2);border-radius:16px;width:100%;max-width:440px;padding:28px;position:relative}
+.sheet .x{position:absolute;top:16px;right:18px;background:none;border:0;color:var(--dim);font-size:20px;cursor:pointer}.sheet .x:hover{color:var(--txt)}
+.sheet .item{display:flex;align-items:center;gap:14px;padding-bottom:18px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.sheet .item .ic{width:48px;height:48px;border-radius:10px;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--gold)}
+.sheet .item h3{font-size:18px}.sheet .item .p{color:var(--gold);font-family:'Oswald';font-size:22px}
+.field label{display:block;font-size:13px;color:var(--dim);margin-bottom:6px}
+.field input{width:100%;padding:11px 13px;border-radius:9px;background:var(--bg2);border:1px solid var(--line2);color:var(--txt);font-size:14px;outline:none}
+.field input:focus{border-color:var(--gold)}
+.pays{display:grid;gap:10px;margin-top:18px}
+.pays .pbtn{display:flex;align-items:center;justify-content:center;gap:10px;padding:13px;border-radius:9px;border:0;cursor:pointer;font-family:'Oswald';letter-spacing:1px;text-transform:uppercase;font-size:14px;transition:.15s}
+.pays .pbtn:hover{transform:translateY(-2px)}.pp-paypal{background:#0070ba;color:#fff}.pp-card{background:#635bff;color:#fff}.pp-crypto{background:#f7931a;color:#fff}
+.pays .pbtn.disabled{opacity:.45;cursor:not-allowed;transform:none}
+.sheet .after{margin-top:14px;font-size:12.5px;color:var(--dim);text-align:center}
+.err{color:var(--red);font-size:13px;margin-top:8px;display:none}
+
+footer{border-top:1px solid var(--line);padding:34px 0;margin-top:30px}.foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;color:var(--dim);font-size:13px}
+
+@media(max-width:860px){.vip-feature,.detail-top,.weapon .wtop{grid-template-columns:1fr}.tiers{grid-template-columns:1fr}.vip-feature .pic img{height:230px}}
+</style>
+</head>
+<body>
+
+<header><div class="wrap"><nav>
+  <a class="logo" href="index.html"><i class="fa-solid fa-skull"></i> BALKAN<span class="accent">SERVERS</span></a>
+  <div class="nav-cta">
+    <a class="btn btn-ghost" href="index.html"><i class="fa-solid fa-arrow-left"></i> Home</a>
+    <button class="btn btn-green" onclick="connect()"><i class="fa-solid fa-play"></i> Connect</button>
+  </div>
+</nav></div></header>
+
+<!-- ===== GRID VIEW ===== -->
+<div id="gridView"><div class="wrap">
+  <div class="phead">
+    <div class="k">STORE</div><h1>Get <span class="gold">VIP</span> & perks</h1>
+    <p>Support BALKAN-SERVERS and unlock the good stuff.</p>
+    <div class="note"><i class="fa-solid fa-shield-halved"></i> Everything applies in-game after the next map change. Pay safely with PayPal / card / crypto.</div>
+  </div>
+  <div class="filters" id="filters"></div>
+  <div id="vipFeatureSlot"></div>
+  <div class="grid" id="grid"></div>
+</div></div>
+
+<!-- ===== DETAIL VIEW ===== -->
+<div id="detailView"><div class="wrap">
+  <div class="back" onclick="closeDetail()"><i class="fa-solid fa-arrow-left"></i> Back to store</div>
+  <div id="detailBody"></div>
+</div></div>
+
+<footer><div class="wrap"><div class="foot">
+  <span>© 2026 BALKAN-SERVERS · Zombie CSO</span>
+  <span><a href="index.html" class="gold">← Back to community</a></span>
+</div></div></footer>
+
+<!-- ===== CHECKOUT MODAL ===== -->
+<div class="modal" id="modal"><div class="sheet">
+  <button class="x" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+  <div class="item"><div class="ic"><i id="mIcon" class="fa-solid fa-crown"></i></div>
+    <div style="flex:1"><h3 id="mName"></h3><div style="color:var(--dim);font-size:13px" id="mSub"></div></div><div class="p" id="mPrice"></div></div>
+  <div class="field"><label>Your SteamID</label><input id="steamid" placeholder="STEAM_0:1:1234567" autocomplete="off">
+    <div class="err" id="err">Enter a valid SteamID (STEAM_0:1:1234567).</div>
+    <div style="font-size:12px;color:var(--dim);margin-top:7px">In-game console type <b>status</b>, or use <a href="https://steamid.io" target="_blank" rel="noopener" style="color:var(--blue)">steamid.io</a>.</div></div>
+  <div class="pays">
+    <button class="pbtn pp-paypal" onclick="pay('paypal')"><i class="fa-brands fa-paypal"></i> PayPal</button>
+    <button class="pbtn pp-card" onclick="pay('card')"><i class="fa-solid fa-credit-card"></i> Card</button>
+    <button class="pbtn pp-crypto" onclick="pay('crypto')"><i class="fa-brands fa-bitcoin"></i> Crypto</button>
+  </div>
+  <div class="after"><i class="fa-solid fa-shield-halved"></i> Applies in-game after the next map change.</div>
+</div></div>
+
+<script>
+const C=CONFIG, cur=C.currency;
+
+/* ---------- grid ---------- */
+let activeCat="All";
+const cats=["All",...new Set(C.items.map(i=>i.cat))];
+function renderFilters(){ document.getElementById('filters').innerHTML=cats.map(c=>`<button class="${c===activeCat?'active':''}" onclick="setCat('${c}')">${c}</button>`).join(''); }
+function setCat(c){ activeCat=c; renderFilters(); renderGrid(); }
+
+function vipFromPrice(){ return Math.min(...C.vipTiers.map(t=>t.price)); }
+function renderGrid(){
+  const vip=C.items.find(i=>i.id==='vip');
+  const showVip=(activeCat==="All"||activeCat==="VIP");
+  document.getElementById('vipFeatureSlot').innerHTML = showVip ? `
+    <div class="vip-feature" onclick="openDetail('vip')">
+      <div class="pic"><span class="flag">★ MOST POPULAR</span><img src="${vip.gallery[0]}" alt="TERROR ETA"></div>
+      <div class="info">
+        <div class="cat" style="font-family:'Oswald';letter-spacing:2px;color:var(--gold);font-size:13px">VIP MEMBERSHIP</div>
+        <h2>${vip.name}</h2><div class="sub">${vip.short}</div>
+        <div class="mini-perks">${vip.perks.slice(0,5).map(p=>`<span><i class="fa-solid ${p.i}"></i>${p.t}</span>`).join('')}</div>
+        <div class="from">From <b>${cur}${vipFromPrice()}</b></div>
+        <div style="margin-top:16px"><span class="btn btn-gold"><i class="fa-solid fa-crown"></i> View VIP</span></div>
+      </div>
+    </div>` : "";
+  const rest=C.items.filter(i=>i.id!=='vip' && (activeCat==="All"||i.cat===activeCat));
+  document.getElementById('grid').innerHTML=rest.map(i=>`
+    <div class="card" onclick="openDetail('${i.id}')">
+      <div class="ic"><i class="fa-solid ${i.icon}"></i></div><div class="ctag">${i.cat}</div>
+      <h3>${i.name}</h3><p>${i.short}</p>
+      <div class="row"><div class="price">${cur}${i.price}</div><span class="btn btn-red">View</span></div>
+    </div>`).join('');
+}
+
+/* ---------- detail (page-on-page) ---------- */
+function openDetail(id){
+  const it=C.items.find(i=>i.id===id);
+  document.getElementById('detailBody').innerHTML = it.tiered ? vipDetail(it) : simpleDetail(it);
+  document.getElementById('gridView').style.display='none';
+  document.getElementById('detailView').style.display='block';
+  history.replaceState(null,'','#'+id);
+  window.scrollTo(0,0);
+}
+function closeDetail(){
+  document.getElementById('detailView').style.display='none';
+  document.getElementById('gridView').style.display='block';
+  history.replaceState(null,'','#');
+  window.scrollTo(0,0);
+}
+
+function vipDetail(it){
+  const tiers=C.vipTiers.map(t=>`
+    <div class="tier ${t.featured?'best':''}">${t.featured?'<span class="best-flag">BEST VALUE</span>':''}
+      <div class="days">${t.days} DAYS</div><div class="price">${cur}${t.price}</div>
+      <div class="per">${(t.price/t.days).toFixed(2)}${cur}/day</div>
+      <button class="btn ${t.featured?'btn-gold':'btn-red'}" onclick="openModal('vip','${t.days} days · VIP',${t.price})">Buy</button>
+    </div>`).join('');
+  const perks=it.perks.map(p=>`
+    <div class="perk"><div class="pi"><i class="fa-solid ${p.i}"></i></div>
+      <div><h4>${p.t}</h4><p>${p.d}</p></div></div>`).join('');
+  const thumbs=it.gallery.map((g,k)=>`<div class="${k===0?'active':''}" onclick="swap(this,'${g}')"><img src="${g}"></div>`).join('');
+  return `
+    <div class="detail-top">
+      <div class="gallery">
+        <div class="main"><img id="mainImg" src="${it.gallery[0]}" alt="TERROR ETA"></div>
+        <div class="thumbs">${thumbs}</div>
+      </div>
+      <div class="detail-info">
+        <div class="cat">VIP MEMBERSHIP</div><h1>${it.name}</h1>
+        <p class="lead">${it.short} Pick how long you want it:</p>
+        <div class="tiers">${tiers}</div>
+        <h3 style="margin:26px 0 14px;font-size:18px">What you get</h3>
+        <div class="perks">${perks}</div>
+      </div>
+    </div>
+    ${hammerBlock()}`;
+}
+
+function hammerBlock(){
+  return `
+  <div class="weapon">
+    <div class="wtop">
+      <div class="wpic"><img src="assets/vip/hammer.png" alt="Hammer knife"></div>
+      <div class="whead"><div class="k">VIP KNIFE</div><h2>The Hammer</h2>
+        <p>A two-mode heavy melee. It hits like a truck, throws zombies back, and its weight lets you jump higher. Comes free with VIP.</p></div>
+    </div>
+    <div class="wstats">
+      <div class="wstat"><div class="lab"><i class="fa-solid fa-burst"></i> Damage</div><p>One of the hardest-hitting knives in the game — devastating to zombies up close.</p></div>
+      <div class="wstat"><div class="lab"><span class="m">MOUSE 1</span> Quick swing</div><p>Fast, lighter hits. Great for staggering a zombie and finishing low-HP ones.</p></div>
+      <div class="wstat"><div class="lab"><span class="m">MOUSE 2</span> Heavy slam</div><p>Slow wind-up, massive damage with a strong knockback. Time it as a zombie lunges in.</p></div>
+      <div class="wstat"><div class="lab"><i class="fa-solid fa-arrows-left-right-to-line"></i> Knockback</div><p>The slam launches zombies away — your #1 tool to peel a horde off a doorway or a teammate.</p></div>
+      <div class="wstat"><div class="lab"><i class="fa-solid fa-feather"></i> Gravity</div><p>The Hammer's weight gives a higher, floatier jump. Reach crates &amp; ledges zombies can't, and slam from above.</p></div>
+      <div class="wstat"><div class="lab"><i class="fa-solid fa-lightbulb"></i> How to hold it &amp; tips</div><p>Back to a wall, jump to high ground, bait the slam. Don't spam Mouse 2 (it has a cooldown) — mix Mouse 1 to stay safe between slams.</p></div>
+    </div>
+  </div>`;
+}
+
+function simpleDetail(it){
+  const media = it.img
+    ? `<div class="gallery"><div class="main"><img src="${it.img}" alt="${it.name}"></div></div>`
+    : `<div class="gallery"><div class="main"><i class="fa-solid ${it.icon}" style="font-size:120px;color:var(--gold);opacity:.85"></i></div></div>`;
+  return `
+    <div class="detail-top">
+      ${media}
+      <div class="detail-info">
+        <div class="cat">${it.cat}</div><h1>${it.name}</h1>
+        <p class="lead">${it.short}</p>
+        <div class="buybox"><div class="price">${cur}${it.price}</div>
+          <button class="btn btn-gold" onclick="openModal('${it.id}','${it.name}',${it.price})"><i class="fa-solid fa-bag-shopping"></i> Buy now</button></div>
+        <div class="note" style="margin-top:16px"><i class="fa-solid fa-shield-halved"></i> Applies in-game after the next map change.</div>
+      </div>
+    </div>`;
+}
+
+function swap(el,src){ document.getElementById('mainImg').src=src; document.querySelectorAll('.thumbs div').forEach(d=>d.classList.remove('active')); el.classList.add('active'); }
+
+/* ---------- checkout ---------- */
+let order=null;
+function openModal(id,label,price){
+  const it=C.items.find(i=>i.id===id);
+  order={ id:id, label:label, price:price };
+  document.getElementById('mName').textContent=it.name;
+  document.getElementById('mSub').textContent=label;
+  document.getElementById('mPrice').textContent=cur+price;
+  document.getElementById('mIcon').className='fa-solid '+it.icon;
+  [['paypal','pp-paypal'],['card','pp-card'],['crypto','pp-crypto']].forEach(([k,cls])=>{
+    document.querySelector('.'+cls).classList.toggle('disabled', !(C.payments[k]&&C.payments[k]!=="#")); });
+  document.getElementById('err').style.display='none';
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+function validSteam(s){ return /^STEAM_[0-5]:[01]:\d+$/i.test((s||'').trim()); }
+function pay(method){
+  const sid=document.getElementById('steamid').value.trim();
+  if(!validSteam(sid)){ document.getElementById('err').style.display='block'; return; }
+  const url=C.payments[method]; if(!url||url==="#"){ alert('This payment method is not set up yet (CONFIG.payments.'+method+').'); return; }
+  const ref=encodeURIComponent(order.id+'|'+order.label+'|'+sid); let go=url;
+  if(method==='paypal') go=url+(url.includes('paypal.me')?'/'+order.price:'');
+  else if(method==='card') go=url+(url.includes('?')?'&':'?')+'client_reference_id='+ref;
+  try{localStorage.setItem('lastOrder',JSON.stringify({item:order.id,label:order.label,price:order.price,steamid:sid,method,ts:Date.now()}));}catch(e){}
+  if(C.discordWebhook){ fetch(C.discordWebhook,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({username:'BALKAN-STORE',embeds:[{title:'🛒 New order',color:0xe8b54a,fields:[
+      {name:'Item',value:order.label,inline:true},{name:'Price',value:cur+order.price,inline:true},{name:'SteamID',value:sid},{name:'Method',value:method,inline:true}]}]})}).catch(()=>{}); }
+  window.open(go,'_blank','noopener'); closeModal();
+}
+
+function connect(){ window.location.href='steam://connect/'+C.serverIP; }
+
+/* init */
+renderFilters(); renderGrid();
+if(location.hash && C.items.find(i=>i.id===location.hash.slice(1))) openDetail(location.hash.slice(1));
+</script>
+</body>
+</html>
