@@ -98,12 +98,18 @@ section{padding:20px 0}.shead{margin-bottom:14px}.shead .k{color:var(--gold);fon
 .money .mi{font-size:30px;color:var(--gold)}
 .money .mv{font-family:'Oswald';font-size:26px}.money .ml{font-size:11px;color:var(--dim);font-family:'Oswald';letter-spacing:1px;text-transform:uppercase}
 .gear{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.gcard{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}
-.gcard .gpic{height:78px;display:flex;align-items:center;justify-content:center;margin-bottom:6px}
-.gcard .gpic img{max-height:78px;max-width:100%;object-fit:contain;filter:drop-shadow(0 6px 12px rgba(0,0,0,.5))}
-.gcard .gpic .gph{font-size:40px;color:var(--line2)}
+.gcard{background:var(--bg2);border:1px solid var(--line);border-radius:14px;overflow:hidden;position:relative;aspect-ratio:3/4;display:flex;flex-direction:column}
+.gcard .gpic{flex:1;display:flex;align-items:center;justify-content:center;padding:10px;min-height:0}
+.gcard .gpic img{max-height:100%;max-width:100%;object-fit:contain;filter:drop-shadow(0 6px 12px rgba(0,0,0,.5))}
+.gcard .gpic .gph{font-size:46px;color:var(--line2)}
+.gcard .gcap{padding:9px 12px;text-align:center;border-top:1px solid var(--line)}
 .gcard .gl{font-size:10px;color:var(--dim);font-family:'Oswald';letter-spacing:1px;text-transform:uppercase}
 .gcard .gv{font-family:'Oswald';font-size:16px}
+/* class: the photo COVERS the entire card, name overlaid */
+.gcard.fill .cov{position:absolute;inset:0;background-position:center top;background-size:cover}
+.gcard.fill .gph2{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:58px;color:var(--line2)}
+.gcard.fill .ov{position:absolute;inset:0;background:linear-gradient(transparent 48%,rgba(0,0,0,.55) 72%,rgba(0,0,0,.92));display:flex;flex-direction:column;justify-content:flex-end;padding:12px}
+.gcard.fill .ov .gl{color:var(--gold)}.gcard.fill .ov .gv{font-size:19px}
 .kb-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
 .kb{background:var(--panel);padding:13px 16px;text-align:center}
 .kb .l{font-size:10px;color:var(--dim);font-family:'Oswald';letter-spacing:1px;text-transform:uppercase}.kb .v{font-family:'Oswald';font-size:22px;margin-top:2px}
@@ -115,6 +121,9 @@ section{padding:20px 0}.shead{margin-bottom:14px}.shead .k{color:var(--gold);fon
 .badge{width:54px;height:54px;flex:0 0 54px;border-radius:50%;background:radial-gradient(circle at 50% 35%,#23252e,#101219);border:2px solid var(--line2);display:flex;align-items:center;justify-content:center;position:relative}
 .medal.done .badge{border-color:var(--gold);box-shadow:0 0 14px rgba(232,181,74,.3)}
 .badge i{font-size:24px}
+.badge.imgb{overflow:hidden;background:#0d0f15}
+.badge.imgb .bw{position:absolute;inset:0;background-size:cover;background-position:center top;filter:grayscale(1) brightness(.78)}
+.badge.imgb .rev{position:absolute;inset:0;background-size:cover;background-position:center top}
 .medal h4{font-size:14px;display:flex;align-items:center;gap:7px}.medal h4 .chk{color:var(--green);font-size:12px}
 .medal p{color:var(--dim);font-size:12px}
 .mprog{height:6px;border-radius:4px;background:var(--panel2);overflow:hidden;margin-top:7px}.mprog i{display:block;height:100%;background:var(--gold)}
@@ -191,10 +200,13 @@ function levelBlock(d){
 }
 
 /* ---- gear card (knife / class with photo) ---- */
-function gear(label, name, img){
-  const pic = img ? `<img src="${img}" alt="${esc(name)}" onerror="this.style.display='none';this.parentNode.innerHTML='<i class=&quot;fa-solid fa-question gph&quot;></i>'">`
-                  : `<i class="fa-solid ${label==='Knife'?'fa-khanda':'fa-skull'} gph"></i>`;
-  return `<div class="gcard"><div class="gpic">${pic}</div><div class="gl">${label}</div><div class="gv">${esc(name)}</div></div>`;
+function knifeCard(name, img){
+  const pic = img ? `<img src="${img}" alt="${esc(name)}">` : `<i class="fa-solid fa-khanda gph"></i>`;
+  return `<div class="gcard"><div class="gpic">${pic}</div><div class="gcap"><div class="gl">Knife</div><div class="gv">${esc(name)}</div></div></div>`;
+}
+function classCard(name, img){
+  return `<div class="gcard fill">${ img ? `<div class="cov" style="background-image:url('${img}')"></div>` : `<div class="gph2"><i class="fa-solid fa-skull"></i></div>` }
+    <div class="ov"><div class="gl">Zombie class</div><div class="gv">${esc(name)}</div></div></div>`;
 }
 
 /* ---- stats panel (cabinet game-profile + search) ---- */
@@ -202,8 +214,11 @@ function gameProfile(d, isMe){
   const medals = CONFIG.medals.map(m=>{
     const val=(d.extra&&d.extra[m.i])||0, done=val>=m.target, pct=Math.min(100,Math.round(val/m.target*100));
     const fill = done ? 'var(--gold)' : `linear-gradient(90deg,var(--gold) ${pct}%,var(--mute) ${pct}%)`;
+    const badge = m.img
+      ? `<div class="badge imgb"><div class="bw" style="background-image:url('${m.img}')"></div><div class="rev" style="background-image:url('${m.img}');clip-path:inset(0 ${100-pct}% 0 0)"></div></div>`
+      : `<div class="badge"><i class="fa-solid ${m.icon}" style="background:${fill};-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent"></i></div>`;
     return `<div class="medal ${done?'done':''}">
-      <div class="badge"><i class="fa-solid ${m.icon}" style="background:${fill};-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent"></i></div>
+      ${badge}
       <div style="flex:1"><h4>${m.name} ${done?'<span class="chk"><i class="fa-solid fa-check"></i></span>':''}</h4><p>${m.desc}</p>
         ${done?'':`<div class="mprog"><i style="width:${pct}%"></i></div><div class="num">${fmt(val)} / ${fmt(m.target)}</div>`}</div></div>`;
   }).join('');
@@ -214,7 +229,7 @@ function gameProfile(d, isMe){
       ${levelBlock(d)}
       <div class="gp-side">
         <div class="money"><i class="fa-solid fa-sack-dollar mi"></i><div><div class="ml">Money</div><div class="mv">${fmt(d.money)} <span class="gold">$</span></div></div></div>
-        <div class="gear">${gear('Knife', d.knife, CONFIG.knifeImg[d.knifeId])}${gear('Zombie class', d.zclass, CONFIG.zclassImg[d.zclassId])}</div>
+        <div class="gear">${knifeCard(d.knife, CONFIG.knifeImg[d.knifeId])}${classCard(d.zclass, CONFIG.zclassImg[d.zclassId])}</div>
       </div>
     </div>
     <div class="kb-row">
