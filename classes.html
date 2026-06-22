@@ -42,7 +42,7 @@ const WIKI = {
       role:"The electric artillery — orbs that trap from range.",
       ab:{ name:"Energy Balls", key:"Mouse 2", icon:"fa-bolt",
         desc:"Charge & hurl up to 5 electric orbs/round. They explode and TRAP humans (can't move or shoot) for ~5s, ~20 dmg + knockback (15s cooldown). A VIP favourite." } },
-    { id:"deimos", name:"Deimos", zid:7, img:"assets/wiki/zclass_deimos.png", hp:null, speed:null, gravity:null, knockback:null,
+    { id:"deimos", name:"Deimos", zid:7, img:null, hp:null, speed:null, gravity:null, knockback:null,
       role:"The boss-tier freezer.",
       ab:{ name:"Freezing Projectile", key:"Mouse 2", icon:"fa-snowflake",
         desc:"Launches a freezing projectile that forces humans to DROP their weapon and freezes them for 3s (10–30 freeze damage, 7s cooldown, 20 uses/round)." } }
@@ -95,8 +95,9 @@ section{padding:26px 0}
 
 .cls-grid{display:grid;gap:16px}
 .cls{display:grid;grid-template-columns:200px 1fr;gap:0;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
-.cls .pic{background:radial-gradient(120% 100% at 50% 0,rgba(227,52,47,.14),#0a0b0e);display:flex;align-items:center;justify-content:center;position:relative;min-height:250px;padding:12px}
-.cls .pic img{max-width:100%;max-height:236px;object-fit:contain;filter:drop-shadow(0 10px 22px rgba(0,0,0,.55))}
+.cls .pic{background:radial-gradient(120% 100% at 50% 0,rgba(227,52,47,.20),#140a0a);position:relative;min-height:250px;overflow:hidden}
+.cls .pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cls .pic .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:64px;color:var(--line2)}
 .cls .pic .ph{font-size:64px;color:var(--line2)}
 .cls .pic .zid{position:absolute;top:12px;left:12px;font-family:'Oswald';letter-spacing:1px;font-size:11px;background:var(--panel2);color:var(--dim);padding:3px 9px;border-radius:20px}
 .cls .info{padding:22px 24px}
@@ -167,10 +168,11 @@ function statRow(c){
     <div class="stat"><div class="l"><i class="fa-solid fa-arrows-left-right-to-line"></i> Knockback</div><div class="v">${c.knockback==null?'—':c.knockback}</div></div>
   </div>`;
 }
+const POS={stamper:'60%',healer:'74%',heavy:'50%',hunter:'28%',sirens:'74%',tesla:'50%'};
 document.getElementById('clsGrid').innerHTML = WIKI.classes.map(c=>`
   <div class="cls" id="${c.id}">
     <div class="pic"><span class="zid">CLASS ${c.zid}</span>
-      ${c.img?`<img src="${c.img}" alt="${c.name}">`:`<i class="fa-solid fa-skull ph"></i>`}</div>
+      ${c.img?`<img src="${c.img}" alt="${c.name}" style="object-position:${POS[c.id]||'50%'} 22%">`:`<i class="fa-solid fa-skull ph"></i>`}</div>
     <div class="info">
       <h3>${c.name}</h3><div class="role">${c.role}</div>
       ${statRow(c)}

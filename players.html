@@ -17,7 +17,8 @@ const CONFIG = {
   // total EXP needed to REACH each level (index 0 = level 1 ... index 29 = level 30 = MAX)
   expTable : [0,8,16,26,40,80,110,250,350,500,850,1100,1525,1800,2400,3000,3875,4900,7000,9600,12400,15400,18600,22750,27500,34500,40000,50000,75000,100000],
   knifeImg : ["assets/wiki/knife_combat.webp","assets/wiki/knife_strong.webp","assets/wiki/knife_axe.webp","assets/wiki/knife_hammer.png",null,"assets/wiki/knife_master.webp"],
-  zclassImg: [null,"assets/wiki/zclass_stamper.png","assets/wiki/zclass_healer.png","assets/wiki/zclass_heavy.png","assets/wiki/zclass_hunter.png","assets/wiki/zclass_sirens.png","assets/wiki/zclass_tesla.png","assets/wiki/zclass_deimos.png"],
+  zclassImg: [null,"assets/wiki/zclass_stamper.png","assets/wiki/zclass_healer.png","assets/wiki/zclass_heavy.png","assets/wiki/zclass_hunter.png","assets/wiki/zclass_sirens.png","assets/wiki/zclass_tesla.png",null],
+  zclassPos: ["50%","60%","74%","50%","28%","74%","50%","50%"],
   medals : [
     { i:0, name:"Gun Expert",        desc:"Kill 5000 zombies with any weapon", target:5000, icon:"fa-gun" },
     { i:1, name:"Headshot Expert",   desc:"1000 headshot zombie kills",         target:1000, icon:"fa-crosshairs" },
@@ -204,8 +205,8 @@ function knifeCard(name, img){
   const pic = img ? `<img src="${img}" alt="${esc(name)}">` : `<i class="fa-solid fa-khanda gph"></i>`;
   return `<div class="gcard"><div class="gpic">${pic}</div><div class="gcap"><div class="gl">Knife</div><div class="gv">${esc(name)}</div></div></div>`;
 }
-function classCard(name, img){
-  return `<div class="gcard fill">${ img ? `<div class="cov" style="background-image:url('${img}')"></div>` : `<div class="gph2"><i class="fa-solid fa-skull"></i></div>` }
+function classCard(name, img, pos){
+  return `<div class="gcard fill">${ img ? `<div class="cov" style="background-image:url('${img}');background-position:${pos||'50%'} 16%"></div>` : `<div class="gph2"><i class="fa-solid fa-skull"></i></div>` }
     <div class="ov"><div class="gl">Zombie class</div><div class="gv">${esc(name)}</div></div></div>`;
 }
 
@@ -229,7 +230,7 @@ function gameProfile(d, isMe){
       ${levelBlock(d)}
       <div class="gp-side">
         <div class="money"><i class="fa-solid fa-sack-dollar mi"></i><div><div class="ml">Money</div><div class="mv">${fmt(d.money)} <span class="gold">$</span></div></div></div>
-        <div class="gear">${knifeCard(d.knife, CONFIG.knifeImg[d.knifeId])}${classCard(d.zclass, CONFIG.zclassImg[d.zclassId])}</div>
+        <div class="gear">${knifeCard(d.knife, CONFIG.knifeImg[d.knifeId])}${classCard(d.zclass, CONFIG.zclassImg[d.zclassId], CONFIG.zclassPos[d.zclassId])}</div>
       </div>
     </div>
     <div class="kb-row">
