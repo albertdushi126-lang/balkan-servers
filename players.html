@@ -3,17 +3,16 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Players & Stats · BALKAN-SERVERS</title>
-<meta name="description" content="BALKAN-SERVERS player statistics — level, money, knife, zombie class, achievements. Sign in to your cabinet." />
+<title>Players & Account · BALKAN-SERVERS</title>
+<meta name="description" content="BALKAN-SERVERS — your account, profile & player statistics." />
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="assets/auth.js"></script>
 
 <script>
 const CONFIG = {
-  apiBase  : "https://balkan-backend.onrender.com",
-  serverIP : "31.57.151.143:27015",
-  // 9 achievement medals (from the in-game stats — user_statsdata extra fields)
+  apiBase : "https://balkan-backend.onrender.com",
   medals : [
     { i:0, name:"Gun Expert",        desc:"Kill 5000 zombies with any weapon", target:5000, icon:"fa-gun" },
     { i:1, name:"Headshot Expert",   desc:"1000 headshot zombie kills",         target:1000, icon:"fa-crosshairs" },
@@ -41,285 +40,256 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);overfl
 h1,h2,h3,h4{font-family:'Oswald',sans-serif;letter-spacing:.5px;text-transform:uppercase;font-weight:700}
 a{color:inherit;text-decoration:none}
 .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
-.gold{color:var(--gold)}.accent{color:var(--red)}.green{color:var(--green)}
-.btn{display:inline-flex;align-items:center;gap:9px;font-family:'Oswald';text-transform:uppercase;letter-spacing:1px;font-size:15px;padding:12px 22px;border-radius:8px;border:1px solid var(--line2);cursor:pointer;transition:.18s;background:var(--panel2);color:var(--txt)}
+.gold{color:var(--gold)}.accent{color:var(--red)}
+.btn{display:inline-flex;align-items:center;gap:9px;font-family:'Oswald';text-transform:uppercase;letter-spacing:1px;font-size:14px;padding:11px 20px;border-radius:8px;border:1px solid var(--line2);cursor:pointer;transition:.18s;background:var(--panel2);color:var(--txt)}
 .btn:hover{transform:translateY(-2px)}
-.btn-red{background:var(--red);color:#fff;border:0}.btn-red:hover{background:var(--red-d)}
-.btn-gold{background:var(--gold);color:#241a02;border:0}.btn-green{background:var(--green);color:#06200f;border:0}.btn-ghost{background:transparent}
+.btn-red{background:var(--red);color:#fff;border:0}.btn-gold{background:var(--gold);color:#241a02;border:0}.btn-green{background:var(--green);color:#06200f;border:0}.btn-ghost{background:transparent}
 
 header{position:sticky;top:0;z-index:100;background:rgba(7,8,9,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
 nav{display:flex;align-items:center;justify-content:space-between;height:64px;gap:12px}
 .logo{display:flex;align-items:center;gap:10px;font-family:'Oswald';font-weight:700;font-size:21px;letter-spacing:1px}.logo i{color:var(--red);font-size:24px}
 .nav-links{display:flex;align-items:center;gap:22px}
 .nav-links a{color:var(--dim);font-size:14px;font-weight:500}.nav-links a:hover{color:var(--txt)}
-.nav-cta{display:flex;gap:10px;align-items:center}
-.who{font-family:'Oswald';letter-spacing:.5px;font-size:14px;color:var(--gold);display:flex;align-items:center;gap:8px}
+.nav-cta{display:flex;gap:8px;align-items:center}
 
-.phead{padding:40px 0 6px}
+.phead{padding:38px 0 6px}
 .phead .k{color:var(--red);font-family:'Oswald';letter-spacing:3px;font-size:13px}
-.phead h1{font-size:clamp(32px,5.5vw,56px);margin-top:4px}
+.phead h1{font-size:clamp(30px,5vw,52px);margin-top:4px}
 .phead p{color:var(--dim);margin-top:6px}
+section{padding:22px 0}
+.shead{margin-bottom:16px}.shead .k{color:var(--gold);font-family:'Oswald';letter-spacing:2px;font-size:12px}.shead h2{font-size:clamp(22px,3.5vw,30px)}
 
-.search{display:flex;gap:10px;margin:22px 0;flex-wrap:wrap}
-.search input{flex:1;min-width:240px;padding:13px 15px;border-radius:9px;background:var(--bg2);border:1px solid var(--line2);color:var(--txt);font-size:15px;outline:none}
-.search input:focus{border-color:var(--gold)}
-.hint{color:var(--dim);font-size:13px;margin-top:-8px}
+/* cabinet / profile */
+.cab{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-bottom:22px}
+.cab-top{display:flex;gap:20px;align-items:center;padding:24px;background:linear-gradient(120deg,rgba(232,181,74,.12),rgba(227,52,47,.06));border-bottom:1px solid var(--line);flex-wrap:wrap}
+.avatar{position:relative;width:96px;height:96px;flex:0 0 96px}
+.avatar img{width:96px;height:96px;border-radius:18px;object-fit:cover;border:2px solid var(--line2)}
+.avatar .ph{width:96px;height:96px;border-radius:18px;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:38px;color:var(--gold)}
+.avatar .cam{position:absolute;bottom:-6px;right:-6px;width:32px;height:32px;border-radius:50%;background:var(--gold);color:#241a02;border:3px solid var(--panel);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px}
+.cab-id h2{font-size:26px}
+.cab-id .meta{color:var(--dim);font-size:14px;margin-top:2px;display:flex;flex-wrap:wrap;gap:6px 16px}
+.cab-id .meta b{color:var(--txt);font-weight:600}
+.cab-act{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
 
-section{padding:26px 0}
-.shead{margin-bottom:18px;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:10px}
-.shead h2{font-size:clamp(22px,3.5vw,30px)}.shead .k{color:var(--gold);font-family:'Oswald';letter-spacing:2px;font-size:12px}
-
-/* ---- stats panel ---- */
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:22px}
-.p-head{display:flex;align-items:center;gap:18px;padding:24px;background:linear-gradient(120deg,rgba(227,52,47,.14),rgba(232,181,74,.06));border-bottom:1px solid var(--line);flex-wrap:wrap}
-.p-ava{width:74px;height:74px;border-radius:14px;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:34px;color:var(--gold);flex:0 0 74px}
-.p-id h2{font-size:clamp(22px,3vw,30px)}
-.p-id .sid{color:var(--dim);font-size:13px;font-family:'Oswald';letter-spacing:1px}
-.p-rank{margin-left:auto;text-align:center}
-.p-rank .n{font-family:'Oswald';font-size:30px;color:var(--gold);line-height:1}
-.p-rank .l{font-size:11px;color:var(--dim);font-family:'Oswald';letter-spacing:1px}
-
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line)}
-.cell{background:var(--panel);padding:16px 18px}
-.cell .l{font-size:11px;color:var(--dim);font-family:'Oswald';letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;gap:6px}
-.cell .v{font-family:'Oswald';font-size:24px;margin-top:4px}
-.cell .v small{font-size:13px;color:var(--dim)}
-.cell.hl .v{color:var(--gold)}
-
-.xpbar{padding:16px 18px;background:var(--panel);border-top:1px solid var(--line)}
-.xpbar .t{display:flex;justify-content:space-between;font-size:12px;color:var(--dim);margin-bottom:6px;font-family:'Oswald';letter-spacing:1px}
-.xptrack{height:9px;border-radius:6px;background:var(--panel2);overflow:hidden}
-.xptrack i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),#c8902f)}
-
-/* medals */
-.medals{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:12px;margin-top:14px}
-.medal{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px;display:flex;gap:13px;align-items:flex-start}
-.medal.done{border-color:rgba(232,181,74,.5);background:linear-gradient(160deg,rgba(232,181,74,.1),transparent)}
-.medal .mi{width:40px;height:40px;border-radius:10px;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--dim);flex:0 0 40px}
-.medal.done .mi{color:var(--gold)}
-.medal h4{font-size:14px;display:flex;align-items:center;gap:7px}
-.medal h4 .chk{color:var(--green);font-size:12px}
-.medal p{color:var(--dim);font-size:12px}
-.mprog{height:6px;border-radius:4px;background:var(--panel2);overflow:hidden;margin-top:8px}
-.mprog i{display:block;height:100%;background:var(--gold)}
-.medal .num{font-size:11px;color:var(--dim);margin-top:5px;font-family:'Oswald';letter-spacing:.5px}
-
-/* leaderboard */
-.lb{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-.lb th,.lb td{padding:13px 16px;text-align:left;border-bottom:1px solid var(--line);font-size:14px}
-.lb th{font-family:'Oswald';letter-spacing:1px;font-size:12px;color:var(--dim);text-transform:uppercase}
-.lb tr:last-child td{border-bottom:0}
-.lb tr.me{background:rgba(232,181,74,.08)}
-.lb td.pos{font-family:'Oswald';color:var(--gold);font-size:18px}
-.lb td.nick{font-weight:600;cursor:pointer}.lb td.nick:hover{color:var(--gold)}
-.lb .tag{font-size:11px;background:var(--panel2);border-radius:20px;padding:2px 9px;color:var(--dim);font-family:'Oswald';letter-spacing:.5px}
-
-.msg{padding:30px;text-align:center;color:var(--dim)}
-.msg i{font-size:34px;color:var(--line2);display:block;margin-bottom:10px}
-
-/* modal (login) */
-.modal{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:20px}
-.modal.open{display:flex}
-.sheet{background:var(--panel);border:1px solid var(--line2);border-radius:16px;width:100%;max-width:420px;padding:28px;position:relative}
-.sheet .x{position:absolute;top:14px;right:16px;background:none;border:0;color:var(--dim);font-size:20px;cursor:pointer}.sheet .x:hover{color:var(--txt)}
-.sheet h3{font-size:21px;margin-bottom:4px}.sheet .sub{color:var(--dim);font-size:13px;margin-bottom:18px}
-.field{margin-bottom:13px}.field label{display:block;font-size:13px;color:var(--dim);margin-bottom:6px}
-.field input{width:100%;padding:11px 13px;border-radius:9px;background:var(--bg2);border:1px solid var(--line2);color:var(--txt);font-size:14px;outline:none}
+.edit{padding:22px 24px;border-bottom:1px solid var(--line);display:none}
+.edit.open{display:block}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{margin-bottom:12px}.field label{display:block;font-size:12.5px;color:var(--dim);margin-bottom:5px}
+.field input{width:100%;padding:10px 12px;border-radius:9px;background:var(--bg2);border:1px solid var(--line2);color:var(--txt);font-size:14px;outline:none}
 .field input:focus{border-color:var(--gold)}
-.note{font-size:12.5px;color:var(--dim);margin-top:12px;background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:11px 13px}
-.note b{color:var(--gold)}
-.err{color:var(--red);font-size:13px;margin-top:8px;min-height:18px}
+.emsg{font-size:13px;margin-top:6px;min-height:18px}.emsg.ok{color:var(--green)}.emsg.bad{color:var(--red)}
 
+.link-sid{padding:20px 24px;text-align:center;color:var(--dim)}
+.link-sid i{font-size:30px;color:var(--line2);display:block;margin-bottom:8px}
+
+/* stats panel (shared with search) */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:22px}
+.p-head{display:flex;align-items:center;gap:16px;padding:22px;background:linear-gradient(120deg,rgba(227,52,47,.12),rgba(232,181,74,.05));border-bottom:1px solid var(--line);flex-wrap:wrap}
+.p-ava{width:64px;height:64px;border-radius:13px;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--gold);flex:0 0 64px}
+.p-id h2{font-size:24px}.p-id .sid{color:var(--dim);font-size:12px;font-family:'Oswald';letter-spacing:1px}
+.p-rank{margin-left:auto;text-align:center}.p-rank .n{font-family:'Oswald';font-size:28px;color:var(--gold);line-height:1}.p-rank .l{font-size:11px;color:var(--dim);font-family:'Oswald';letter-spacing:1px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--line)}
+.cell{background:var(--panel);padding:15px 17px}
+.cell .l{font-size:11px;color:var(--dim);font-family:'Oswald';letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.cell .v{font-family:'Oswald';font-size:23px;margin-top:3px}.cell .v small{font-size:13px;color:var(--dim)}.cell.hl .v{color:var(--gold)}
+.medals{display:grid;grid-template-columns:repeat(auto-fill,minmax(245px,1fr));gap:12px;margin-top:14px}
+.medal{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;gap:12px;align-items:flex-start}
+.medal.done{border-color:rgba(232,181,74,.5);background:linear-gradient(160deg,rgba(232,181,74,.1),transparent)}
+.medal .mi{width:38px;height:38px;border-radius:10px;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--dim);flex:0 0 38px}
+.medal.done .mi{color:var(--gold)}
+.medal h4{font-size:14px;display:flex;align-items:center;gap:7px}.medal h4 .chk{color:var(--green);font-size:12px}
+.medal p{color:var(--dim);font-size:12px}.mprog{height:6px;border-radius:4px;background:var(--panel2);overflow:hidden;margin-top:7px}.mprog i{display:block;height:100%;background:var(--gold)}
+.medal .num{font-size:11px;color:var(--dim);margin-top:4px;font-family:'Oswald'}
+
+.search{display:flex;gap:10px;margin:8px 0 4px;flex-wrap:wrap}
+.search input{flex:1;min-width:230px;padding:12px 14px;border-radius:9px;background:var(--bg2);border:1px solid var(--line2);color:var(--txt);font-size:15px;outline:none}
+.search input:focus{border-color:var(--gold)}
+.hint{color:var(--dim);font-size:13px}
+.lb{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.lb th,.lb td{padding:12px 15px;text-align:left;border-bottom:1px solid var(--line);font-size:14px}
+.lb th{font-family:'Oswald';letter-spacing:1px;font-size:12px;color:var(--dim);text-transform:uppercase}
+.lb tr:last-child td{border-bottom:0}.lb td.pos{font-family:'Oswald';color:var(--gold);font-size:18px}
+.lb td.nick{font-weight:600;cursor:pointer}.lb td.nick:hover{color:var(--gold)}.lb .tag{font-size:11px;background:var(--panel2);border-radius:20px;padding:2px 9px;color:var(--dim);font-family:'Oswald'}
+.msg{padding:26px;text-align:center;color:var(--dim)}.msg i{font-size:30px;color:var(--line2);display:block;margin-bottom:8px}
 footer{border-top:1px solid var(--line);padding:30px 0;margin-top:24px}.foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--dim);font-size:13px}
-@media(max-width:760px){.nav-links{display:none}}
+@media(max-width:680px){.nav-links{display:none}.frow{grid-template-columns:1fr}.cab-act{margin-left:0;width:100%}}
 </style>
 </head>
 <body>
 
 <header><div class="wrap"><nav>
   <a class="logo" href="index.html"><i class="fa-solid fa-skull"></i> BALKAN<span class="accent">SERVERS</span></a>
-  <div class="nav-links">
-    <a href="index.html">Home</a><a href="index.html#news">News</a><a href="index.html#giveaways">Giveaways</a><a href="store.html"><i class="fa-solid fa-crown gold"></i> Store</a>
-  </div>
-  <div class="nav-cta" id="authBox"></div>
+  <div class="nav-links"><a href="index.html">Home</a><a href="players.html" class="gold">Stats</a><a href="classes.html">Classes</a><a href="store.html">Store</a></div>
+  <div class="nav-cta"><span id="balkanAuthUI" style="display:flex;gap:8px;align-items:center"></span>
+    <button class="btn btn-green" onclick="window.location.href='steam://connect/31.57.151.143:27015'"><i class="fa-solid fa-play"></i> Connect</button></div>
 </nav></div></header>
 
 <div class="wrap">
-  <div class="phead">
-    <div class="k">PLAYERS</div><h1>Player <span class="gold">Stats</span></h1>
-    <p>Search any player by SteamID, or sign in to your own cabinet.</p>
-  </div>
-  <div class="search">
-    <input id="searchSid" placeholder="STEAM_0:1:1234567" onkeydown="if(event.key==='Enter')doSearch()">
-    <button class="btn btn-red" onclick="doSearch()"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
-    <button class="btn btn-gold" id="cabBtn" onclick="openLogin()"><i class="fa-solid fa-user"></i> My Cabinet</button>
-  </div>
-  <div class="hint">Don't know your SteamID? In-game console type <b>status</b>, or use <a href="https://steamid.io" target="_blank" rel="noopener" style="color:var(--blue)">steamid.io</a>.</div>
+  <div class="phead"><div class="k">ACCOUNT</div><h1>My <span class="gold">Cabinet</span></h1>
+    <p>Your profile, photo and live game stats — or search any player below.</p></div>
 </div>
 
 <div class="wrap">
-  <section id="playerSection" style="display:none">
-    <div class="shead"><div><div class="k" id="pSectionTag">PROFILE</div><h2 id="pSectionTitle">Player</h2></div><button class="btn btn-ghost" onclick="hidePlayer()" id="closePlayerBtn" style="display:none"><i class="fa-solid fa-xmark"></i> Close</button></div>
-    <div id="playerPanel"></div>
+  <section id="cabSection"><div id="cabinet"></div></section>
+
+  <section>
+    <div class="shead"><div class="k">SEARCH</div><h2>Find a player</h2></div>
+    <div class="search"><input id="searchSid" placeholder="STEAM_0:1:1234567" onkeydown="if(event.key==='Enter')doSearch()">
+      <button class="btn btn-red" onclick="doSearch()"><i class="fa-solid fa-magnifying-glass"></i> Search</button></div>
+    <div class="hint">In-game console type <b>status</b>, or use <a href="https://steamid.io" target="_blank" rel="noopener" style="color:var(--blue)">steamid.io</a>.</div>
+    <div id="searchPanel" style="margin-top:14px"></div>
   </section>
 
   <section>
-    <div class="shead"><div><div class="k">TOP PLAYERS</div><h2>Leaderboard</h2></div><span class="hint">by kills + infections</span></div>
+    <div class="shead"><div class="k">TOP PLAYERS</div><h2>Leaderboard</h2></div>
     <div id="leaderboard"><div class="msg"><i class="fa-solid fa-spinner fa-spin"></i> Loading…</div></div>
   </section>
 </div>
 
+<input type="file" id="photoInput" accept="image/*" style="display:none" onchange="onPhotoPick(this)">
+
 <footer><div class="wrap"><div class="foot">
-  <span>© 2026 BALKAN-SERVERS · Zombie CSO</span>
-  <span><a href="index.html" class="gold">← Back to community</a></span>
+  <span>© 2026 BALKAN-SERVERS · Zombie CSO</span><span><a href="index.html" class="gold">← Back to community</a></span>
 </div></div></footer>
 
-<!-- login modal -->
-<div class="modal" id="loginModal"><div class="sheet">
-  <button class="x" onclick="closeLogin()"><i class="fa-solid fa-xmark"></i></button>
-  <h3>Sign in</h3><div class="sub">See your cabinet, enter giveaways & more.</div>
-  <div class="field"><label>SteamID</label><input id="li_sid" placeholder="STEAM_0:1:1234567" autocomplete="username"></div>
-  <div class="field"><label>Password</label><input id="li_pw" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
-  <button class="btn btn-gold" style="width:100%;justify-content:center" onclick="doLogin()"><i class="fa-solid fa-right-to-bracket"></i> Sign in</button>
-  <div class="err" id="li_err"></div>
-  <div class="note"><b>First time?</b> Create your web password <b>in-game</b>: type <b>/setpw yourpassword</b> in chat. Then sign in here with your SteamID + that password.</div>
-</div></div>
-
 <script>
-const API = CONFIG.apiBase;
-const KEY = 'balkanAuth';
-const $ = (id) => document.getElementById(id);
+const fmt = (n) => (n==null ? '—' : Number(n).toLocaleString('en-US'));
 const validSteam = (s) => /^STEAM_[0-5]:[01]:\d+$/i.test((s||'').trim());
-const fmt = (n) => (n==null?'—':Number(n).toLocaleString('en-US'));
+const esc = (s) => String(s==null?'':s).replace(/[<>&"]/g, c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
 
-function getAuth(){ try{ return JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){ return null; } }
-function setAuth(a){ localStorage.setItem(KEY, JSON.stringify(a)); renderAuth(); }
-function logout(){ localStorage.removeItem(KEY); renderAuth(); location.hash=''; hidePlayer(); }
+/* react to login/logout from auth.js */
+document.addEventListener('balkan-auth', renderCabinet);
+window.onBalkanAuth = renderCabinet;
 
-function renderAuth(){
-  const a = getAuth();
-  const box = $('authBox');
-  if(a && a.token){
-    box.innerHTML = `<span class="who"><i class="fa-solid fa-user-check"></i> ${a.nick||a.sid}</span>
-      <button class="btn btn-ghost" onclick="logout()">Logout</button>`;
-    $('cabBtn').innerHTML = '<i class="fa-solid fa-user"></i> My Cabinet';
-    $('cabBtn').onclick = loadCabinet;
-  } else {
-    box.innerHTML = `<button class="btn btn-gold" onclick="openLogin()"><i class="fa-solid fa-right-to-bracket"></i> Sign in</button>`;
-    $('cabBtn').onclick = openLogin;
+/* ---------- cabinet ---------- */
+let CURRENT=null;
+async function renderCabinet(){
+  const box = document.getElementById('cabinet');
+  if(!window.BalkanAuth || !BalkanAuth.isIn()){
+    box.innerHTML = `<div class="cab"><div class="msg"><i class="fa-solid fa-user-lock"></i>
+      Sign in to see your cabinet, profile & stats.<br><br>
+      <button class="btn btn-gold" onclick="BalkanAuth.open('up')"><i class="fa-solid fa-user-plus"></i> Create account</button>
+      <button class="btn btn-ghost" onclick="BalkanAuth.open('in')">Sign in</button></div></div>`;
+    return;
   }
-}
-
-function openLogin(){ $('loginModal').classList.add('open'); $('li_sid').focus(); }
-function closeLogin(){ $('loginModal').classList.remove('open'); $('li_err').textContent=''; }
-
-async function doLogin(){
-  const sid = $('li_sid').value.trim(), pw = $('li_pw').value;
-  $('li_err').textContent='';
-  if(!validSteam(sid)){ $('li_err').textContent='Enter a valid SteamID.'; return; }
-  if(!pw){ $('li_err').textContent='Enter your password.'; return; }
-  try{
-    const r = await fetch(API+'/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({steamid:sid,password:pw}) });
-    const d = await r.json();
-    if(!r.ok){ $('li_err').textContent = d.error || 'Login failed.'; return; }
-    setAuth({ token:d.token, sid:d.sid });
-    closeLogin();
-    loadCabinet();
-  }catch(e){ $('li_err').textContent='Network error. Try again.'; }
-}
-
-async function loadCabinet(){
-  const a = getAuth();
-  if(!a||!a.token){ openLogin(); return; }
-  showLoading('MY CABINET','Your stats');
-  try{
-    const r = await fetch(API+'/api/me', { headers:{ Authorization:'Bearer '+a.token } });
-    if(r.status===401){ logout(); openLogin(); return; }
-    const d = await r.json();
-    if(!r.ok){ showMsg(d.error||'No stats yet.'); return; }
-    if(a.nick!==d.nick){ a.nick=d.nick; setAuth(a); }
-    renderPanel(d,'MY CABINET','Welcome back, '+d.nick, false);
-  }catch(e){ showMsg('Network error.'); }
-}
-
-async function doSearch(){
-  const sid = $('searchSid').value.trim();
-  if(!validSteam(sid)){ showPlayerSection(); showMsg('Enter a valid SteamID (STEAM_0:1:1234567).'); return; }
-  showLoading('PROFILE','Loading…');
-  try{
-    const r = await fetch(API+'/api/stats?steamid='+encodeURIComponent(sid));
-    const d = await r.json();
-    if(!r.ok){ showMsg(d.error==='player not found'?'No player found with that SteamID.':(d.error||'Error.')); return; }
-    renderPanel(d,'PROFILE','Player profile', true);
-  }catch(e){ showMsg('Network error.'); }
-}
-
-function showPlayerSection(){ $('playerSection').style.display='block'; }
-function hidePlayer(){ $('playerSection').style.display='none'; }
-function showLoading(tag,title){ showPlayerSection(); $('pSectionTag').textContent=tag; $('pSectionTitle').textContent=title; $('closePlayerBtn').style.display='none'; $('playerPanel').innerHTML='<div class="msg"><i class="fa-solid fa-spinner fa-spin"></i> Loading…</div>'; window.scrollTo({top:0}); }
-function showMsg(t){ $('playerPanel').innerHTML='<div class="msg"><i class="fa-solid fa-ghost"></i>'+t+'</div>'; }
-
-function renderPanel(d, tag, title, closeable){
-  showPlayerSection();
-  $('pSectionTag').textContent = tag;
-  $('pSectionTitle').textContent = title;
-  $('closePlayerBtn').style.display = closeable?'inline-flex':'none';
-  const kd = d.extra && d.extra[9] != null ? null : null;
-  const medals = CONFIG.medals.map(m=>{
-    const val = (d.extra && d.extra[m.i]) || 0;
-    const done = val >= m.target;
-    const pct = Math.min(100, Math.round(val/m.target*100));
-    return `<div class="medal ${done?'done':''}"><div class="mi"><i class="fa-solid ${m.icon}"></i></div>
-      <div style="flex:1"><h4>${m.name} ${done?'<span class="chk"><i class="fa-solid fa-check"></i></span>':''}</h4>
-        <p>${m.desc}</p>
-        ${done?'':`<div class="mprog"><i style="width:${pct}%"></i></div><div class="num">${fmt(val)} / ${fmt(m.target)}</div>`}
-      </div></div>`;
-  }).join('');
-  $('playerPanel').innerHTML = `
-    <div class="panel">
-      <div class="p-head">
-        <div class="p-ava"><i class="fa-solid fa-user-astronaut"></i></div>
-        <div class="p-id"><h2>${d.nick}</h2><div class="sid">${d.sid}</div></div>
-        <div class="p-rank"><div class="n">#${d.rank||'—'}</div><div class="l">of ${fmt(d.totalPlayers)}</div></div>
+  box.innerHTML = `<div class="cab"><div class="msg"><i class="fa-solid fa-spinner fa-spin"></i> Loading your cabinet… <small>(first load can take ~30s while the server wakes up)</small></div></div>`;
+  const r = await BalkanAuth.api('/api/me');
+  if(r.status===401){ BalkanAuth.logout(); renderCabinet(); return; }
+  if(!r.ok){ box.innerHTML = `<div class="cab"><div class="msg"><i class="fa-solid fa-triangle-exclamation"></i> Could not load your cabinet. Try again.</div></div>`; return; }
+  CURRENT = r.data;
+  const p = r.data.profile, s = r.data.stats;
+  const photo = p.photo ? `<img src="${p.photo}" alt="me">` : `<div class="ph"><i class="fa-solid fa-user-astronaut"></i></div>`;
+  box.innerHTML = `
+    <div class="cab">
+      <div class="cab-top">
+        <div class="avatar">${photo}<div class="cam" title="Change photo" onclick="document.getElementById('photoInput').click()"><i class="fa-solid fa-camera"></i></div></div>
+        <div class="cab-id">
+          <h2>${esc(p.nick||p.name||'Player')}</h2>
+          <div class="meta">
+            ${p.name?`<span><b>Name:</b> ${esc(p.name)}</span>`:''}
+            ${p.age?`<span><b>Age:</b> ${esc(p.age)}</span>`:''}
+            <span><b>Email:</b> ${esc(p.email)}</span>
+            ${p.steamid?`<span><b>SteamID:</b> ${esc(p.steamid)}</span>`:''}
+          </div>
+        </div>
+        <div class="cab-act">
+          <button class="btn btn-gold" onclick="toggleEdit()"><i class="fa-solid fa-pen"></i> Edit profile</button>
+          <button class="btn btn-ghost" onclick="BalkanAuth.logout()">Logout</button>
+        </div>
       </div>
-      <div class="grid">
-        <div class="cell hl"><div class="l"><i class="fa-solid fa-arrow-up-9-1"></i> Level</div><div class="v">${fmt(d.level)}</div></div>
-        <div class="cell hl"><div class="l"><i class="fa-solid fa-coins"></i> Money</div><div class="v">${fmt(d.money)}<small>$</small></div></div>
-        <div class="cell"><div class="l"><i class="fa-solid fa-crosshairs"></i> Kills</div><div class="v">${fmt(d.kills)}</div></div>
-        <div class="cell"><div class="l"><i class="fa-solid fa-syringe"></i> Infections</div><div class="v">${fmt(d.infects)}</div></div>
-        <div class="cell"><div class="l"><i class="fa-solid fa-hammer"></i> Knife</div><div class="v" style="font-size:18px">${d.knife}</div></div>
-        <div class="cell"><div class="l"><i class="fa-solid fa-skull"></i> Zombie class</div><div class="v" style="font-size:18px">${d.zclass}</div></div>
+      <div class="edit" id="editPane">
+        <div class="frow">
+          <div class="field"><label>Name</label><input id="ed_name" value="${esc(p.name)}"></div>
+          <div class="field"><label>Age</label><input id="ed_age" type="number" value="${esc(p.age)}"></div>
+        </div>
+        <div class="frow">
+          <div class="field"><label>In-game nick</label><input id="ed_nick" value="${esc(p.nick)}"></div>
+          <div class="field"><label>SteamID (links your game stats)</label><input id="ed_sid" value="${esc(p.steamid)}" placeholder="STEAM_0:1:1234567"></div>
+        </div>
+        <button class="btn btn-gold" onclick="saveProfile()"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+        <div class="emsg" id="ed_msg"></div>
       </div>
-      <div class="xpbar"><div class="t"><span>EXP</span><span>${fmt(d.exp)}</span></div><div class="xptrack"><i style="width:${Math.min(100, d.level?100:(d.exp?20:2))}%"></i></div></div>
+      ${ s ? '' : `<div class="link-sid"><i class="fa-solid fa-link"></i> Add your <b>SteamID</b> (Edit profile) to show your in-game level, money, knife, zombie class & medals here.</div>` }
     </div>
-    <div class="shead" style="margin-top:6px"><div><div class="k" style="color:var(--gold)">ACHIEVEMENTS</div><h2 style="font-size:22px">Medals</h2></div></div>
-    <div class="medals">${medals}</div>`;
-  window.scrollTo({top:0,behavior:'smooth'});
+    ${ s ? renderStatsPanel(s, true) : '' }`;
 }
+function toggleEdit(){ document.getElementById('editPane').classList.toggle('open'); }
+async function saveProfile(){
+  const m = document.getElementById('ed_msg'); m.textContent='Saving…'; m.className='emsg';
+  const sid = document.getElementById('ed_sid').value.trim();
+  if(sid && !validSteam(sid)){ m.textContent='Invalid SteamID (or leave it empty).'; m.className='emsg bad'; return; }
+  const body = { name:document.getElementById('ed_name').value.trim(), age:document.getElementById('ed_age').value.trim(), nick:document.getElementById('ed_nick').value.trim(), steamid:sid };
+  const r = await BalkanAuth.api('/api/profile', {method:'PUT', body});
+  if(r.ok){ m.textContent='Saved!'; m.className='emsg ok'; renderCabinet(); }
+  else { m.textContent=(r.data&&r.data.error)||'Could not save.'; m.className='emsg bad'; }
+}
+
+/* ---------- photo upload (resized client-side) ---------- */
+function onPhotoPick(input){
+  const f = input.files && input.files[0]; if(!f) return;
+  const img = new Image();
+  img.onload = () => {
+    const max=256; let w=img.width,h=img.height;
+    if(w>h){ if(w>max){ h=Math.round(h*max/w); w=max; } } else { if(h>max){ w=Math.round(w*max/h); h=max; } }
+    const c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0,w,h);
+    savePhoto(c.toDataURL('image/jpeg',0.85)); URL.revokeObjectURL(img.src);
+  };
+  img.onerror = () => alert('Could not read that image.');
+  img.src = URL.createObjectURL(f);
+  input.value='';
+}
+async function savePhoto(dataUrl){
+  const r = await BalkanAuth.api('/api/profile', {method:'PUT', body:{photo:dataUrl}});
+  if(r.ok) renderCabinet(); else alert((r.data&&r.data.error)||'Could not save photo.');
+}
+
+/* ---------- stats panel (cabinet + search) ---------- */
+function renderStatsPanel(d, isMe){
+  const medals = CONFIG.medals.map(m=>{
+    const val=(d.extra&&d.extra[m.i])||0, done=val>=m.target, pct=Math.min(100,Math.round(val/m.target*100));
+    return `<div class="medal ${done?'done':''}"><div class="mi"><i class="fa-solid ${m.icon}"></i></div>
+      <div style="flex:1"><h4>${m.name} ${done?'<span class="chk"><i class="fa-solid fa-check"></i></span>':''}</h4><p>${m.desc}</p>
+      ${done?'':`<div class="mprog"><i style="width:${pct}%"></i></div><div class="num">${fmt(val)} / ${fmt(m.target)}</div>`}</div></div>`;
+  }).join('');
+  return `<div class="panel">
+    <div class="p-head"><div class="p-ava"><i class="fa-solid fa-user-astronaut"></i></div>
+      <div class="p-id"><h2>${esc(d.nick)} ${isMe?'<span style="font-size:12px;color:var(--gold)">· you</span>':''}</h2><div class="sid">${esc(d.sid)}</div></div>
+      <div class="p-rank"><div class="n">#${d.rank||'—'}</div><div class="l">of ${fmt(d.totalPlayers)}</div></div></div>
+    <div class="grid">
+      <div class="cell hl"><div class="l"><i class="fa-solid fa-arrow-up-9-1"></i> Level</div><div class="v">${fmt(d.level)}</div></div>
+      <div class="cell hl"><div class="l"><i class="fa-solid fa-coins"></i> Money</div><div class="v">${fmt(d.money)}<small>$</small></div></div>
+      <div class="cell"><div class="l"><i class="fa-solid fa-crosshairs"></i> Kills</div><div class="v">${fmt(d.kills)}</div></div>
+      <div class="cell"><div class="l"><i class="fa-solid fa-syringe"></i> Infections</div><div class="v">${fmt(d.infects)}</div></div>
+      <div class="cell"><div class="l"><i class="fa-solid fa-hammer"></i> Knife</div><div class="v" style="font-size:17px">${esc(d.knife)}</div></div>
+      <div class="cell"><div class="l"><i class="fa-solid fa-skull"></i> Zombie class</div><div class="v" style="font-size:17px">${esc(d.zclass)}</div></div>
+    </div></div>
+    <div class="shead" style="margin:6px 0 12px"><div class="k">ACHIEVEMENTS</div><h2 style="font-size:21px">Medals</h2></div>
+    <div class="medals">${medals}</div>`;
+}
+
+/* ---------- search ---------- */
+async function doSearch(){
+  const sid = document.getElementById('searchSid').value.trim();
+  const box = document.getElementById('searchPanel');
+  if(!validSteam(sid)){ box.innerHTML='<div class="panel"><div class="msg"><i class="fa-solid fa-ghost"></i>Enter a valid SteamID.</div></div>'; return; }
+  box.innerHTML='<div class="panel"><div class="msg"><i class="fa-solid fa-spinner fa-spin"></i> Loading…</div></div>';
+  const r = await BalkanAuth.api('/api/stats?steamid='+encodeURIComponent(sid));
+  if(!r.ok){ box.innerHTML='<div class="panel"><div class="msg"><i class="fa-solid fa-ghost"></i>'+((r.data&&r.data.error==='player not found')?'No player with that SteamID.':'Error.')+'</div></div>'; return; }
+  box.innerHTML = renderStatsPanel(r.data, false);
+}
+function viewSid(sid){ document.getElementById('searchSid').value=sid; doSearch(); window.scrollTo({top:document.getElementById('searchSid').offsetTop-80,behavior:'smooth'}); }
 
 async function loadLeaderboard(){
-  try{
-    const r = await fetch(API+'/api/top?limit=25');
-    const rows = await r.json();
-    const me = getAuth();
-    if(!Array.isArray(rows) || !rows.length){ $('leaderboard').innerHTML='<div class="msg"><i class="fa-solid fa-trophy"></i>No players yet — be the first!</div>'; return; }
-    $('leaderboard').innerHTML = `<table class="lb">
-      <thead><tr><th>#</th><th>Player</th><th>Level</th><th>Kills</th><th>Infects</th><th>Money</th><th>Knife</th></tr></thead>
-      <tbody>${rows.map(p=>`
-        <tr class="${me&&me.sid===p.sid?'me':''}">
-          <td class="pos">${p.pos}</td>
-          <td class="nick" onclick="viewSid('${p.sid}')">${p.nick}</td>
-          <td>${fmt(p.level)}</td><td>${fmt(p.kills)}</td><td>${fmt(p.infects)}</td>
-          <td>${fmt(p.money)}$</td><td><span class="tag">${p.knife}</span></td>
-        </tr>`).join('')}</tbody></table>`;
-  }catch(e){ $('leaderboard').innerHTML='<div class="msg"><i class="fa-solid fa-triangle-exclamation"></i>Could not load the leaderboard.</div>'; }
+  const r = await BalkanAuth.api('/api/top?limit=25');
+  const box=document.getElementById('leaderboard');
+  if(!r.ok || !Array.isArray(r.data) || !r.data.length){ box.innerHTML='<div class="msg"><i class="fa-solid fa-trophy"></i>No players yet — be the first!</div>'; return; }
+  box.innerHTML=`<table class="lb"><thead><tr><th>#</th><th>Player</th><th>Level</th><th>Kills</th><th>Infects</th><th>Money</th><th>Knife</th></tr></thead>
+    <tbody>${r.data.map(p=>`<tr><td class="pos">${p.pos}</td><td class="nick" onclick="viewSid('${p.sid}')">${esc(p.nick)}</td>
+      <td>${fmt(p.level)}</td><td>${fmt(p.kills)}</td><td>${fmt(p.infects)}</td><td>${fmt(p.money)}$</td><td><span class="tag">${esc(p.knife)}</span></td></tr>`).join('')}</tbody></table>`;
 }
-function viewSid(sid){ $('searchSid').value=sid; doSearch(); }
 
 /* init */
-renderAuth();
-loadLeaderboard();
-if(getAuth()) { /* optionally auto-load cabinet */ }
+window.addEventListener('load', () => { renderCabinet(); loadLeaderboard(); });
 </script>
 </body>
 </html>
