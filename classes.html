@@ -14,7 +14,7 @@
 const WIKI = {
   // zombie classes — stats & abilities pulled from the server source
   classes: [
-    { id:"fast", name:"Fast", zid:0, img:null, hp:1750, speed:265, gravity:0.69, knockback:0.49,
+    { id:"fast", name:"Fast", zid:0, img:"assets/wiki/zclass_fast.png", hp:1750, speed:265, gravity:0.69, knockback:0.49,
       role:"The nimble runner — fastest of all, but light on its feet.",
       ab:{ name:"No special ability", key:"Passive", icon:"fa-person-running",
         desc:"Pure speed & agility. The lowest gravity of any class (0.69) means it jumps the highest — great for flanking and chasing." } },
@@ -168,7 +168,7 @@ function statRow(c){
     <div class="stat"><div class="l"><i class="fa-solid fa-arrows-left-right-to-line"></i> Knockback</div><div class="v">${c.knockback==null?'—':c.knockback}</div></div>
   </div>`;
 }
-const POS={stamper:'60%',healer:'74%',heavy:'50%',hunter:'28%',sirens:'74%',tesla:'50%',deimos:'50%'};
+const POS={fast:'50%',stamper:'60%',healer:'74%',heavy:'50%',hunter:'28%',sirens:'74%',tesla:'50%',deimos:'50%'};
 document.getElementById('clsGrid').innerHTML = WIKI.classes.map(c=>`
   <div class="cls" id="${c.id}">
     <div class="pic"><span class="zid">CLASS ${c.zid}</span>
