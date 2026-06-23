@@ -53,13 +53,9 @@ const WIKI = {
     { id:"strong", name:"Strong",  img:"assets/wiki/knife_strong.webp", note:"A heavy machete — bigger hits." },
     { id:"axe",    name:"Axe",     img:"assets/wiki/knife_axe.webp",    note:"A hooked axe — wide swing." },
     { id:"hammer", name:"Hammer",  img:"assets/wiki/knife_hammer.png",  note:"VIP knife — huge damage, knockback & a higher, floatier jump (gravity)." , vip:true },
-    { id:"master", name:"Master",  img:"assets/wiki/knife_master.webp", note:"Master combat knife — premium skin." }
-  ],
-  // special CSO weapons (Extra-Items)
-  // Balrog-IX photo: drop the file at assets/wiki/weapon_balrog9.png and set img below.
-  weapons: [
-    { id:"balrog9", name:"Balrog-IX", img:"", tag:"Special",
-      note:"The legendary CSO rifle. As you rack up zombie kills it charges its Balrog System — once full it enters Balrog mode, firing explosive rounds that blast the whole horde. Find it in Extra-Items." }
+    { id:"master", name:"Master",  img:"assets/wiki/knife_master.webp", note:"Master combat knife — premium skin." },
+    { id:"balrog9", name:"Balrog-IX", img:"assets/wiki/knife_balrog9.png", special:true,
+      note:"The legendary CSO melee. It charges a Balrog System as you slay zombies — once full, its strike unleashes a powerful charged hit with massive damage & knockback." }
   ]
 };
 </script>
@@ -132,18 +128,10 @@ section{padding:26px 0}
 .kn h4{font-size:17px}.kn h4 .vipt{font-size:10px;background:var(--gold);color:#241a02;border-radius:5px;padding:1px 6px;vertical-align:middle;margin-left:5px;font-family:'Oswald'}
 .kn p{color:var(--dim);font-size:12.5px;margin-top:4px}
 
-/* ---------- SPECIAL WEAPONS ---------- */
-.wp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
-.wp{display:grid;grid-template-columns:130px 1fr;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:border-color .2s,box-shadow .2s,transform .2s}
-.wp:hover{border-color:rgba(232,181,74,.5);box-shadow:0 14px 34px rgba(0,0,0,.5),0 0 0 1px rgba(232,181,74,.22);transform:translateY(-3px)}
-.wp .wpic{background:radial-gradient(120% 100% at 50% 0,rgba(232,181,74,.18),#161007);position:relative;display:flex;align-items:center;justify-content:center;padding:12px;overflow:hidden}
-.wp .wpic img{max-width:100%;max-height:130px;object-fit:contain;transition:transform .35s ease}
-.wp:hover .wpic img{transform:scale(1.07)}
-.wp .wpic .ph{font-size:46px;color:var(--line2)}
-.wp .winfo{padding:16px 18px}
-.wp .winfo h4{font-size:20px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
-.wp .winfo .wtag{font-family:'Oswald';letter-spacing:.5px;font-size:10px;background:var(--gold);color:#241a02;padding:2px 8px;border-radius:5px;text-transform:uppercase}
-.wp .winfo p{color:var(--dim);font-size:13px;margin-top:6px}
+.kn .kp .ph{font-size:42px;color:var(--line2)}
+.kn h4 .vipt.spec{background:linear-gradient(90deg,#2fbf71,#1d9e75);color:#04210f}
+.kn-special{background:radial-gradient(120% 90% at 50% 0,rgba(47,191,113,.10),var(--panel))}
+.kn-special:hover{border-color:rgba(47,191,113,.55);box-shadow:0 12px 30px rgba(0,0,0,.5),0 0 0 1px rgba(47,191,113,.25)}
 
 .miss{margin-top:14px;font-size:13px;color:var(--dim);background:var(--panel);border:1px dashed var(--line2);border-radius:10px;padding:12px 14px}
 footer{border-top:1px solid var(--line);padding:30px 0;margin-top:30px}.foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--dim);font-size:13px}
@@ -152,7 +140,6 @@ footer{border-top:1px solid var(--line);padding:30px 0;margin-top:30px}.foot{dis
   .nav-links{display:none}
   .nav-links.open{display:flex;position:absolute;top:64px;left:0;right:0;flex-direction:column;align-items:flex-start;background:var(--bg2);padding:16px 22px;gap:14px;border-bottom:1px solid var(--line)}
   .cls{grid-template-columns:1fr}.cls .pic{min-height:220px}
-  .wp{grid-template-columns:104px 1fr}
   .stats{gap:6px}.stat{min-width:0;flex:1 1 calc(50% - 6px)}
 }
 </style>
@@ -182,11 +169,7 @@ footer{border-top:1px solid var(--line);padding:30px 0;margin-top:30px}.foot{dis
 
   <section><div class="shead"><div class="k">MELEE</div><h2>Knives</h2></div>
     <div class="kn-grid" id="knGrid"></div>
-  </section>
-
-  <section><div class="shead"><div class="k">EXTRA-ITEMS</div><h2>Special <span class="gold">Weapons</span></h2></div>
-    <div class="wp-grid" id="wpGrid"></div>
-    <div class="miss" id="wpMiss"></div>
+    <div class="miss" id="knMiss"></div>
   </section>
 </div>
 
@@ -223,20 +206,14 @@ document.getElementById('clsMiss').innerHTML = missing.length
   ? `<i class="fa-solid fa-circle-info"></i> Model images still to add: <b>${missing.join(', ')}</b> — they'll appear here once uploaded.`
   : '';
 
+function knBadge(k){ return k.vip?'<span class="vipt">VIP</span>':(k.special?'<span class="vipt spec">SPECIAL</span>':''); }
 document.getElementById('knGrid').innerHTML = WIKI.knives.map(k=>`
-  <div class="kn"><div class="kp"><img src="${k.img}" alt="${k.name}"></div>
-    <h4>${k.name}${k.vip?'<span class="vipt">VIP</span>':''}</h4><p>${k.note}</p></div>`).join('');
+  <div class="kn${k.special?' kn-special':''}" id="${k.id}"><div class="kp">${k.img?`<img src="${k.img}" alt="${k.name}">`:`<i class="fa-solid fa-khanda ph"></i>`}</div>
+    <h4>${k.name}${knBadge(k)}</h4><p>${k.note}</p></div>`).join('');
 
-const weapons = WIKI.weapons || [];
-document.getElementById('wpGrid').innerHTML = weapons.map(w=>`
-  <div class="wp" id="${w.id}">
-    <div class="wpic">${w.img?`<img src="${w.img}" alt="${w.name}">`:`<i class="fa-solid fa-gun ph"></i>`}</div>
-    <div class="winfo"><h4>${w.name}${w.tag?`<span class="wtag">${w.tag}</span>`:''}</h4><p>${w.note}</p></div>
-  </div>`).join('');
-
-const wpMissing = weapons.filter(w=>!w.img).map(w=>w.name);
-document.getElementById('wpMiss').innerHTML = wpMissing.length
-  ? `<i class="fa-solid fa-circle-info"></i> Weapon images still to add: <b>${wpMissing.join(', ')}</b> — they'll appear here once uploaded.`
+const knMissing = WIKI.knives.filter(k=>!k.img).map(k=>k.name);
+document.getElementById('knMiss').innerHTML = knMissing.length
+  ? `<i class="fa-solid fa-circle-info"></i> Knife images still to add: <b>${knMissing.join(', ')}</b> — they'll appear here once uploaded.`
   : '';
 </script>
 </body>
