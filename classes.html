@@ -53,7 +53,9 @@ const WIKI = {
     { id:"strong", name:"Strong",  img:"assets/wiki/knife_strong.webp", note:"A heavy machete — bigger hits." },
     { id:"axe",    name:"Axe",     img:"assets/wiki/knife_axe.webp",    note:"A hooked axe — wide swing." },
     { id:"hammer", name:"Hammer",  img:"assets/wiki/knife_hammer.png",  note:"VIP knife — huge damage, knockback & a higher, floatier jump (gravity)." , vip:true },
-    { id:"master", name:"Master",  img:"assets/wiki/knife_master.webp", note:"Master combat knife — premium skin." }
+    { id:"master", name:"Master",  img:"assets/wiki/knife_master.webp", note:"Master combat knife — premium skin." },
+    { id:"balrog9", name:"Balrog-IX", img:"assets/wiki/knife_balrog9.png", special:true,
+      note:"The legendary CSO melee. It charges a Balrog System as you slay zombies — once full, its strike unleashes a powerful charged hit with massive damage & knockback." }
   ]
 };
 </script>
@@ -82,6 +84,7 @@ nav{display:flex;align-items:center;justify-content:space-between;height:64px;ga
 .nav-links{display:flex;align-items:center;gap:22px}
 .nav-links a{color:var(--dim);font-size:14px;font-weight:500}.nav-links a:hover{color:var(--txt)}
 .nav-cta{display:flex;gap:8px;align-items:center}
+.burger{display:none;font-size:22px;background:none;border:0;color:var(--txt);cursor:pointer;padding:4px 8px}
 
 .phead{padding:42px 0 8px}
 .phead .k{color:var(--red);font-family:'Oswald';letter-spacing:3px;font-size:13px}
@@ -94,9 +97,11 @@ section{padding:26px 0}
 .shead h2{font-size:clamp(24px,4vw,34px)}
 
 .cls-grid{display:grid;gap:16px}
-.cls{display:grid;grid-template-columns:200px 1fr;gap:0;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.cls{display:grid;grid-template-columns:200px 1fr;gap:0;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;transition:border-color .2s,box-shadow .2s,transform .2s}
+.cls:hover{border-color:rgba(227,52,47,.45);box-shadow:0 14px 38px rgba(0,0,0,.5),0 0 0 1px rgba(227,52,47,.25);transform:translateY(-3px)}
 .cls .pic{background:radial-gradient(120% 100% at 50% 0,rgba(227,52,47,.20),#140a0a);position:relative;min-height:250px;overflow:hidden}
-.cls .pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cls .pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .35s ease}
+.cls:hover .pic img{transform:scale(1.06)}
 .cls .pic .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:64px;color:var(--line2)}
 .cls .pic .ph{font-size:64px;color:var(--line2)}
 .cls .pic .zid{position:absolute;top:12px;left:12px;font-family:'Oswald';letter-spacing:1px;font-size:11px;background:var(--panel2);color:var(--dim);padding:3px 9px;border-radius:20px}
@@ -115,26 +120,40 @@ section{padding:26px 0}
 .ability p{color:var(--dim);font-size:13.5px;margin-top:5px}
 
 .kn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
-.kn{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px;text-align:center}
+.kn{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px;text-align:center;transition:border-color .2s,box-shadow .2s,transform .2s}
+.kn:hover{border-color:rgba(232,181,74,.45);box-shadow:0 12px 30px rgba(0,0,0,.45);transform:translateY(-3px)}
 .kn .kp{height:84px;display:flex;align-items:center;justify-content:center;margin-bottom:8px}
-.kn .kp img{max-height:84px;max-width:100%;object-fit:contain}
+.kn .kp img{max-height:84px;max-width:100%;object-fit:contain;transition:transform .3s ease}
+.kn:hover .kp img{transform:scale(1.08)}
 .kn h4{font-size:17px}.kn h4 .vipt{font-size:10px;background:var(--gold);color:#241a02;border-radius:5px;padding:1px 6px;vertical-align:middle;margin-left:5px;font-family:'Oswald'}
 .kn p{color:var(--dim);font-size:12.5px;margin-top:4px}
 
+.kn .kp .ph{font-size:42px;color:var(--line2)}
+.kn h4 .vipt.spec{background:linear-gradient(90deg,#2fbf71,#1d9e75);color:#04210f}
+.kn-special{background:radial-gradient(120% 90% at 50% 0,rgba(47,191,113,.10),var(--panel))}
+.kn-special:hover{border-color:rgba(47,191,113,.55);box-shadow:0 12px 30px rgba(0,0,0,.5),0 0 0 1px rgba(47,191,113,.25)}
+
 .miss{margin-top:14px;font-size:13px;color:var(--dim);background:var(--panel);border:1px dashed var(--line2);border-radius:10px;padding:12px 14px}
 footer{border-top:1px solid var(--line);padding:30px 0;margin-top:30px}.foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--dim);font-size:13px}
-@media(max-width:680px){.nav-links{display:none}.cls{grid-template-columns:1fr}.cls .pic{min-height:200px}}
+@media(max-width:680px){
+  .burger{display:block}
+  .nav-links{display:none}
+  .nav-links.open{display:flex;position:absolute;top:64px;left:0;right:0;flex-direction:column;align-items:flex-start;background:var(--bg2);padding:16px 22px;gap:14px;border-bottom:1px solid var(--line)}
+  .cls{grid-template-columns:1fr}.cls .pic{min-height:220px}
+  .stats{gap:6px}.stat{min-width:0;flex:1 1 calc(50% - 6px)}
+}
 </style>
 </head>
 <body>
 
 <header><div class="wrap"><nav>
   <a class="logo" href="index.html"><i class="fa-solid fa-skull"></i> BALKAN<span class="accent">SERVERS</span></a>
-  <div class="nav-links">
+  <div class="nav-links" id="navLinks">
     <a href="index.html">Home</a><a href="players.html">Stats</a><a href="classes.html" class="gold">Classes</a><a href="store.html">Store</a>
   </div>
   <div class="nav-cta"><span id="balkanAuthUI" style="display:flex;gap:8px;align-items:center"></span>
-    <button class="btn btn-green" onclick="window.location.href='steam://connect/31.57.151.143:27015'"><i class="fa-solid fa-play"></i> Connect</button></div>
+    <button class="btn btn-green" onclick="window.location.href='steam://connect/31.57.151.143:27015'"><i class="fa-solid fa-play"></i> Connect</button>
+    <button class="burger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Menu"><i class="fa-solid fa-bars"></i></button></div>
 </nav></div></header>
 
 <div class="wrap">
@@ -150,6 +169,7 @@ footer{border-top:1px solid var(--line);padding:30px 0;margin-top:30px}.foot{dis
 
   <section><div class="shead"><div class="k">MELEE</div><h2>Knives</h2></div>
     <div class="kn-grid" id="knGrid"></div>
+    <div class="miss" id="knMiss"></div>
   </section>
 </div>
 
@@ -186,9 +206,15 @@ document.getElementById('clsMiss').innerHTML = missing.length
   ? `<i class="fa-solid fa-circle-info"></i> Model images still to add: <b>${missing.join(', ')}</b> — they'll appear here once uploaded.`
   : '';
 
+function knBadge(k){ return k.vip?'<span class="vipt">VIP</span>':(k.special?'<span class="vipt spec">SPECIAL</span>':''); }
 document.getElementById('knGrid').innerHTML = WIKI.knives.map(k=>`
-  <div class="kn"><div class="kp"><img src="${k.img}" alt="${k.name}"></div>
-    <h4>${k.name}${k.vip?'<span class="vipt">VIP</span>':''}</h4><p>${k.note}</p></div>`).join('');
+  <div class="kn${k.special?' kn-special':''}" id="${k.id}"><div class="kp">${k.img?`<img src="${k.img}" alt="${k.name}">`:`<i class="fa-solid fa-khanda ph"></i>`}</div>
+    <h4>${k.name}${knBadge(k)}</h4><p>${k.note}</p></div>`).join('');
+
+const knMissing = WIKI.knives.filter(k=>!k.img).map(k=>k.name);
+document.getElementById('knMiss').innerHTML = knMissing.length
+  ? `<i class="fa-solid fa-circle-info"></i> Knife images still to add: <b>${knMissing.join(', ')}</b> — they'll appear here once uploaded.`
+  : '';
 </script>
 </body>
 </html>
