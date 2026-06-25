@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link rel="icon" type="image/webp" href="assets/phobos.webp">
 <script src="assets/auth.js"></script>
+<script src="assets/i18n.js"></script>
 
 <!-- ===================== CONFIG (edit me) ===================== -->
 <script>
@@ -314,19 +315,20 @@ footer{border-top:1px solid var(--line);padding:40px 0;margin-top:20px}
 <header><div class="wrap"><nav>
   <a class="logo" href="#top"><span class="brand" data-brand="34"><i class="fa-solid fa-skull"></i></span> BALKAN<span class="accent">SERVERS</span></a>
   <div class="nav-links" id="navLinks">
-    <a href="#top">Home</a>
-    <a href="#servers">Servers</a>
-    <a href="store.html"><i class="fa-solid fa-cart-shopping gold"></i> Store</a>
-    <a href="store.html"><i class="fa-solid fa-crown gold"></i> Privileges</a>
-    <a href="players.html"><i class="fa-solid fa-ranking-star gold"></i> Stats</a>
-    <a href="classes.html">Classes</a>
-    <a href="#news">News</a>
+    <a href="#top" data-i18n="home">Home</a>
+    <a href="#servers" data-i18n="servers">Servers</a>
+    <a href="store.html"><i class="fa-solid fa-cart-shopping gold"></i> <span data-i18n="store">Store</span></a>
+    <a href="store.html"><i class="fa-solid fa-crown gold"></i> <span data-i18n="privileges">Privileges</span></a>
+    <a href="players.html"><i class="fa-solid fa-ranking-star gold"></i> <span data-i18n="stats">Stats</span></a>
+    <a href="classes.html" data-i18n="classes">Classes</a>
+    <a href="#news" data-i18n="news">News</a>
     <a href="#" id="navDiscord"><i class="fa-brands fa-discord"></i></a>
   </div>
-  <div class="nav-search"><i class="fa-solid fa-magnifying-glass"></i><input placeholder="Search…" onkeydown="if(event.key==='Enter')siteSearch(this.value)"></div>
+  <div class="nav-search"><i class="fa-solid fa-magnifying-glass"></i><input data-i18n-ph="search" placeholder="Search…" onkeydown="if(event.key==='Enter')siteSearch(this.value)"></div>
   <div class="nav-cta">
     <span id="balkanAuthUI" style="display:flex;gap:8px;align-items:center"></span>
-    <button class="btn btn-green" onclick="connect()"><i class="fa-solid fa-play"></i> Play</button>
+    <span id="langPicker"></span>
+    <button class="btn btn-green" onclick="connect()"><i class="fa-solid fa-play"></i> <span data-i18n="play">Play</span></button>
     <button class="burger" onclick="document.getElementById('navLinks').classList.toggle('open')"><i class="fa-solid fa-bars"></i></button>
   </div>
 </nav></div></header>
@@ -337,19 +339,19 @@ footer{border-top:1px solid var(--line);padding:40px 0;margin-top:20px}
   <div class="promo">
     <img class="fig" src="assets/vip/terror.png" alt="" onerror="this.style.display='none'">
     <div class="ph">
-      <div class="k">PRIVILEGE STORE</div>
-      <h1>GET <span class="gold">MORE</span><br>POWER</h1>
-      <p>Buy VIP, custom knives, zombie classes & money packs. Stand out on the server and unlock unique abilities and commands.</p>
+      <div class="k" data-i18n="hero_k">PRIVILEGE STORE</div>
+      <h1 data-i18n-html="hero_t">GET <span class="gold">MORE</span><br>POWER</h1>
+      <p data-i18n="hero_d">Buy VIP, custom knives, zombie classes & money packs. Stand out on the server and unlock unique abilities and commands.</p>
       <div class="pcta">
-        <a class="btn btn-gold" href="store.html"><i class="fa-solid fa-crown"></i> Go to store</a>
-        <button class="btn btn-ghost" onclick="connect()"><i class="fa-solid fa-play"></i> Connect</button>
+        <a class="btn btn-gold" href="store.html"><i class="fa-solid fa-crown"></i> <span data-i18n="gotostore">Go to store</span></a>
+        <button class="btn btn-ghost" onclick="connect()"><i class="fa-solid fa-play"></i> <span data-i18n="connect">Connect</span></button>
       </div>
     </div>
     <div class="dots"><i class="on"></i><i></i><i></i></div>
   </div>
 
   <div class="srv-card" id="servers">
-    <div class="h"><span class="t"><i class="fa-solid fa-server gold"></i> PLAY ON OUR SERVERS</span><span class="on"><span class="dot"></span> ONLINE</span></div>
+    <div class="h"><span class="t"><i class="fa-solid fa-server gold"></i> <span data-i18n="srv_t">PLAY ON OUR SERVERS</span></span><span class="on"><span class="dot"></span> <span data-i18n="online">ONLINE</span></span></div>
     <div id="srvList"></div>
     <div class="all" id="srvTotal">Players online · —</div>
   </div>
@@ -362,11 +364,11 @@ footer{border-top:1px solid var(--line);padding:40px 0;margin-top:20px}
 <section><div class="wrap">
   <div class="mid-grid">
     <div class="card">
-      <div class="card-h"><i class="fa-solid fa-coins"></i> LATEST PURCHASES <span class="dim">support the project ♥</span></div>
+      <div class="card-h"><i class="fa-solid fa-coins"></i> <span data-i18n="buy_t">LATEST PURCHASES</span> <span class="dim" data-i18n="buy_s">support the project ♥</span></div>
       <div id="buyList"></div>
     </div>
     <div>
-      <div class="shead" style="margin-bottom:14px"><div><div class="k">THIS SEASON</div><h2 style="font-size:24px">Stats</h2></div></div>
+      <div class="shead" style="margin-bottom:14px"><div><div class="k" data-i18n="season_k">THIS SEASON</div><h2 style="font-size:24px" data-i18n="season_t">Stats</h2></div></div>
       <div class="stat-tiles" id="statTiles"></div>
     </div>
   </div>
@@ -376,18 +378,18 @@ footer{border-top:1px solid var(--line);padding:40px 0;margin-top:20px}
 <section style="padding-top:8px"><div class="wrap">
   <div class="bottom-grid">
     <div class="card">
-      <div class="card-h"><i class="fa-solid fa-newspaper"></i> LATEST NEWS <a href="#news" class="dim" style="margin-left:auto">all ›</a></div>
+      <div class="card-h"><i class="fa-solid fa-newspaper"></i> <span data-i18n="lnews_t">LATEST NEWS</span> <a href="#news" class="dim" style="margin-left:auto"><span data-i18n="all">all</span> ›</a></div>
       <div class="news-list" id="newsListShort"></div>
     </div>
 
     <div class="card">
-      <div class="card-h"><i class="fa-solid fa-comments"></i> COMMUNITY CHAT <span class="dim" id="chatStatus"><span class="cdot"></span> live</span></div>
+      <div class="card-h"><i class="fa-solid fa-comments"></i> <span data-i18n="chat_t">COMMUNITY CHAT</span> <span class="dim" id="chatStatus"><span class="cdot"></span> live</span></div>
       <div class="chat-body" id="chatBody"></div>
-      <div class="chat-foot"><input id="chatInput" maxlength="280" placeholder="Write a message…" onkeydown="if(event.key==='Enter')sendChat()"><button onclick="sendChat()" title="Send"><i class="fa-solid fa-paper-plane"></i></button></div>
+      <div class="chat-foot"><input id="chatInput" maxlength="280" data-i18n-ph="chat_write" placeholder="Write a message…" onkeydown="if(event.key==='Enter')sendChat()"><button onclick="sendChat()" title="Send"><i class="fa-solid fa-paper-plane"></i></button></div>
     </div>
 
     <div class="card">
-      <div class="toptabs"><div class="toptab on" id="tabPlayers" onclick="topTab('players')">TOP PLAYERS</div><div class="toptab" id="tabDon" onclick="topTab('don')">TOP DONATORS</div></div>
+      <div class="toptabs"><div class="toptab on" id="tabPlayers" data-i18n="top_p" onclick="topTab('players')">TOP PLAYERS</div><div class="toptab" id="tabDon" data-i18n="top_d" onclick="topTab('don')">TOP DONATORS</div></div>
       <div id="topBody"></div>
     </div>
   </div>
@@ -395,26 +397,26 @@ footer{border-top:1px solid var(--line);padding:40px 0;margin-top:20px}
 
 <!-- ===== FULL NEWS ===== -->
 <section id="news" style="background:var(--bg2)"><div class="wrap">
-  <div class="shead"><div><div class="k">CHANGELOG</div><h2>What's new</h2></div><div class="more">Added · Fixed · Coming soon</div></div>
+  <div class="shead"><div><div class="k" data-i18n="chg_k">CHANGELOG</div><h2 data-i18n="chg_t">What's new</h2></div><div class="more" data-i18n="chg_m">Added · Fixed · Coming soon</div></div>
   <div class="news-list card" id="newsList" style="overflow:hidden"></div>
 </div></section>
 
 <!-- ===== GIVEAWAYS ===== -->
 <section id="giveaways"><div class="wrap">
-  <div class="shead"><div><div class="k">FREE LOOT</div><h2>Giveaways</h2></div><div class="more">Enter via Discord</div></div>
+  <div class="shead"><div><div class="k" data-i18n="gw_k">FREE LOOT</div><h2 data-i18n="gw_t">Giveaways</h2></div><div class="more" data-i18n="gw_m">Enter via Discord</div></div>
   <div class="gw-grid" id="gwGrid"></div>
 </div></section>
 
 <!-- ===== SUGGESTIONS ===== -->
 <section id="suggest" style="background:var(--bg2)"><div class="wrap">
-  <div class="shead"><div><div class="k">YOUR VOICE</div><h2>Suggestions</h2></div></div>
+  <div class="shead"><div><div class="k" data-i18n="sug_k">YOUR VOICE</div><h2 data-i18n="sug_t">Suggestions</h2></div></div>
   <div class="two-col">
     <div class="board" id="sugBoard"></div>
     <div class="card-box">
-      <h3>Suggest something</h3><p class="desc">Got an idea for the server? Send it — it lands in our Discord and the community votes.</p>
-      <div class="field"><label>Your name / nick</label><input id="sg_name" placeholder="lluna"></div>
-      <div class="field"><label>Your suggestion</label><textarea id="sg_text" rows="3" placeholder="e.g. add a frost-knife event on weekends"></textarea></div>
-      <button class="btn btn-red" onclick="submitForm('suggestion')"><i class="fa-solid fa-paper-plane"></i> Send suggestion</button>
+      <h3 data-i18n="sug_ft">Suggest something</h3><p class="desc" data-i18n="sug_fd">Got an idea for the server? Send it — it lands in our Discord and the community votes.</p>
+      <div class="field"><label data-i18n="sug_nl">Your name / nick</label><input id="sg_name" placeholder="lluna"></div>
+      <div class="field"><label data-i18n="sug_tl">Your suggestion</label><textarea id="sg_text" rows="3" placeholder="e.g. add a frost-knife event on weekends"></textarea></div>
+      <button class="btn btn-red" onclick="submitForm('suggestion')"><i class="fa-solid fa-paper-plane"></i> <span data-i18n="sug_send">Send suggestion</span></button>
       <div class="fmsg" id="sg_msg"></div>
     </div>
   </div>
@@ -422,39 +424,39 @@ footer{border-top:1px solid var(--line);padding:40px 0;margin-top:20px}
 
 <!-- ===== ADMIN APPLY ===== -->
 <section id="apply"><div class="wrap">
-  <div class="shead"><div><div class="k">JOIN THE TEAM</div><h2>Apply for Admin / Staff</h2></div></div>
+  <div class="shead"><div><div class="k" data-i18n="ap_k">JOIN THE TEAM</div><h2 data-i18n="ap_t">Apply for Admin / Staff</h2></div></div>
   <div class="card-box" style="max-width:760px;margin:0 auto">
-    <p class="desc">Want to help moderate BALKAN-SERVERS? Fill this in — applications go straight to the staff team on Discord.</p>
-    <div class="frow"><div class="field"><label>In-game name</label><input id="ap_name" placeholder="lluna"></div>
-      <div class="field"><label>Age</label><input id="ap_age" type="number" placeholder="18"></div></div>
-    <div class="frow"><div class="field"><label>SteamID</label><input id="ap_steam" placeholder="STEAM_0:1:1234567"></div>
-      <div class="field"><label>Discord tag</label><input id="ap_disc" placeholder="name#0000 or @name"></div></div>
-    <div class="frow"><div class="field"><label>Hours/day you can play</label><input id="ap_hours" placeholder="3-4"></div>
-      <div class="field"><label>Languages</label><input id="ap_lang" placeholder="Albanian, English"></div></div>
-    <div class="field"><label>Past admin experience</label><textarea id="ap_exp" rows="2" placeholder="Where, how long, what tools (AMXX)…"></textarea></div>
-    <div class="field"><label>Why should we pick you?</label><textarea id="ap_why" rows="3" placeholder="Tell us about yourself"></textarea></div>
-    <button class="btn btn-red" onclick="submitForm('application')"><i class="fa-solid fa-shield-halved"></i> Submit application</button>
+    <p class="desc" data-i18n="ap_d">Want to help moderate BALKAN-SERVERS? Fill this in — applications go straight to the staff team on Discord.</p>
+    <div class="frow"><div class="field"><label data-i18n="ap_name">In-game name</label><input id="ap_name" placeholder="lluna"></div>
+      <div class="field"><label data-i18n="ap_age">Age</label><input id="ap_age" type="number" placeholder="18"></div></div>
+    <div class="frow"><div class="field"><label data-i18n="ap_steam">SteamID</label><input id="ap_steam" placeholder="STEAM_0:1:1234567"></div>
+      <div class="field"><label data-i18n="ap_disc">Discord tag</label><input id="ap_disc" placeholder="name#0000 or @name"></div></div>
+    <div class="frow"><div class="field"><label data-i18n="ap_hours">Hours/day you can play</label><input id="ap_hours" placeholder="3-4"></div>
+      <div class="field"><label data-i18n="ap_lang">Languages</label><input id="ap_lang" placeholder="Albanian, English"></div></div>
+    <div class="field"><label data-i18n="ap_exp">Past admin experience</label><textarea id="ap_exp" rows="2" placeholder="Where, how long, what tools (AMXX)…"></textarea></div>
+    <div class="field"><label data-i18n="ap_why">Why should we pick you?</label><textarea id="ap_why" rows="3" placeholder="Tell us about yourself"></textarea></div>
+    <button class="btn btn-red" onclick="submitForm('application')"><i class="fa-solid fa-shield-halved"></i> <span data-i18n="ap_submit">Submit application</span></button>
     <div class="fmsg" id="ap_msg"></div>
   </div>
 </div></section>
 
 <!-- ===== STORE CTA ===== -->
 <section style="background:var(--bg2)"><div class="wrap"><div class="store-cta">
-  <h2>Become <span class="gold">VIP</span></h2>
-  <p>The TERROR ETA model, the Hammer knife, random armor every round, reserved slot & more. From €3.</p>
-  <a class="btn btn-gold" href="store.html" style="font-size:17px;padding:15px 30px"><i class="fa-solid fa-crown"></i> Open the Store</a>
+  <h2 data-i18n-html="cta_t">Become <span class="gold">VIP</span></h2>
+  <p data-i18n="cta_d">The TERROR ETA model, the Hammer knife, random armor every round, reserved slot & more. From €3.</p>
+  <a class="btn btn-gold" href="store.html" style="font-size:17px;padding:15px 30px"><i class="fa-solid fa-crown"></i> <span data-i18n="cta_b">Open the Store</span></a>
 </div></div></section>
 
 <!-- ===== DISCORD BAND ===== -->
 <section style="padding-top:0"><div class="wrap"><div class="disc">
-  <div><h2>Join the community</h2><p>News, giveaways, support & events — all on Discord. Apply for staff, report players, suggest features.</p></div>
-  <a class="btn btn-disc" href="#" id="bandDiscord" style="font-size:17px;padding:15px 28px"><i class="fa-brands fa-discord"></i> Join Discord</a>
+  <div><h2 data-i18n="disc_t">Join the community</h2><p data-i18n="disc_d">News, giveaways, support & events — all on Discord. Apply for staff, report players, suggest features.</p></div>
+  <a class="btn btn-disc" href="#" id="bandDiscord" style="font-size:17px;padding:15px 28px"><i class="fa-brands fa-discord"></i> <span data-i18n="disc_b">Join Discord</span></a>
 </div></div></section>
 
 <!-- ===== FOOTER ===== -->
 <footer><div class="wrap"><div class="foot">
   <a class="logo" href="#top"><span class="brand" data-brand="30"><i class="fa-solid fa-skull"></i></span> BALKAN<span class="accent">SERVERS</span></a>
-  <div class="pay"><span style="font-size:13px">Secure checkout</span><i class="fa-brands fa-paypal"></i><i class="fa-brands fa-cc-stripe"></i><i class="fa-brands fa-bitcoin"></i><i class="fa-brands fa-cc-visa"></i></div>
+  <div class="pay"><span style="font-size:13px" data-i18n="foot_secure">Secure checkout</span><i class="fa-brands fa-paypal"></i><i class="fa-brands fa-cc-stripe"></i><i class="fa-brands fa-bitcoin"></i><i class="fa-brands fa-cc-visa"></i></div>
   <small>© 2026 BALKAN-SERVERS · Zombie CSO</small>
 </div></div></footer>
 
@@ -542,8 +544,10 @@ async function sendChat(){
   else { setChatStatus((r.data&&r.data.error)||'could not send'); }
 }
 function setChatStatus(t){ var s=document.getElementById('chatStatus'); if(!s)return; s.textContent=t; setTimeout(function(){ s.innerHTML='<span class="cdot"></span> live'; },2600); }
-function chatAuthHint(){ var inp=document.getElementById('chatInput'); if(inp) inp.placeholder=(window.BalkanAuth&&BalkanAuth.isIn())?'Write a message…':'Sign in to chat…'; }
+function chatAuthHint(){ var inp=document.getElementById('chatInput'); if(!inp) return; var t=window.BalkanI18n, on=(window.BalkanAuth&&BalkanAuth.isIn());
+  inp.placeholder = on ? (t?t.tr('chat_write'):'Write a message…') : (t?t.tr('chat_signin'):'Sign in to chat…'); }
 document.addEventListener('balkan-auth',chatAuthHint);
+document.addEventListener('balkan-lang',chatAuthHint);
 loadChat(); chatAuthHint(); setInterval(loadChat,8000);
 
 /* ---- news (short + full) ---- */
