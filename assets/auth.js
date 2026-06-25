@@ -3,7 +3,7 @@
   const API = "https://balkan-backend.onrender.com";
   // 👉 PASTE your Google OAuth "Web application" Client ID here to turn on Google sign-in.
   //    Leave it "" and the Google buttons stay disabled ("soon").
-  const GOOGLE_CLIENT_ID = "";
+  const GOOGLE_CLIENT_ID = "802869586598-pinp7bkcp0h6ourh27mf54ovppcmdt9a.apps.googleusercontent.com";
   const KEY = "balkanAuth";
   const validSteam = (s) => /^STEAM_[0-5]:[01]:\d+$/i.test((s || "").trim());
   const validEmail = (s) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test((s || "").trim());
