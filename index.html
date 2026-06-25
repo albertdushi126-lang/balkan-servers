@@ -503,22 +503,31 @@ renderStats();
 
 /* ---- community chat (real, writable; backed by /api/chat) ---- */
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function myAid(){
+  try{ var t=window.BalkanAuth&&BalkanAuth.token&&BalkanAuth.token(); if(!t) return null;
+    var p=JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); return p.aid||null;
+  }catch(e){ return null; }
+}
 function renderChat(list){
   var box=document.getElementById('chatBody');
   var arr=(list&&list.length)?list:CONFIG.chat.map(function(c){return {name:c.who,flag:c.flag,message:c.msg};});
+  var mine=myAid();
   var atBottom=box.scrollHeight-box.scrollTop-box.clientHeight<60;
   box.innerHTML=arr.map(function(c){
     var flag=c.flag?' <span class="fl '+esc(c.flag)+'">'+esc(c.flag)+'</span>':'';
     var av=(c.hasPhoto&&c.aid)
       ? '<img src="'+CONFIG.apiBase+'/api/avatar?aid='+c.aid+'" alt="" onerror="this.remove()"><i class="fa-solid fa-user"></i>'
       : '<i class="fa-solid fa-user"></i>';
-    var link=c.steamid?(' cmsg-link" title="View '+esc(c.name)+'’s profile" onclick="goProfile(\''+esc(c.steamid)+'\')'):'';
+    var link='';
+    if(c.aid&&mine&&c.aid===mine){ link=' cmsg-link" title="View your profile" onclick="goMine()'; }
+    else if(c.steamid){ link=' cmsg-link" title="View '+esc(c.name)+'’s profile" onclick="goProfile(\''+esc(c.steamid)+'\')'; }
     return '<div class="cmsg'+link+'"><div class="av">'+av+'</div>'+
       '<div class="cc"><div class="who">'+esc(c.name)+flag+'</div><div class="tx">'+esc(c.message)+'</div></div></div>';
   }).join('');
   if(atBottom) box.scrollTop=box.scrollHeight;
 }
 function goProfile(sid){ if(sid) window.location.href='players.html?steamid='+encodeURIComponent(sid); }
+function goMine(){ window.location.href='players.html#me'; }
 async function loadChat(){
   try{ var r=await fetch(CONFIG.apiBase+'/api/chat'); var d=r.ok?await r.json():null; renderChat(d); }
   catch(e){ renderChat(null); }
