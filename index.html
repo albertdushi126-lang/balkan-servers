@@ -222,8 +222,12 @@ section{padding:42px 0}
 .news-item p{color:var(--dim);font-size:13px;margin-top:4px}
 
 .chat-body{padding:14px 16px;display:flex;flex-direction:column;gap:11px;max-height:330px;overflow-y:auto}
-.cmsg{display:flex;gap:10px;align-items:flex-start}
-.cmsg .av{width:30px;height:30px;border-radius:8px;background:var(--panel3);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:13px;flex-shrink:0}
+.cmsg{display:flex;gap:10px;align-items:flex-start;padding:4px 6px;margin:-4px -6px;border-radius:9px;transition:background .12s}
+.cmsg-link{cursor:pointer}
+.cmsg-link:hover{background:var(--panel2)}
+.cmsg-link:hover .who{color:var(--gold)}
+.cmsg .av{position:relative;overflow:hidden;width:30px;height:30px;border-radius:8px;background:var(--panel3);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:13px;flex-shrink:0}
+.cmsg .av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .cmsg .cc .who{font-family:'Oswald';font-size:12.5px;letter-spacing:.5px}
 .cmsg .cc .who .fl{font-size:9px;padding:1px 6px;border-radius:5px;margin-left:6px;letter-spacing:1px}
 .fl.OWNER{background:rgba(227,52,47,.18);color:#ff8c89}.fl.VIP{background:rgba(232,181,74,.18);color:var(--gold)}
@@ -505,11 +509,16 @@ function renderChat(list){
   var atBottom=box.scrollHeight-box.scrollTop-box.clientHeight<60;
   box.innerHTML=arr.map(function(c){
     var flag=c.flag?' <span class="fl '+esc(c.flag)+'">'+esc(c.flag)+'</span>':'';
-    return '<div class="cmsg"><div class="av"><i class="fa-solid fa-user"></i></div>'+
+    var av=(c.hasPhoto&&c.aid)
+      ? '<img src="'+CONFIG.apiBase+'/api/avatar?aid='+c.aid+'" alt="" onerror="this.remove()"><i class="fa-solid fa-user"></i>'
+      : '<i class="fa-solid fa-user"></i>';
+    var link=c.steamid?(' cmsg-link" title="View '+esc(c.name)+'’s profile" onclick="goProfile(\''+esc(c.steamid)+'\')'):'';
+    return '<div class="cmsg'+link+'"><div class="av">'+av+'</div>'+
       '<div class="cc"><div class="who">'+esc(c.name)+flag+'</div><div class="tx">'+esc(c.message)+'</div></div></div>';
   }).join('');
   if(atBottom) box.scrollTop=box.scrollHeight;
 }
+function goProfile(sid){ if(sid) window.location.href='players.html?steamid='+encodeURIComponent(sid); }
 async function loadChat(){
   try{ var r=await fetch(CONFIG.apiBase+'/api/chat'); var d=r.ok?await r.json():null; renderChat(d); }
   catch(e){ renderChat(null); }

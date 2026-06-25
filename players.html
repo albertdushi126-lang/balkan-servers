@@ -312,7 +312,11 @@ async function loadLeaderboard(){
   box.innerHTML=`<table class="lb"><thead><tr><th>#</th><th>Player</th><th>Level</th><th>Kills</th><th>Infects</th><th>Money</th><th>Knife</th></tr></thead>
     <tbody>${r.data.map(p=>`<tr><td class="pos">${p.pos}</td><td class="nick" onclick="viewSid('${p.sid}')">${esc(p.nick)}</td><td>${fmt(p.level)}</td><td>${fmt(p.kills)}</td><td>${fmt(p.infects)}</td><td>${fmt(p.money)}$</td><td><span class="tag">${esc(p.knife)}</span></td></tr>`).join('')}</tbody></table>`;
 }
-window.addEventListener('load',()=>{ renderCabinet(); loadLeaderboard(); });
+window.addEventListener('load',()=>{ renderCabinet(); loadLeaderboard();
+  // open a specific player's profile when linked from the chat: players.html?steamid=STEAM_0:1:123
+  const q=new URLSearchParams(location.search), sid=q.get('steamid')||q.get('sid');
+  if(sid && validSteam(sid)) viewSid(sid);
+});
 </script>
 </body>
 </html>
