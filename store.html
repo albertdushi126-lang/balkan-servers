@@ -41,12 +41,7 @@ const CONFIG = {
         { i:"fa-wifi",       t:"No high-ping kick", d:"Stay in the game even on a bad connection." },
         { i:"fa-ticket",     t:"Reserved slot", d:"Always get in — even when the server is full." }
       ]
-    },
-    { id:"hammer", cat:"Knife", name:"Knife — Hammer", icon:"fa-hammer", price:3, short:"The account-bound Hammer melee — huge damage, knockback & higher jump.", img:"assets/vip/hammer.png" },
-    { id:"skins",  cat:"Skins", name:"Skin Pack",      icon:"fa-spray-can", price:4, short:"A weapon-skin set for your loadout." },
-    { id:"money",  cat:"Boost", name:"Money Pack — 300k", icon:"fa-coins", price:3, short:"Top your in-game balance to the 300,000 cap." },
-    { id:"level",  cat:"Boost", name:"Level Boost — 30",  icon:"fa-arrow-up-9-1", price:5, short:"Jump straight to the max level (30)." },
-    { id:"tesla",  cat:"Zombie", name:"Zombie Class — Tesla", icon:"fa-bolt", price:2, short:"Unlock the Tesla zombie class." }
+    }
   ]
 };
 </script>
@@ -236,7 +231,7 @@ const C=CONFIG, cur=C.currency;
 /* ---------- grid ---------- */
 let activeCat="All";
 const cats=["All",...new Set(C.items.map(i=>i.cat))];
-function renderFilters(){ document.getElementById('filters').innerHTML=cats.map(c=>`<button class="${c===activeCat?'active':''}" onclick="setCat('${c}')">${c}</button>`).join(''); }
+function renderFilters(){ const el=document.getElementById('filters'); if(cats.length<=2){ el.style.display='none'; el.innerHTML=''; return; } el.style.display='flex'; el.innerHTML=cats.map(c=>`<button class="${c===activeCat?'active':''}" onclick="setCat('${c}')">${c}</button>`).join(''); }
 function setCat(c){ activeCat=c; renderFilters(); renderGrid(); }
 
 function vipFromPrice(){ return Math.min(...C.vipTiers.map(t=>t.price)); }
