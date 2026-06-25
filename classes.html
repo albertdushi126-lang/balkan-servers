@@ -55,7 +55,9 @@ const WIKI = {
     { id:"hammer", name:"Hammer",  img:"assets/wiki/knife_hammer.png",  note:"VIP knife — huge damage, knockback & a higher, floatier jump (gravity)." , vip:true },
     { id:"master", name:"Master",  img:"assets/wiki/knife_master.webp", note:"Master combat knife — premium skin." },
     { id:"balrog9", name:"Balrog-IX", img:"assets/wiki/knife_balrog9.png", special:true,
-      note:"The legendary CSO melee. It charges a Balrog System as you slay zombies — once full, its strike unleashes a powerful charged hit with massive damage & knockback." }
+      note:"The legendary CSO melee. It charges a Balrog System as you slay zombies — once full, its strike unleashes a powerful charged hit with massive damage & knockback." },
+    { id:"dragon", name:"Dragon Knife", img:"assets/wiki/knife_dragon.png", special:true, wide:true,
+      note:"The crescent blade of Guan Yu from the Three Kingdoms — long reach, a fast rate of slash and high zombie damage that can cut down several targets at once." }
   ]
 };
 </script>
@@ -132,6 +134,9 @@ section{padding:26px 0}
 .kn h4 .vipt.spec{background:linear-gradient(90deg,#2fbf71,#1d9e75);color:#04210f}
 .kn-special{background:radial-gradient(120% 90% at 50% 0,rgba(47,191,113,.10),var(--panel))}
 .kn-special:hover{border-color:rgba(47,191,113,.55);box-shadow:0 12px 30px rgba(0,0,0,.5),0 0 0 1px rgba(47,191,113,.25)}
+.kn-wide{grid-column:span 2}
+.kn-wide .kp{height:auto;min-height:60px;padding:6px 0}
+.kn-wide .kp img{max-height:none;width:100%;object-fit:contain}
 
 .miss{margin-top:14px;font-size:13px;color:var(--dim);background:var(--panel);border:1px dashed var(--line2);border-radius:10px;padding:12px 14px}
 footer{border-top:1px solid var(--line);padding:30px 0;margin-top:30px}.foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--dim);font-size:13px}
@@ -208,7 +213,7 @@ document.getElementById('clsMiss').innerHTML = missing.length
 
 function knBadge(k){ return k.vip?'<span class="vipt">VIP</span>':(k.special?'<span class="vipt spec">SPECIAL</span>':''); }
 document.getElementById('knGrid').innerHTML = WIKI.knives.map(k=>`
-  <div class="kn${k.special?' kn-special':''}" id="${k.id}"><div class="kp">${k.img?`<img src="${k.img}" alt="${k.name}">`:`<i class="fa-solid fa-khanda ph"></i>`}</div>
+  <div class="kn${k.special?' kn-special':''}${k.wide?' kn-wide':''}" id="${k.id}"><div class="kp">${k.img?`<img src="${k.img}" alt="${k.name}">`:`<i class="fa-solid fa-khanda ph"></i>`}</div>
     <h4>${k.name}${knBadge(k)}</h4><p>${k.note}</p></div>`).join('');
 
 const knMissing = WIKI.knives.filter(k=>!k.img).map(k=>k.name);
