@@ -1,6 +1,9 @@
 /* BALKAN-SERVERS shared auth — sign up / sign in (email + password), used by every page. */
 (function () {
   const API = "https://balkan-backend.onrender.com";
+  // 👉 PASTE your Google OAuth "Web application" Client ID here to turn on Google sign-in.
+  //    Leave it "" and the Google buttons stay disabled ("soon").
+  const GOOGLE_CLIENT_ID = "";
   const KEY = "balkanAuth";
   const validSteam = (s) => /^STEAM_[0-5]:[01]:\d+$/i.test((s || "").trim());
   const validEmail = (s) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test((s || "").trim());
@@ -17,13 +20,64 @@
     opts = opts || {};
     const headers = Object.assign({ "Content-Type": "application/json" }, opts.headers || {});
     const t = token(); if (t) headers.Authorization = "Bearer " + t;
-    try {
-      const r = await fetch(API + path, { method: opts.method || "GET", headers, body: opts.body ? JSON.stringify(opts.body) : undefined });
-      let d = null; try { d = await r.json(); } catch (e) {}
-      return { ok: r.ok, status: r.status, data: d };
-    } catch (e) { return { ok: false, status: 0, data: null }; }
+    // The free Render backend sleeps after ~15 min idle; the first request can
+    // take ~30-50s or fail transiently while it boots — so retry once before giving up.
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const r = await fetch(API + path, { method: opts.method || "GET", headers, body: opts.body ? JSON.stringify(opts.body) : undefined });
+        let d = null; try { d = await r.json(); } catch (e) {}
+        return { ok: r.ok, status: r.status, data: d };
+      } catch (e) {
+        if (attempt === 0) { await new Promise(function (res) { setTimeout(res, 2500); }); continue; }
+        return { ok: false, status: 0, data: null };
+      }
+    }
   }
   async function me() { return api("/api/me"); }
+
+  // Wake the sleeping backend as early as possible so that by the time the user
+  // clicks Sign up / Sign in it is already awake (no cold-start wait). Fire-and-forget.
+  var warmed = false;
+  function warmup() { if (warmed) return; warmed = true; try { fetch(API + "/api/top", { method: "GET" }).catch(function () {}); } catch (e) {} }
+
+  // ---- Google sign-in (Google Identity Services) ----
+  function googleEnabled() { return !!GOOGLE_CLIENT_ID; }
+  function loadGIS(cb) {
+    if (window.google && google.accounts && google.accounts.id) return cb();
+    var s = document.getElementById("gisScript");
+    if (s) { var t = setInterval(function () { if (window.google && google.accounts && google.accounts.id) { clearInterval(t); cb(); } }, 120); return; }
+    s = document.createElement("script"); s.id = "gisScript"; s.src = "https://accounts.google.com/gsi/client"; s.async = true; s.defer = true;
+    s.onload = cb; document.head.appendChild(s);
+  }
+  async function _google(resp) {
+    if (!resp || !resp.credential) return;
+    var ei = document.getElementById("baInErr"), eu = document.getElementById("baUpErr");
+    if (ei) ei.textContent = "Signing in with Google…"; if (eu) eu.textContent = "Signing in with Google…";
+    const r = await api("/api/google", { method: "POST", body: { credential: resp.credential } });
+    if (r.ok && r.data && r.data.token) { set({ token: r.data.token }); close(); afterAuth(); return; }
+    const m = (r.data && r.data.error) || (r.status === 0 ? "Server is waking up — please try again." : "Google sign-in failed.");
+    if (ei) ei.textContent = m; if (eu) eu.textContent = m;
+  }
+  function renderGBtn(id) {
+    var el = document.getElementById(id);
+    if (el && window.google && google.accounts && google.accounts.id) {
+      el.innerHTML = "";
+      try { google.accounts.id.renderButton(el, { theme: "filled_black", size: "large", width: 360, text: "continue_with", shape: "pill" }); } catch (e) {}
+    }
+  }
+  function initGoogle() {
+    loadGIS(function () {
+      try { google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: _google }); renderGBtn("baGoogleIn"); renderGBtn("baGoogleUp"); } catch (e) {}
+    });
+  }
+  function paintGoogle() {
+    if (googleEnabled()) { initGoogle(); return; }
+    // not configured yet -> keep a disabled "soon" button, hide the "or" dividers
+    ["baGoogleIn", "baGoogleUp"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.innerHTML = '<button class="ba-google" disabled><i class="fa-brands fa-google"></i> Continue with Google (soon)</button>';
+    });
+  }
 
   // ---- modal (injected once) ----
   function injectModal() {
@@ -48,6 +102,9 @@
       #balkanAuthModal .ba-sub{color:var(--dim,#9aa0ac);font-size:13px;margin-bottom:16px}
       #balkanAuthModal .ba-soon{margin-top:12px;text-align:center;font-size:12px;color:var(--dim,#9aa0ac)}
       #balkanAuthModal .ba-google{width:100%;justify-content:center;display:inline-flex;align-items:center;gap:9px;padding:11px;border-radius:9px;border:1px solid var(--line2,rgba(255,255,255,.15));background:#fff;color:#111;font-weight:600;font-size:14px;margin-bottom:14px;opacity:.5;cursor:not-allowed}
+      #balkanAuthModal .ba-gwrap{display:flex;justify-content:center;min-height:42px;margin-bottom:14px}
+      #balkanAuthModal .ba-or{display:flex;align-items:center;gap:10px;color:var(--dim,#9aa0ac);font-size:11px;letter-spacing:1px;text-transform:uppercase;margin:0 0 14px}
+      #balkanAuthModal .ba-or::before,#balkanAuthModal .ba-or::after{content:"";flex:1;height:1px;background:var(--line2,rgba(255,255,255,.15))}
     `;
     document.head.appendChild(css);
     const m = document.createElement("div");
@@ -56,8 +113,8 @@
       <button class="ba-x" onclick="BalkanAuth.close()">&times;</button>
       <div class="ba-tabs"><div class="ba-tab on" id="baTabIn" onclick="BalkanAuth._tab('in')">Sign in</div><div class="ba-tab" id="baTabUp" onclick="BalkanAuth._tab('up')">Sign up</div></div>
       <div id="baPaneIn">
-        <h3>Welcome back</h3><div class="ba-sub">Sign in to apply, suggest & enter giveaways.</div>
-        <button class="ba-google" disabled><i class="fa-brands fa-google"></i> Continue with Google (soon)</button>
+        <h3>Welcome back</h3><div class="ba-sub">Sign in to apply, suggest, chat & enter giveaways.</div>
+        <div class="ba-gwrap" id="baGoogleIn"></div><div class="ba-or" id="baOrIn">or with email</div>
         <div class="ba-f"><label>Email</label><input id="baInEmail" type="email" placeholder="you@email.com" autocomplete="email"></div>
         <div class="ba-f"><label>Password</label><input id="baInPw" type="password" placeholder="••••••••" autocomplete="current-password"></div>
         <button class="ba-btn" onclick="BalkanAuth._login()"><i class="fa-solid fa-right-to-bracket"></i> Sign in</button>
@@ -65,18 +122,19 @@
       </div>
       <div id="baPaneUp" style="display:none">
         <h3>Create account</h3><div class="ba-sub">Quick — like signing up anywhere.</div>
-        <button class="ba-google" disabled><i class="fa-brands fa-google"></i> Sign up with Google (soon)</button>
+        <div class="ba-gwrap" id="baGoogleUp"></div><div class="ba-or" id="baOrUp">or with email</div>
         <div class="ba-row"><div class="ba-f"><label>Name</label><input id="baUpName" placeholder="Your name"></div><div class="ba-f"><label>Age</label><input id="baUpAge" type="number" placeholder="18"></div></div>
         <div class="ba-f"><label>Email</label><input id="baUpEmail" type="email" placeholder="you@email.com"></div>
         <div class="ba-f"><label>In-game nick</label><input id="baUpNick" placeholder="the nick you use in CS"></div>
         <div class="ba-f"><label>SteamID <span style="opacity:.6">(optional — to show your stats)</span></label><input id="baUpSid" placeholder="STEAM_0:1:1234567"></div>
-        <div class="ba-f"><label>Password</label><input id="baUpPw" type="password" placeholder="min 4 characters"></div>
+        <div class="ba-f"><label>Password</label><input id="baUpPw" type="password" placeholder="min 6 characters"></div>
         <button class="ba-btn" onclick="BalkanAuth._register()"><i class="fa-solid fa-user-plus"></i> Create account</button>
         <div class="ba-err" id="baUpErr"></div>
       </div>
     </div>`;
     document.body.appendChild(m);
     m.addEventListener("click", (e) => { if (e.target === m) close(); });
+    paintGoogle();
   }
 
   function open(tab) { injectModal(); document.getElementById("balkanAuthModal").classList.add("open"); _tab(tab || "in"); }
@@ -86,6 +144,8 @@
     document.getElementById("baPaneUp").style.display = t === "up" ? "block" : "none";
     document.getElementById("baTabIn").classList.toggle("on", t === "in");
     document.getElementById("baTabUp").classList.toggle("on", t === "up");
+    // re-render the now-visible Google button (renderButton needs a visible box for full width)
+    if (googleEnabled()) renderGBtn(t === "in" ? "baGoogleIn" : "baGoogleUp");
   }
 
   async function _login() {
@@ -93,9 +153,9 @@
     const err = document.getElementById("baInErr"); err.textContent = "";
     if (!validEmail(email)) return (err.textContent = "Enter a valid email.");
     if (!pw) return (err.textContent = "Enter your password.");
-    err.textContent = "Signing in…";
+    err.textContent = "Signing in… (first time can take ~30s while the server wakes up)";
     const r = await api("/api/login", { method: "POST", body: { email, password: pw } });
-    if (!r.ok) return (err.textContent = (r.data && r.data.error) || (r.status === 404 || r.status === 0 ? "Accounts are launching very soon — check back shortly!" : "Sign in failed."));
+    if (!r.ok) return (err.textContent = (r.data && r.data.error) || (r.status === 0 ? "Server is waking up — please try again in a few seconds." : r.status === 404 ? "Accounts are launching very soon — check back shortly!" : "Sign in failed."));
     set({ token: r.data.token }); close(); afterAuth();
   }
   async function _register() {
@@ -104,11 +164,11 @@
     if (!body.name) return (err.textContent = "Enter your name.");
     if (!validEmail(body.email)) return (err.textContent = "Enter a valid email.");
     if (!body.nick) return (err.textContent = "Enter your in-game nick.");
-    if ((body.password || "").length < 4) return (err.textContent = "Password too short (min 4).");
+    if ((body.password || "").length < 6) return (err.textContent = "Password too short (min 6).");
     if (body.steamid && !validSteam(body.steamid)) return (err.textContent = "Invalid SteamID (or leave it empty).");
-    err.textContent = "Creating account…";
+    err.textContent = "Creating account… (first time can take ~30s while the server wakes up)";
     const r = await api("/api/register", { method: "POST", body });
-    if (!r.ok) return (err.textContent = (r.data && r.data.error) || (r.status === 404 || r.status === 0 ? "Accounts are launching very soon — check back shortly!" : "Could not create account."));
+    if (!r.ok) return (err.textContent = (r.data && r.data.error) || (r.status === 0 ? "Server is waking up — please try again in a few seconds." : r.status === 404 ? "Accounts are launching very soon — check back shortly!" : "Could not create account."));
     set({ token: r.data.token }); close(); afterAuth();
   }
   function val(id) { return (document.getElementById(id).value || "").trim(); }
@@ -138,5 +198,5 @@
   function require(fn) { if (isIn()) { fn && fn(); return true; } open("in"); return false; }
 
   window.BalkanAuth = { API, open, close, logout: clear, isIn, get, token, me, api, require, updateUI, _tab, _login, _register };
-  document.addEventListener("DOMContentLoaded", function () { injectModal(); updateUI(); });
+  document.addEventListener("DOMContentLoaded", function () { injectModal(); updateUI(); warmup(); });
 })();
