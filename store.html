@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="assets/i18n-dict.js"></script>
+<script src="assets/i18n.js"></script>
 
 <!-- ===================== STORE CONFIG (edit me) ===================== -->
 <script>
@@ -182,6 +184,7 @@ footer{border-top:1px solid var(--line);padding:34px 0;margin-top:30px}.foot{dis
   <a class="logo" href="index.html"><i class="fa-solid fa-skull"></i> BALKAN<span class="accent">SERVERS</span></a>
   <div class="nav-cta">
     <a class="btn btn-ghost" href="index.html"><i class="fa-solid fa-arrow-left"></i> Home</a>
+    <span id="langPicker"></span>
     <button class="btn btn-green" onclick="connect()"><i class="fa-solid fa-play"></i> Connect</button>
   </div>
 </nav></div></header>
@@ -189,7 +192,7 @@ footer{border-top:1px solid var(--line);padding:34px 0;margin-top:30px}.foot{dis
 <!-- ===== GRID VIEW ===== -->
 <div id="gridView"><div class="wrap">
   <div class="phead">
-    <div class="k">STORE</div><h1>Get <span class="gold">VIP</span> & perks</h1>
+    <div class="k">STORE</div><h1 data-i18n-html="store_h1">Get <span class="gold">VIP</span> & perks</h1>
     <p>Support BALKAN-SERVERS and unlock the good stuff.</p>
     <div class="note"><i class="fa-solid fa-shield-halved"></i> Everything applies in-game after the next map change. Pay safely with PayPal / card / crypto.</div>
   </div>

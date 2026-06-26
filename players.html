@@ -9,6 +9,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="assets/auth.js"></script>
+<script src="assets/i18n-dict.js"></script>
+<script src="assets/i18n.js"></script>
 
 <script>
 const CONFIG = {
@@ -149,10 +151,11 @@ footer{border-top:1px solid var(--line);padding:30px 0;margin-top:24px}.foot{dis
   <a class="logo" href="index.html"><i class="fa-solid fa-skull"></i> BALKAN<span class="accent">SERVERS</span></a>
   <div class="nav-links"><a href="index.html">Home</a><a href="players.html" class="gold">Stats</a><a href="classes.html">Classes</a><a href="store.html">Store</a></div>
   <div class="nav-cta"><span id="balkanAuthUI" style="display:flex;gap:8px;align-items:center"></span>
+    <span id="langPicker"></span>
     <button class="btn btn-green" onclick="window.location.href='steam://connect/31.57.151.143:27015'"><i class="fa-solid fa-play"></i> Connect</button></div>
 </nav></div></header>
 
-<div class="wrap"><div class="phead"><div class="k">ACCOUNT</div><h1>My <span class="gold">Cabinet</span></h1>
+<div class="wrap"><div class="phead"><div class="k">ACCOUNT</div><h1 data-i18n-html="players_h1">My <span class="gold">Cabinet</span></h1>
   <p>Your profile, photos and live game stats — or search any player below.</p></div></div>
 
 <div class="wrap">
