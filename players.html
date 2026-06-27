@@ -291,15 +291,20 @@ async function saveProfile(){
   if(r.ok){ m.textContent='Saved!'; m.className='emsg ok'; renderCabinet(); } else { m.textContent=(r.data&&r.data.error)||'Could not save.'; m.className='emsg bad'; }
 }
 
-/* ---- photo / cover upload (resized client-side) ---- */
+/* ---- photo / cover upload (resized client-side; GIF avatars kept animated) ---- */
 function onPick(input,kind,max){
-  const f=input.files&&input.files[0]; if(!f) return;
+  const f=input.files&&input.files[0]; if(!f) return; input.value='';
+  // animated GIF profile photo: keep the original (canvas would flatten it to one static frame)
+  if(kind==='photo' && f.type==='image/gif'){
+    if(f.size > 3*1024*1024){ alert('That GIF is too big (max 3MB). Pick a smaller one.'); return; }
+    const rd=new FileReader(); rd.onload=()=>saveImg(kind, rd.result); rd.onerror=()=>alert('Could not read that image.'); rd.readAsDataURL(f); return;
+  }
   const img=new Image();
   img.onload=()=>{ let w=img.width,h=img.height;
     if(w>h){ if(w>max){h=Math.round(h*max/w);w=max;} } else { if(h>max){w=Math.round(w*max/h);h=max;} }
     const c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0,w,h);
     saveImg(kind,c.toDataURL('image/jpeg',0.85)); URL.revokeObjectURL(img.src); };
-  img.onerror=()=>alert('Could not read that image.'); img.src=URL.createObjectURL(f); input.value='';
+  img.onerror=()=>alert('Could not read that image.'); img.src=URL.createObjectURL(f);
 }
 async function saveImg(kind,dataUrl){ const r=await BalkanAuth.api('/api/profile',{method:'PUT',body:{[kind]:dataUrl}}); if(r.ok) renderCabinet(); else alert((r.data&&r.data.error)||'Could not save.'); }
 

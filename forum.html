@@ -277,6 +277,7 @@ function pcard(a){
   var av = (a.hasPhoto&&a.aid) ? '<img src="'+API+'/api/avatar?aid='+a.aid+'" alt="" onerror="this.remove()">' : '';
   return '<div class="pcard"><div class="pc-av">'+av+'<i class="fa-solid fa-user"></i><span class="dot'+(a.online?' on':'')+'"></span></div>'
     +'<div class="pc-name" onclick="goAuthor('+(a.aid||0)+')">'+esc(a.name)+'</div>'+ (badge(a.role)?'<div style="margin-top:4px">'+badge(a.role)+'</div>':'')
+    +(a.age?'<div class="pc-meta">Age '+a.age+'</div>':'')
     +(a.memberSince?'<div class="pc-meta">Member since '+year(a.memberSince)+'</div>':'')+'</div>';
 }
 function replyHtml(rp){
@@ -324,7 +325,7 @@ async function viewProfile(aid){
     +'<div class="profile-top">'
       +'<div class="pbig-av">'+av+'<i class="fa-solid fa-user"></i><span class="dot'+(c.online?' on':'')+'"></span></div>'
       +'<div class="pinfo"><h1>'+esc(c.name)+badge(c.role)+'</h1>'
-        +'<div style="color:var(--dim2);font-size:12px;font-family:Oswald;letter-spacing:1px">'+(c.online?'<span style="color:var(--green)">● Online</span>':'● Offline')+(c.memberSince?' · Member since '+year(c.memberSince):'')+'</div>'
+        +'<div style="color:var(--dim2);font-size:12px;font-family:Oswald;letter-spacing:1px">'+(c.online?'<span style="color:var(--green)">● Online</span>':'● Offline')+(c.age?' · Age '+c.age:'')+(c.memberSince?' · Member since '+year(c.memberSince):'')+'</div>'
         + (c.about?'<div class="about">'+esc(c.about)+'</div>':'')
         +'<div class="pstats">'
           +'<div class="pstat"><b>'+c.suggestions+'</b><span>Suggestions</span></div>'
