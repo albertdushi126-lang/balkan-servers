@@ -268,7 +268,10 @@ section{padding:42px 0}
 .gw h3{font-size:21px;margin:6px 0}
 .gw .prize{color:var(--dim);font-size:14px}
 .gw .how{margin-top:14px;font-size:13px;color:var(--dim);border-top:1px solid var(--line);padding-top:12px}
-.gw .ends{margin-top:12px;display:inline-block;font-family:'Oswald';letter-spacing:1px;font-size:11px;background:var(--panel2);padding:4px 11px;border-radius:20px;color:var(--gold)}
+.gw .ends{display:inline-block;font-family:'Oswald';letter-spacing:1px;font-size:11px;background:var(--panel2);padding:4px 11px;border-radius:20px;color:var(--gold)}
+.gw-vip{border-color:rgba(232,181,74,.4);background:linear-gradient(140deg,rgba(232,181,74,.08),var(--panel))}
+.gw-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:16px}
+.gw-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
 .board{display:grid;gap:10px}
 .sug{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:13px 16px}
@@ -325,11 +328,11 @@ footer{border-top:1px solid var(--line);padding:40px 0;margin-top:20px}
   <div class="nav-links" id="navLinks">
     <a href="#top" data-i18n="home">Home</a>
     <a href="#servers" data-i18n="servers">Servers</a>
-    <a href="store.html"><i class="fa-solid fa-cart-shopping gold"></i> <span data-i18n="store">Store</span></a>
-    <a href="store.html"><i class="fa-solid fa-crown gold"></i> <span data-i18n="privileges">Privileges</span></a>
-    <a href="players.html"><i class="fa-solid fa-ranking-star gold"></i> <span data-i18n="stats">Stats</span></a>
+    <a href="store.html"><span data-i18n="store">Store</span></a>
+    <a href="store.html"><span data-i18n="privileges">Privileges</span></a>
+    <a href="players.html"><span data-i18n="stats">Stats</span></a>
     <a href="classes.html" data-i18n="classes">Classes</a>
-    <a href="forum.html"><i class="fa-solid fa-comments gold"></i> Forum</a>
+    <a href="forum.html">Forum</a>
     <a href="#news" data-i18n="news">News</a>
     <a href="#" id="navDiscord"><i class="fa-brands fa-discord"></i></a>
   </div>
@@ -360,14 +363,11 @@ footer{border-top:1px solid var(--line);padding:40px 0;margin-top:20px}
   </div>
 
   <div class="srv-card" id="servers">
-    <div class="h"><span class="t"><i class="fa-solid fa-server gold"></i> <span data-i18n="srv_t">PLAY ON OUR SERVERS</span></span><span class="on"><span class="dot"></span> <span data-i18n="online">ONLINE</span></span></div>
+    <div class="h"><span class="t"><i class="fa-solid fa-server gold"></i> <span data-i18n="srv_t">PLAY ON OUR SERVERS</span></span><span class="on" id="srvOnline"><span class="dot"></span> ONLINE</span></div>
     <div id="srvList"></div>
     <div class="all" id="srvTotal">Players online · —</div>
   </div>
 </div></div></div>
-
-<!-- ===== GAME MODES ===== -->
-<div class="wrap"><div class="modes" id="modes"></div></div>
 
 <!-- ===== PURCHASES + SEASON STATS ===== -->
 <section><div class="wrap">
@@ -431,7 +431,7 @@ footer{border-top:1px solid var(--line);padding:40px 0;margin-top:20px}
 
 <!-- ===== GIVEAWAYS ===== -->
 <section id="giveaways"><div class="wrap">
-  <div class="shead"><div><div class="k" data-i18n="gw_k">FREE LOOT</div><h2 data-i18n="gw_t">Giveaways</h2></div><div class="more" data-i18n="gw_m">Enter via Discord</div></div>
+  <div class="shead"><div><div class="k" data-i18n="gw_k">FREE LOOT</div><h2 data-i18n="gw_t">Giveaways</h2></div><div class="more">Sign in to enter — winner drawn from all accounts</div></div>
   <div class="gw-grid" id="gwGrid"></div>
 </div></section>
 
@@ -498,7 +498,7 @@ function renderServers(){
   document.getElementById('srvList').innerHTML=CONFIG.servers.map((s,i)=>`
     <div class="srv">
       <div class="ico"><span class="brand" data-brand="30"><i class="fa-solid fa-skull"></i></span></div>
-      <div class="meta"><div class="n">${s.name}</div><div class="d">${s.mode} · ${s.map}</div></div>
+      <div class="meta"><div class="n">${s.name}</div><div class="d">${s.mode} · <span id="srvMap${i}">${s.map}</span></div></div>
       <div class="cnt"><b id="srvP${i}">${s.players}/${s.max}</b><span>players</span></div>
       <button class="go" title="Connect" onclick="connectTo('${s.ip}')"><i class="fa-solid fa-play"></i></button>
     </div>`).join('');
@@ -512,11 +512,6 @@ renderServers();
     var h=el.getAttribute('data-brand'); el.innerHTML='<img src="'+src+'" alt="BALKAN" style="height:'+h+'px">'; }); };
   probe.src=src;
 })();
-
-/* ---- game modes ---- */
-document.getElementById('modes').innerHTML=CONFIG.gameModes.map(m=>`
-  <div class="mode"><img class="bg" src="${m.img||''}" alt="" onerror="this.style.display='none'">
-    <i class="ic fa-solid ${m.icon}"></i><div class="n">${m.name}</div><div class="d">${m.desc}</div></div>`).join('');
 
 /* ---- purchases ---- */
 document.getElementById('buyList').innerHTML=CONFIG.purchases.map(p=>`
@@ -587,9 +582,32 @@ document.getElementById('newsListShort').innerHTML=newsHTML(CONFIG.news.slice(0,
 document.getElementById('newsList').innerHTML=newsHTML(CONFIG.news);
 
 /* ---- giveaways ---- */
-document.getElementById('gwGrid').innerHTML=CONFIG.giveaways.map(g=>`
-  <div class="gw"><div class="tag"><i class="fa-solid fa-gift"></i> GIVEAWAY</div><h3>${g.title}</h3>
-    <div class="prize">${g.prize}</div><div class="how"><b>How to enter:</b> ${g.how}</div><span class="ends">${g.ends}</span></div>`).join('');
+/* ---- giveaway (web-based; VIP only for now) ---- */
+function renderGiveaway(){
+  document.getElementById('gwGrid').innerHTML=
+    '<div class="gw gw-vip"><div class="tag"><i class="fa-solid fa-crown"></i> GIVEAWAY</div>'
+    +'<h3>1 Month VIP</h3>'
+    +'<div class="prize">Full VIP — the TERROR model, Hammer knife, Tesla class & all perks.</div>'
+    +'<div class="how"><b>How to enter:</b> sign in with your account and click below. The winner is drawn from all entries.</div>'
+    +'<div class="gw-foot"><span class="ends" id="gwCount">…</span>'
+    +'<button class="btn btn-green" id="gwBtn" onclick="enterGiveaway()"><i class="fa-solid fa-ticket"></i> Enter giveaway</button></div></div>';
+  loadGiveaway();
+}
+async function loadGiveaway(){
+  try{
+    var r=await BalkanAuth.api('/api/giveaway?gid=vip'); if(!r.ok||!r.data) return;
+    var cEl=document.getElementById('gwCount'); if(cEl) cEl.textContent=r.data.count+' entered';
+    if(r.data.entered){ var b=document.getElementById('gwBtn'); if(b){ b.innerHTML='<i class="fa-solid fa-check"></i> You’re in!'; b.className='btn btn-ghost'; b.onclick=null; } }
+  }catch(e){}
+}
+async function enterGiveaway(){
+  if(!window.BalkanAuth||!BalkanAuth.isIn()) return BalkanAuth.open('in');
+  var b=document.getElementById('gwBtn'); if(b) b.disabled=true;
+  var r=await BalkanAuth.api('/api/giveaway',{method:'POST',body:{giveawayId:'vip'}});
+  if(b) b.disabled=false;
+  if(r.ok) loadGiveaway(); else alert((r.data&&r.data.error)||'Could not enter.');
+}
+renderGiveaway();
 
 /* ---- suggestions (live forum teaser) ---- */
 function roleBadge(role){ var r=(role==='OWNER'||role==='VIP')?role:''; return r?' <span class="fl '+r+'">'+r+'</span>':''; }
@@ -700,14 +718,19 @@ function connectTo(ip){ window.location.href='steam://connect/'+ip; }
 function goDiscord(){ if(CONFIG.discord && CONFIG.discord!=='#') window.open(CONFIG.discord,'_blank'); else alert('Discord link coming soon!'); }
 function siteSearch(q){ q=(q||'').toLowerCase(); if(q.includes('vip')||q.includes('store')||q.includes('knife'))location.href='store.html'; else if(q.includes('stat')||q.includes('player'))location.href='players.html'; else if(q.includes('class')||q.includes('zombie'))location.href='classes.html'; else location.href='#news'; }
 
-/* ---- live status (placeholder until an A2S query endpoint is wired) ---- */
-function fetchStatus(){
-  const online=0, total=CONFIG.maxSlots;
-  CONFIG.servers.forEach((s,i)=>{ const el=document.getElementById('srvP'+i); if(el) el.textContent=s.players+'/'+s.max; });
-  CONFIG.stats.forEach((s,i)=>{ if(s.live==='online'){ const el=document.getElementById('stat'+i); if(el) el.textContent=online; } });
-  document.getElementById('srvTotal').textContent='Players online · '+online+' / '+total;
+/* ---- live status (real A2S query via backend /api/server, refreshed every 30s) ---- */
+async function fetchStatus(){
+  var total=CONFIG.maxSlots, d=null;
+  try{ var r=await fetch(CONFIG.apiBase+'/api/server'); d=r.ok?await r.json():null; }catch(e){}
+  var on=d&&d.online, cur=on?d.players:0, max=on?d.max:total;
+  var p=document.getElementById('srvP0'); if(p) p.textContent=on?(cur+'/'+max):'—';
+  var mp=document.getElementById('srvMap0'); if(mp&&on&&d.map) mp.textContent=d.map;
+  var st=document.getElementById('srvOnline');
+  if(st) st.innerHTML = on ? '<span class="dot"></span> ONLINE' : '<span class="dot" style="background:var(--dim2);box-shadow:none"></span> OFFLINE';
+  var tot=document.getElementById('srvTotal'); if(tot) tot.textContent = on ? ('Players online · '+cur+' / '+max) : 'Server offline';
+  CONFIG.stats.forEach(function(s,i){ if(s.live==='online'){ var el=document.getElementById('stat'+i); if(el) el.textContent=on?cur:0; } });
 }
-fetchStatus();
+fetchStatus(); setInterval(fetchStatus, 30000);
 
 /* ---- intro ---- */
 function skipIntro(){ const v=document.getElementById('introVid'); if(v){try{v.pause();}catch(e){}} document.getElementById('intro').classList.add('gone'); }
