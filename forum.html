@@ -96,6 +96,13 @@ nav{display:flex;align-items:center;gap:16px;height:66px}
 .replybox textarea{width:100%;background:var(--bg2);border:1px solid var(--line2);border-radius:9px;color:var(--txt);padding:11px 13px;font-size:14px;font-family:'Inter';outline:none;resize:vertical;min-height:80px}
 .replybox textarea:focus{border-color:var(--gold)}
 .fmsg{font-size:13px;margin-top:8px;min-height:18px}.fmsg.ok{color:var(--green)}.fmsg.bad{color:var(--red)}
+.post-img{max-width:100%;max-height:360px;border-radius:10px;margin-top:10px;border:1px solid var(--line);cursor:zoom-in;display:block}
+.img-pick{display:flex;align-items:center;gap:12px;margin-top:10px}
+.btn-sm{padding:7px 13px;font-size:12px}
+.img-prev{position:relative;display:inline-block}
+.img-prev img{height:46px;border-radius:7px;border:1px solid var(--line2);vertical-align:middle;display:block}
+.img-x{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;background:var(--red);color:#fff;border:0;cursor:pointer;font-size:12px;line-height:1;padding:0}
+.thumb-mini{width:62px;height:44px;object-fit:cover;border-radius:7px;border:1px solid var(--line);margin-bottom:9px}
 
 /* profile page */
 .profile-top{display:flex;gap:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px;flex-wrap:wrap;align-items:center}
@@ -156,6 +163,32 @@ function authorLine(a){
 }
 function goAuthor(aid){ if(aid) location.href='forum.html?profile='+aid; }
 
+/* ---------- image attach ---------- */
+var PICK = {};
+function imgPickerHtml(key){
+  return '<div class="img-pick"><label class="btn btn-ghost btn-sm"><i class="fa-solid fa-image"></i> Add image'
+    +'<input type="file" accept="image/*" style="display:none" onchange="onPick(this,\''+key+'\')"></label>'
+    +'<span id="pk_'+key+'" class="img-prev"></span></div>';
+}
+function onPick(input,key){
+  var f=input.files&&input.files[0]; if(!f) return;
+  resizeImg(f,1000,function(durl){ PICK[key]=durl; var p=document.getElementById('pk_'+key);
+    if(p) p.innerHTML='<img src="'+durl+'"><button type="button" class="img-x" onclick="clearPick(\''+key+'\')">×</button>'; });
+  input.value='';
+}
+function clearPick(key){ PICK[key]=null; var p=document.getElementById('pk_'+key); if(p) p.innerHTML=''; }
+function resizeImg(file,max,cb){
+  if(!/^image\//.test(file.type)){ alert('Pick an image file.'); return; }
+  var img=new Image();
+  img.onload=function(){ var w=img.width,h=img.height;
+    if(w>h){ if(w>max){h=Math.round(h*max/w);w=max;} } else { if(h>max){w=Math.round(w*max/h);h=max;} }
+    var c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0,w,h);
+    cb(c.toDataURL('image/jpeg',0.82)); URL.revokeObjectURL(img.src); };
+  img.onerror=function(){ alert('Could not read that image.'); };
+  img.src=URL.createObjectURL(file);
+}
+function postImg(t,id){ return '<img class="post-img" src="'+API+'/api/simg?t='+t+'&id='+id+'" alt="" onerror="this.remove()" onclick="window.open(this.src)">'; }
+
 /* ---------- routing ---------- */
 function route(){
   var q=new URLSearchParams(location.search);
@@ -182,6 +215,7 @@ async function viewList(sort){
       +'<div class="tbody" onclick="location.href=\'forum.html?id='+t.id+'\'">'
         +'<h3>'+(t.pinned?'<i class="fa-solid fa-thumbtack pinned"></i> ':'')+esc(t.title)+' <span class="pill '+esc(t.status)+'">'+esc(t.status)+'</span></h3>'
         +'<div class="snip">'+esc(t.snippet||'')+'</div>'
+        +(t.hasImage?'<img class="thumb-mini" src="'+API+'/api/simg?t=s&id='+t.id+'" alt="" onerror="this.remove()">':'')
         +'<div class="tmeta">'+authorLine(t.author)+'<span><i class="fa-solid fa-thumbs-up"></i> '+t.likes+'</span><span><i class="fa-solid fa-thumbs-down"></i> '+t.dislikes+'</span><span><i class="fa-solid fa-comment"></i> '+t.replyCount+' replies</span></div>'
       +'</div></div>';
   }).join('');
@@ -192,15 +226,17 @@ function newSuggestion(){
     +'<div class="replybox"><h3 style="margin-bottom:12px">New suggestion</h3>'
     +'<div style="margin-bottom:10px"><input id="nsTitle" maxlength="120" placeholder="Title (e.g. Add an ARM weapon)" style="width:100%;background:var(--bg2);border:1px solid var(--line2);border-radius:9px;color:var(--txt);padding:11px 13px;font-size:14px;outline:none;font-family:Inter"></div>'
     +'<textarea id="nsBody" placeholder="Describe your suggestion…"></textarea>'
+    + imgPickerHtml('ns')
     +'<div style="margin-top:12px"><button class="btn btn-gold" onclick="submitNew()"><i class="fa-solid fa-paper-plane"></i> Post suggestion</button></div>'
     +'<div class="fmsg" id="nsMsg"></div></div>';
+  PICK.ns=null;
 }
 async function submitNew(){
   var t=(document.getElementById('nsTitle').value||'').trim(), b=(document.getElementById('nsBody').value||'').trim(), m=document.getElementById('nsMsg');
   if(t.length<4){ m.className='fmsg bad'; m.textContent='Give it a short title.'; return; }
   if(b.length<8){ m.className='fmsg bad'; m.textContent='Write a few words.'; return; }
   m.className='fmsg'; m.textContent='Posting…';
-  var r=await BalkanAuth.api('/api/suggestions',{method:'POST',body:{title:t,body:b}});
+  var r=await BalkanAuth.api('/api/suggestions',{method:'POST',body:{title:t,body:b,image:PICK.ns||undefined}});
   if(r.ok&&r.data&&r.data.id) location.href='forum.html?id='+r.data.id;
   else { m.className='fmsg bad'; m.textContent=(r.data&&r.data.error)||'Could not post.'; }
 }
@@ -219,7 +255,7 @@ async function viewThread(id){
   // OP
   html+='<div class="post op">'+pcard(t.author)
     +'<div class="post-main"><h2>'+(t.pinned?'<i class="fa-solid fa-thumbtack pinned"></i> ':'')+esc(t.title)+' <span class="pill '+esc(t.status)+'">'+esc(t.status)+'</span></h2>'
-    +'<div class="post-body">'+esc(t.body)+'</div><div class="post-time">'+when(t.ts)+'</div>'
+    +'<div class="post-body">'+esc(t.body)+'</div>'+(t.hasImage?postImg('s',t.id):'')+'<div class="post-time">'+when(t.ts)+'</div>'
     +'<div class="votebar">'
       +'<div class="vbtn up'+(CUR.myVote===1?' on':'')+'" id="vUp" onclick="vote(1)"><i class="fa-solid fa-thumbs-up"></i> <span data-i18n>Like</span> <b id="cUp">'+t.likes+'</b></div>'
       +'<div class="vbtn down'+(CUR.myVote===-1?' on':'')+'" id="vDown" onclick="vote(-1)"><i class="fa-solid fa-thumbs-down"></i> <span data-i18n>Dislike</span> <b id="cDown">'+t.dislikes+'</b></div>'
@@ -230,10 +266,12 @@ async function viewThread(id){
   html+='<div class="rhead">'+reps.length+' replies</div><div id="reps">'+reps.map(replyHtml).join('')+'</div>';
   // reply composer
   html+='<div class="replybox"><textarea id="repText" placeholder="Write a reply…"></textarea>'
+    + imgPickerHtml('rep')
     +'<div style="margin-top:10px"><button class="btn btn-gold" onclick="sendReply()"><i class="fa-solid fa-reply"></i> Reply</button>'
     + (canDelete?' <button class="btn btn-ghost" onclick="delThread()"><i class="fa-solid fa-trash"></i> Delete</button>':'')
     +'</div><div class="fmsg" id="repMsg"></div></div>';
   app.innerHTML=html;
+  PICK.rep=null;
 }
 function pcard(a){
   var av = (a.hasPhoto&&a.aid) ? '<img src="'+API+'/api/avatar?aid='+a.aid+'" alt="" onerror="this.remove()">' : '';
@@ -242,7 +280,7 @@ function pcard(a){
     +(a.memberSince?'<div class="pc-meta">Member since '+year(a.memberSince)+'</div>':'')+'</div>';
 }
 function replyHtml(rp){
-  return '<div class="post">'+pcard(rp.author)+'<div class="post-main"><div class="post-body">'+esc(rp.message)+'</div><div class="post-time">'+when(rp.ts)+'</div></div></div>';
+  return '<div class="post">'+pcard(rp.author)+'<div class="post-main"><div class="post-body">'+esc(rp.message)+'</div>'+(rp.hasImage?postImg('r',rp.id):'')+'<div class="post-time">'+when(rp.ts)+'</div></div></div>';
 }
 function ownerCtl(t){
   var opts=['open','planned','done','declined'].map(function(s){return '<option value="'+s+'"'+(t.status===s?' selected':'')+'>'+s+'</option>';}).join('');
@@ -263,10 +301,10 @@ async function vote(dir){
 async function sendReply(){
   if(!BalkanAuth.isIn()) return BalkanAuth.open('in');
   var ta=document.getElementById('repText'), msg=document.getElementById('repMsg'), v=(ta.value||'').trim();
-  if(v.length<2){ msg.className='fmsg bad'; msg.textContent='Write a reply.'; return; }
+  if(v.length<2 && !PICK.rep){ msg.className='fmsg bad'; msg.textContent='Write a reply (or attach an image).'; return; }
   msg.className='fmsg'; msg.textContent='Sending…';
-  var r=await BalkanAuth.api('/api/suggestions/'+CUR.id+'/reply',{method:'POST',body:{message:v}});
-  if(r.ok&&r.data&&r.data.reply){ ta.value=''; msg.textContent='';
+  var r=await BalkanAuth.api('/api/suggestions/'+CUR.id+'/reply',{method:'POST',body:{message:v,image:PICK.rep||undefined}});
+  if(r.ok&&r.data&&r.data.reply){ ta.value=''; msg.textContent=''; clearPick('rep');
     document.getElementById('reps').insertAdjacentHTML('beforeend', replyHtml(r.data.reply));
     var rh=app.querySelector('.rhead'); if(rh){ var n=app.querySelectorAll('#reps .post').length; rh.textContent=n+' replies'; }
   } else { msg.className='fmsg bad'; msg.textContent=(r.data&&r.data.error)||'Could not reply.'; }
