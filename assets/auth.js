@@ -186,8 +186,8 @@
       const a = get();
       box.innerHTML = `<a class="btn btn-ghost" href="players.html#me"><i class="fa-solid fa-user"></i> ${a.nick || "My account"}</a>
         <button class="btn btn-ghost" onclick="BalkanAuth.logout()">Logout</button>`;
-      // resolve nick lazily
-      if (!a.nick) { const r = await me(); if (r.ok && r.data.profile) { a.nick = r.data.profile.nick || r.data.profile.name; localStorage.setItem(KEY, JSON.stringify(a)); updateUI(); } }
+      // resolve nick + role lazily (role used for owner-only UI; authoritative badges always come from server payloads)
+      if (!a.nick || a.role === undefined) { const r = await me(); if (r.ok && r.data.profile) { a.nick = r.data.profile.nick || r.data.profile.name; a.role = r.data.role || ''; localStorage.setItem(KEY, JSON.stringify(a)); updateUI(); document.dispatchEvent(new Event("balkan-auth")); } }
     } else {
       box.innerHTML = `<button class="btn btn-gold" onclick="BalkanAuth.open('up')"><i class="fa-solid fa-user-plus"></i> Sign up</button>
         <button class="btn btn-ghost" onclick="BalkanAuth.open('in')">Sign in</button>`;
@@ -197,6 +197,17 @@
   // require login before running fn; otherwise open the modal
   function require(fn) { if (isIn()) { fn && fn(); return true; } open("in"); return false; }
 
-  window.BalkanAuth = { API, open, close, logout: clear, isIn, get, token, me, api, require, updateUI, _tab, _login, _register };
-  document.addEventListener("DOMContentLoaded", function () { injectModal(); updateUI(); warmup(); });
+  // cached role for owner-only UI (server payloads remain authoritative for badges shown to others)
+  function role() { const a = get(); return (a && a.role) || ""; }
+  function isOwner() { return role() === "OWNER"; }
+
+  // presence heartbeat (works signed in or out; server uses softAuth)
+  function beat() { try { api("/api/heartbeat", { method: "POST", body: {} }); } catch (e) {} }
+
+  window.BalkanAuth = { API, open, close, logout: clear, isIn, get, token, me, api, require, updateUI, role, isOwner, _tab, _login, _register };
+  document.addEventListener("DOMContentLoaded", function () {
+    injectModal(); updateUI(); warmup();
+    beat(); setInterval(function () { if (document.visibilityState === "visible") beat(); }, 45000);
+  });
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) beat(); });
 })();

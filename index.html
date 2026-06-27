@@ -214,6 +214,10 @@ section{padding:42px 0}
 
 /* ---------- BOTTOM 3-COL: news / chat / top ---------- */
 .bottom-grid{display:grid;grid-template-columns:1.15fr 1fr .85fr;gap:20px;align-items:start}
+.dash-row{display:flex;gap:14px;flex-wrap:wrap}
+.dash-stat{flex:1;min-width:130px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:18px;text-align:center}
+.dash-num{font-family:'Oswald';font-size:34px;color:var(--gold);display:block;line-height:1}
+.dash-stat label{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1px}
 .news-list{display:grid}
 .news-item{padding:15px 20px;border-bottom:1px solid var(--line);border-left:3px solid var(--red);display:flex;gap:14px;align-items:flex-start;transition:.15s}
 .news-item:last-child{border-bottom:0}
@@ -322,6 +326,7 @@ footer{border-top:1px solid var(--line);padding:40px 0;margin-top:20px}
     <a href="store.html"><i class="fa-solid fa-crown gold"></i> <span data-i18n="privileges">Privileges</span></a>
     <a href="players.html"><i class="fa-solid fa-ranking-star gold"></i> <span data-i18n="stats">Stats</span></a>
     <a href="classes.html" data-i18n="classes">Classes</a>
+    <a href="forum.html"><i class="fa-solid fa-comments gold"></i> Forum</a>
     <a href="#news" data-i18n="news">News</a>
     <a href="#" id="navDiscord"><i class="fa-brands fa-discord"></i></a>
   </div>
@@ -396,6 +401,18 @@ footer{border-top:1px solid var(--line);padding:40px 0;margin-top:20px}
   </div>
 </div></div></section>
 
+<!-- ===== OWNER DASHBOARD (owner only) ===== -->
+<section id="ownerDashSec" style="padding-top:0"><div class="wrap">
+  <div class="card card-pad" id="ownerDash" style="display:none">
+    <div class="card-h" style="padding:0 0 14px;border:0"><i class="fa-solid fa-shield-halved gold"></i> Owner dashboard</div>
+    <div class="dash-row">
+      <div class="dash-stat"><span class="dash-num" id="dashOnline">–</span><label>Online now</label></div>
+      <div class="dash-stat"><span class="dash-num" id="dashAccounts">–</span><label>Registered accounts</label></div>
+      <div class="dash-stat"><span class="dash-num" id="dashVips">–</span><label>VIPs</label></div>
+    </div>
+  </div>
+</div></section>
+
 <!-- ===== FULL NEWS ===== -->
 <section id="news" style="background:var(--bg2)"><div class="wrap">
   <div class="shead"><div><div class="k" data-i18n="chg_k">CHANGELOG</div><h2 data-i18n="chg_t">What's new</h2></div><div class="more" data-i18n="chg_m">Added · Fixed · Coming soon</div></div>
@@ -410,14 +427,14 @@ footer{border-top:1px solid var(--line);padding:40px 0;margin-top:20px}
 
 <!-- ===== SUGGESTIONS ===== -->
 <section id="suggest" style="background:var(--bg2)"><div class="wrap">
-  <div class="shead"><div><div class="k" data-i18n="sug_k">YOUR VOICE</div><h2 data-i18n="sug_t">Suggestions</h2></div></div>
+  <div class="shead"><div><div class="k" data-i18n="sug_k">YOUR VOICE</div><h2 data-i18n="sug_t">Suggestions</h2></div><a class="more" href="forum.html"><i class="fa-solid fa-comments"></i> Open full forum →</a></div>
   <div class="two-col">
     <div class="board" id="sugBoard"></div>
     <div class="card-box">
-      <h3 data-i18n="sug_ft">Suggest something</h3><p class="desc" data-i18n="sug_fd">Got an idea for the server? Send it — it lands in our Discord and the community votes.</p>
-      <div class="field"><label data-i18n="sug_nl">Your name / nick</label><input id="sg_name" placeholder="lluna"></div>
-      <div class="field"><label data-i18n="sug_tl">Your suggestion</label><textarea id="sg_text" rows="3" placeholder="e.g. add a frost-knife event on weekends"></textarea></div>
-      <button class="btn btn-red" onclick="submitForm('suggestion')"><i class="fa-solid fa-paper-plane"></i> <span data-i18n="sug_send">Send suggestion</span></button>
+      <h3 data-i18n="sug_ft">Suggest something</h3><p class="desc">Post an idea — others reply and vote it up or down. It opens in the forum.</p>
+      <div class="field"><label>Title</label><input id="sg_title" maxlength="120" placeholder="Add an ARM weapon"></div>
+      <div class="field"><label data-i18n="sug_tl">Your suggestion</label><textarea id="sg_text" rows="3" placeholder="Describe your suggestion…"></textarea></div>
+      <button class="btn btn-red" onclick="postSuggestion()"><i class="fa-solid fa-paper-plane"></i> <span data-i18n="sug_send">Send suggestion</span></button>
       <div class="fmsg" id="sg_msg"></div>
     </div>
   </div>
@@ -517,7 +534,7 @@ function renderChat(list){
   var mine=myAid();
   var atBottom=box.scrollHeight-box.scrollTop-box.clientHeight<60;
   box.innerHTML=arr.map(function(c){
-    var flag=c.flag?' <span class="fl '+esc(c.flag)+'">'+esc(c.flag)+'</span>':'';
+    var rl=(c.flag==='OWNER'||c.flag==='VIP')?c.flag:''; var flag=rl?' <span class="fl '+rl+'">'+rl+'</span>':'';
     var av=(c.hasPhoto&&c.aid)
       ? '<img src="'+CONFIG.apiBase+'/api/avatar?aid='+c.aid+'" alt="" onerror="this.remove()"><i class="fa-solid fa-user"></i>'
       : '<i class="fa-solid fa-user"></i>';
@@ -564,12 +581,43 @@ document.getElementById('gwGrid').innerHTML=CONFIG.giveaways.map(g=>`
   <div class="gw"><div class="tag"><i class="fa-solid fa-gift"></i> GIVEAWAY</div><h3>${g.title}</h3>
     <div class="prize">${g.prize}</div><div class="how"><b>How to enter:</b> ${g.how}</div><span class="ends">${g.ends}</span></div>`).join('');
 
-/* ---- suggestions ---- */
-function renderSug(){ document.getElementById('sugBoard').innerHTML=CONFIG.suggestions.slice().sort((a,b)=>b.votes-a.votes).map((s,i)=>`
-  <div class="sug"><div class="vote" onclick="voteSug(${i})"><b>${s.votes}</b><span><i class="fa-solid fa-caret-up"></i> vote</span></div>
-    <div class="body"><h4>${s.title}</h4><small>by ${s.by}</small></div></div>`).join(''); }
-function voteSug(i){ const sorted=CONFIG.suggestions.slice().sort((a,b)=>b.votes-a.votes); sorted[i].votes++; renderSug(); }
-renderSug();
+/* ---- suggestions (live forum teaser) ---- */
+function roleBadge(role){ var r=(role==='OWNER'||role==='VIP')?role:''; return r?' <span class="fl '+r+'">'+r+'</span>':''; }
+function renderSug(items){
+  var box=document.getElementById('sugBoard');
+  if(!items||!items.length){ box.innerHTML='<div class="sug"><div class="body"><small>No suggestions yet — be the first.</small></div></div>'; return; }
+  box.innerHTML=items.map(function(t){
+    return '<div class="sug" onclick="location.href=\'forum.html?id='+t.id+'\'" style="cursor:pointer">'
+      +'<div class="vote"><b>'+(t.likes-t.dislikes)+'</b><span><i class="fa-solid fa-caret-up"></i> votes</span></div>'
+      +'<div class="body"><h4>'+esc(t.title)+'</h4><small>'+esc(t.author.name)+roleBadge(t.author.role)+' · '+t.replyCount+' replies</small></div></div>';
+  }).join('');
+}
+async function loadSug(){ try{ var r=await fetch(CONFIG.apiBase+'/api/suggestions?sort=top&limit=6'); var d=r.ok?await r.json():null; renderSug(d&&d.items); }catch(e){ renderSug(null); } }
+async function postSuggestion(){
+  var title=val('sg_title'), body=val('sg_text'), msg=document.getElementById('sg_msg');
+  if(!window.BalkanAuth||!BalkanAuth.isIn()){ setMsg(msg,'Please sign in first.',false); BalkanAuth.open('in'); return; }
+  if(title.length<4) return setMsg(msg,'Give it a short title.',false);
+  if(body.length<8) return setMsg(msg,'Write a few words.',false);
+  setMsg(msg,'Posting…',true);
+  var r=await BalkanAuth.api('/api/suggestions',{method:'POST',body:{title:title,body:body}});
+  if(r.ok&&r.data&&r.data.id){ location.href='forum.html?id='+r.data.id; }
+  else setMsg(msg,(r.data&&r.data.error)||'Could not post.',false);
+}
+loadSug();
+
+/* ---- owner dashboard (owner only) ---- */
+async function loadDash(){
+  var box=document.getElementById('ownerDash'); if(!box) return;
+  if(!window.BalkanAuth || !BalkanAuth.isOwner()){ box.style.display='none'; return; }
+  var r=await BalkanAuth.api('/api/admin/overview');
+  if(!r.ok||!r.data){ box.style.display='none'; return; }
+  box.style.display='';
+  document.getElementById('dashOnline').textContent=r.data.online;
+  document.getElementById('dashAccounts').textContent=r.data.accounts;
+  document.getElementById('dashVips').textContent=r.data.vips;
+}
+document.addEventListener('balkan-auth', loadDash);
+loadDash(); setInterval(function(){ if(window.BalkanAuth&&BalkanAuth.isOwner()) loadDash(); }, 20000);
 
 /* ---- TOP players (live from backend) ---- */
 let TOP=[];

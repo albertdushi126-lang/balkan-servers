@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Forum · BALKAN-SERVERS</title>
+<meta name="description" content="BALKAN-SERVERS community forum — suggest features, reply & vote." />
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="icon" type="image/webp" href="assets/phobos.webp">
+<script src="assets/auth.js"></script>
+<script src="assets/i18n-dict.js"></script>
+<script src="assets/i18n.js"></script>
+<style>
+:root{
+  --bg:#08090d;--bg2:#0c0e13;--panel:#13161e;--panel2:#1a1e28;--panel3:#20242f;
+  --line:rgba(255,255,255,.07);--line2:rgba(255,255,255,.14);
+  --txt:#eef0f3;--dim:#959bab;--dim2:#6b7180;
+  --red:#e3342f;--red-d:#b3231f;--gold:#e8b54a;--gold-d:#c79528;--green:#2fbf71;--blue:#4d8df6;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);line-height:1.6;overflow-x:hidden;
+  background-image:radial-gradient(900px 480px at 78% -6%,rgba(240,169,59,.08),transparent 60%)}
+h1,h2,h3,h4{font-family:'Oswald',sans-serif;letter-spacing:.5px;text-transform:uppercase;font-weight:700}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+.gold{color:var(--gold)}.accent{color:var(--red)}
+.btn{display:inline-flex;align-items:center;gap:9px;font-family:'Oswald';text-transform:uppercase;letter-spacing:1px;font-size:14px;padding:11px 20px;border-radius:9px;border:1px solid var(--line2);cursor:pointer;transition:.18s;background:var(--panel2);color:var(--txt)}
+.btn:hover{transform:translateY(-2px)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-d));color:#241a02;border:0}
+.btn-green{background:var(--green);color:#06200f;border:0}.btn-ghost{background:transparent;border:1px solid var(--line2);color:var(--dim)}
+.btn-red{background:var(--red);color:#fff;border:0}
+.fl{font-size:9px;padding:2px 7px;border-radius:5px;margin-left:6px;letter-spacing:1px;font-family:'Oswald';vertical-align:middle}
+.fl.OWNER{background:rgba(227,52,47,.18);color:#ff8c89}.fl.VIP{background:rgba(232,181,74,.18);color:var(--gold)}
+
+header{position:sticky;top:0;z-index:100;background:rgba(8,9,13,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+nav{display:flex;align-items:center;gap:16px;height:66px}
+.logo{display:flex;align-items:center;gap:10px;font-family:'Oswald';font-weight:700;font-size:21px;letter-spacing:1px;white-space:nowrap}.logo i{color:var(--red);font-size:24px}
+.logo .brand img{height:30px;width:auto;display:block}
+.nav-links{display:flex;align-items:center;gap:20px;margin-left:8px}
+.nav-links a{color:var(--dim);font-size:13.5px;font-weight:600;font-family:'Oswald';text-transform:uppercase;letter-spacing:.5px}.nav-links a:hover{color:var(--txt)}
+.nav-links a.on{color:var(--gold)}
+.nav-cta{margin-left:auto;display:flex;gap:9px;align-items:center}
+
+.phead{padding:30px 0 6px;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.phead .k{color:var(--red);font-family:'Oswald';letter-spacing:3px;font-size:12px}
+.phead h1{font-size:clamp(28px,4.5vw,44px);margin-top:4px}
+.tabs{display:flex;gap:8px;margin:18px 0}
+.tab{font-family:'Oswald';letter-spacing:1px;font-size:13px;text-transform:uppercase;padding:9px 18px;border-radius:30px;border:1px solid var(--line2);background:var(--panel);color:var(--dim);cursor:pointer}
+.tab.on{background:var(--gold);color:#241a02;border-color:var(--gold)}
+
+/* list */
+.thread{display:flex;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:12px;transition:.15s}
+.thread:hover{border-color:rgba(240,169,59,.4)}
+.tvote{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:64px;background:var(--bg2);border:1px solid var(--line);border-radius:11px;padding:8px}
+.tvote b{font-family:'Oswald';font-size:22px;color:var(--gold);line-height:1}.tvote span{font-size:10px;color:var(--dim2);font-family:'Oswald';letter-spacing:1px;text-transform:uppercase}
+.tbody{flex:1;min-width:0;cursor:pointer}
+.tbody h3{font-size:18px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.tbody .snip{color:var(--dim);font-size:13.5px;margin:5px 0 9px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.tmeta{display:flex;align-items:center;gap:12px;color:var(--dim2);font-size:12px;flex-wrap:wrap}
+.tmeta .au{display:inline-flex;align-items:center;gap:7px;color:var(--dim)}
+.miniav{width:22px;height:22px;border-radius:6px;background:var(--panel3);position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;color:var(--gold);font-size:11px;flex-shrink:0}
+.miniav img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pill{font-family:'Oswald';letter-spacing:1px;font-size:10px;padding:3px 9px;border-radius:20px;text-transform:uppercase}
+.pill.open{background:rgba(77,141,246,.16);color:#9bc0fb}.pill.planned{background:rgba(232,181,74,.16);color:var(--gold)}
+.pill.done{background:rgba(47,191,113,.16);color:#5fe09b}.pill.declined{background:rgba(227,52,47,.16);color:#ff8c89}
+.pinned{color:var(--gold)}
+.muted{padding:30px;text-align:center;color:var(--dim)}
+
+/* thread detail + profile cards */
+.back{display:inline-flex;align-items:center;gap:8px;color:var(--dim);font-family:'Oswald';letter-spacing:1px;font-size:13px;cursor:pointer;margin:6px 0 14px}.back:hover{color:var(--txt)}
+.post{display:flex;gap:16px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+.post.op{border-color:rgba(240,169,59,.3)}
+.pcard{width:150px;flex:0 0 150px;text-align:center}
+.pc-av{position:relative;width:72px;height:72px;margin:0 auto 8px;border-radius:14px;background:var(--panel3);display:grid;place-items:center;color:var(--dim);font-size:26px;overflow:hidden}
+.pc-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pc-av .dot{position:absolute;right:-2px;bottom:-2px;width:15px;height:15px;border-radius:50%;background:var(--dim2);border:2px solid var(--panel)}
+.pc-av .dot.on{background:var(--green);box-shadow:0 0 8px var(--green)}
+.pc-name{font-family:'Oswald';letter-spacing:.5px;font-size:15px;cursor:pointer}.pc-name:hover{color:var(--gold)}
+.pc-meta{font-size:11px;color:var(--dim2);margin-top:2px}
+.post-main{flex:1;min-width:0}
+.post-main h2{font-size:clamp(20px,3vw,28px);margin-bottom:6px}
+.post-body{white-space:pre-wrap;color:var(--txt);font-size:14.5px;word-wrap:break-word}
+.post-time{color:var(--dim2);font-size:12px;margin-top:10px}
+.votebar{display:flex;gap:10px;margin-top:16px;align-items:center}
+.vbtn{display:inline-flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--line2);border-radius:9px;padding:9px 16px;color:var(--dim);cursor:pointer;font-family:'Oswald';letter-spacing:.5px}
+.vbtn:hover{color:var(--txt)}
+.vbtn.up.on{border-color:var(--green);color:var(--green);background:rgba(47,191,113,.1)}
+.vbtn.down.on{border-color:var(--red);color:var(--red);background:rgba(227,52,47,.1)}
+.owner-ctl{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+.owner-ctl select,.owner-ctl button{background:var(--panel2);border:1px solid var(--line2);color:var(--txt);border-radius:8px;padding:7px 11px;font-size:12px;cursor:pointer;font-family:'Inter'}
+.rhead{font-family:'Oswald';letter-spacing:1px;font-size:14px;color:var(--dim);margin:22px 0 12px;text-transform:uppercase}
+.replybox{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:6px}
+.replybox textarea{width:100%;background:var(--bg2);border:1px solid var(--line2);border-radius:9px;color:var(--txt);padding:11px 13px;font-size:14px;font-family:'Inter';outline:none;resize:vertical;min-height:80px}
+.replybox textarea:focus{border-color:var(--gold)}
+.fmsg{font-size:13px;margin-top:8px;min-height:18px}.fmsg.ok{color:var(--green)}.fmsg.bad{color:var(--red)}
+
+/* profile page */
+.profile-top{display:flex;gap:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px;flex-wrap:wrap;align-items:center}
+.pbig-av{position:relative;width:108px;height:108px;border-radius:18px;background:var(--panel3);display:grid;place-items:center;color:var(--dim);font-size:42px;overflow:hidden;flex-shrink:0}
+.pbig-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pbig-av .dot{position:absolute;right:2px;bottom:2px;width:18px;height:18px;border-radius:50%;background:var(--dim2);border:3px solid var(--panel)}
+.pbig-av .dot.on{background:var(--green);box-shadow:0 0 9px var(--green)}
+.pinfo h1{font-size:30px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pinfo .about{color:var(--dim);font-size:14px;margin-top:6px;max-width:520px}
+.pstats{display:flex;gap:14px;margin-top:16px;flex-wrap:wrap}
+.pstat{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:13px 18px;text-align:center;min-width:92px}
+.pstat b{font-family:'Oswald';color:var(--gold);font-size:24px;display:block;line-height:1}
+.pstat span{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px}
+
+footer{border-top:1px solid var(--line);padding:30px 0;margin-top:30px}.foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--dim);font-size:13px}
+@media(max-width:680px){.nav-links{display:none}.pcard{flex:0 0 84px;width:84px}.pc-av{width:56px;height:56px;font-size:20px}.post{padding:14px}}
+</style>
+</head>
+<body>
+
+<header><div class="wrap"><nav>
+  <a class="logo" href="index.html"><span class="brand"><i class="fa-solid fa-skull"></i></span> BALKAN<span class="accent">SERVERS</span></a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="store.html">Store</a>
+    <a href="players.html">Stats</a>
+    <a href="classes.html">Classes</a>
+    <a href="forum.html" class="on">Forum</a>
+  </div>
+  <div class="nav-cta">
+    <span id="balkanAuthUI" style="display:flex;gap:8px;align-items:center"></span>
+    <span id="langPicker"></span>
+    <button class="btn btn-green" onclick="connect()"><i class="fa-solid fa-play"></i> Play</button>
+  </div>
+</nav></div></header>
+
+<div class="wrap" id="app" style="padding-top:6px;padding-bottom:40px"></div>
+
+<footer><div class="wrap"><div class="foot">
+  <span>© 2026 BALKAN-SERVERS · Zombie CSO</span>
+  <span><a href="index.html" class="gold">← Back to community</a></span>
+</div></div></footer>
+
+<script>
+const API = "https://balkan-backend.onrender.com";
+const app = document.getElementById('app');
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function connect(){ window.location.href='steam://connect/31.57.151.143:27015'; }
+function badge(role){ var r=(role==='OWNER'||role==='VIP')?role:''; return r?' <span class="fl '+r+'">'+r+'</span>':''; }
+function when(ts){ if(!ts) return ''; var d=new Date(ts*1000); return d.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'}); }
+function year(ts){ return ts? new Date(ts*1000).getFullYear() : ''; }
+function miniAv(a){
+  var inner = (a.hasPhoto&&a.aid) ? '<img src="'+API+'/api/avatar?aid='+a.aid+'" alt="" onerror="this.remove()">' : '';
+  return '<span class="miniav">'+inner+'<i class="fa-solid fa-user"></i></span>';
+}
+function authorLine(a){
+  return '<span class="au" onclick="event.stopPropagation();goAuthor('+(a.aid||0)+',\''+(a.steamid||'')+'\')" style="cursor:pointer">'+miniAv(a)+esc(a.name)+badge(a.role)+'</span>';
+}
+function goAuthor(aid){ if(aid) location.href='forum.html?profile='+aid; }
+
+/* ---------- routing ---------- */
+function route(){
+  var q=new URLSearchParams(location.search);
+  if(q.get('profile')) return viewProfile(parseInt(q.get('profile'),10));
+  if(q.get('id')) return viewThread(parseInt(q.get('id'),10));
+  return viewList(q.get('sort')||'top');
+}
+
+/* ---------- list ---------- */
+async function viewList(sort){
+  sort = (sort==='new')?'new':'top';
+  app.innerHTML='<div class="phead"><div><div class="k">COMMUNITY</div><h1>Suggestions Forum</h1></div>'
+    +'<button class="btn btn-gold" onclick="newSuggestion()"><i class="fa-solid fa-plus"></i> New suggestion</button></div>'
+    +'<div class="tabs"><div class="tab '+(sort==='top'?'on':'')+'" onclick="location.href=\'forum.html?sort=top\'">Top</div>'
+    +'<div class="tab '+(sort==='new'?'on':'')+'" onclick="location.href=\'forum.html?sort=new\'">New</div></div>'
+    +'<div id="list"><div class="muted">Loading…</div></div>';
+  var r=await BalkanAuth.api('/api/suggestions?sort='+sort+'&limit=40');
+  var box=document.getElementById('list');
+  if(!r.ok||!r.data){ box.innerHTML='<div class="muted">Could not load the forum.</div>'; return; }
+  if(!r.data.items.length){ box.innerHTML='<div class="muted">No suggestions yet — be the first to post one.</div>'; return; }
+  box.innerHTML=r.data.items.map(function(t){
+    return '<div class="thread">'
+      +'<div class="tvote"><b>'+(t.likes-t.dislikes)+'</b><span>votes</span></div>'
+      +'<div class="tbody" onclick="location.href=\'forum.html?id='+t.id+'\'">'
+        +'<h3>'+(t.pinned?'<i class="fa-solid fa-thumbtack pinned"></i> ':'')+esc(t.title)+' <span class="pill '+esc(t.status)+'">'+esc(t.status)+'</span></h3>'
+        +'<div class="snip">'+esc(t.snippet||'')+'</div>'
+        +'<div class="tmeta">'+authorLine(t.author)+'<span><i class="fa-solid fa-thumbs-up"></i> '+t.likes+'</span><span><i class="fa-solid fa-thumbs-down"></i> '+t.dislikes+'</span><span><i class="fa-solid fa-comment"></i> '+t.replyCount+' replies</span></div>'
+      +'</div></div>';
+  }).join('');
+}
+function newSuggestion(){
+  if(!BalkanAuth.isIn()) return BalkanAuth.open('in');
+  app.innerHTML='<div class="back" onclick="route()"><i class="fa-solid fa-arrow-left"></i> Back</div>'
+    +'<div class="replybox"><h3 style="margin-bottom:12px">New suggestion</h3>'
+    +'<div style="margin-bottom:10px"><input id="nsTitle" maxlength="120" placeholder="Title (e.g. Add an ARM weapon)" style="width:100%;background:var(--bg2);border:1px solid var(--line2);border-radius:9px;color:var(--txt);padding:11px 13px;font-size:14px;outline:none;font-family:Inter"></div>'
+    +'<textarea id="nsBody" placeholder="Describe your suggestion…"></textarea>'
+    +'<div style="margin-top:12px"><button class="btn btn-gold" onclick="submitNew()"><i class="fa-solid fa-paper-plane"></i> Post suggestion</button></div>'
+    +'<div class="fmsg" id="nsMsg"></div></div>';
+}
+async function submitNew(){
+  var t=(document.getElementById('nsTitle').value||'').trim(), b=(document.getElementById('nsBody').value||'').trim(), m=document.getElementById('nsMsg');
+  if(t.length<4){ m.className='fmsg bad'; m.textContent='Give it a short title.'; return; }
+  if(b.length<8){ m.className='fmsg bad'; m.textContent='Write a few words.'; return; }
+  m.className='fmsg'; m.textContent='Posting…';
+  var r=await BalkanAuth.api('/api/suggestions',{method:'POST',body:{title:t,body:b}});
+  if(r.ok&&r.data&&r.data.id) location.href='forum.html?id='+r.data.id;
+  else { m.className='fmsg bad'; m.textContent=(r.data&&r.data.error)||'Could not post.'; }
+}
+
+/* ---------- thread ---------- */
+var CUR=null;
+async function viewThread(id){
+  app.innerHTML='<div class="muted">Loading…</div>';
+  var r=await BalkanAuth.api('/api/suggestions/'+id);
+  if(!r.ok||!r.data){ app.innerHTML='<div class="back" onclick="location.href=\'forum.html\'"><i class="fa-solid fa-arrow-left"></i> Back</div><div class="muted">Not found.</div>'; return; }
+  CUR={ id:id, myVote:r.data.myVote||0, t:r.data.thread };
+  var t=r.data.thread, reps=r.data.replies||[];
+  var owner = window.BalkanAuth && BalkanAuth.isOwner();
+  var canDelete = owner; // author check is server-side; owner always can
+  var html='<div class="back" onclick="location.href=\'forum.html\'"><i class="fa-solid fa-arrow-left"></i> Back to forum</div>';
+  // OP
+  html+='<div class="post op">'+pcard(t.author)
+    +'<div class="post-main"><h2>'+(t.pinned?'<i class="fa-solid fa-thumbtack pinned"></i> ':'')+esc(t.title)+' <span class="pill '+esc(t.status)+'">'+esc(t.status)+'</span></h2>'
+    +'<div class="post-body">'+esc(t.body)+'</div><div class="post-time">'+when(t.ts)+'</div>'
+    +'<div class="votebar">'
+      +'<div class="vbtn up'+(CUR.myVote===1?' on':'')+'" id="vUp" onclick="vote(1)"><i class="fa-solid fa-thumbs-up"></i> <span data-i18n>Like</span> <b id="cUp">'+t.likes+'</b></div>'
+      +'<div class="vbtn down'+(CUR.myVote===-1?' on':'')+'" id="vDown" onclick="vote(-1)"><i class="fa-solid fa-thumbs-down"></i> <span data-i18n>Dislike</span> <b id="cDown">'+t.dislikes+'</b></div>'
+    +'</div>'
+    + (owner ? ownerCtl(t) : '')
+    +'</div></div>';
+  // replies
+  html+='<div class="rhead">'+reps.length+' replies</div><div id="reps">'+reps.map(replyHtml).join('')+'</div>';
+  // reply composer
+  html+='<div class="replybox"><textarea id="repText" placeholder="Write a reply…"></textarea>'
+    +'<div style="margin-top:10px"><button class="btn btn-gold" onclick="sendReply()"><i class="fa-solid fa-reply"></i> Reply</button>'
+    + (canDelete?' <button class="btn btn-ghost" onclick="delThread()"><i class="fa-solid fa-trash"></i> Delete</button>':'')
+    +'</div><div class="fmsg" id="repMsg"></div></div>';
+  app.innerHTML=html;
+}
+function pcard(a){
+  var av = (a.hasPhoto&&a.aid) ? '<img src="'+API+'/api/avatar?aid='+a.aid+'" alt="" onerror="this.remove()">' : '';
+  return '<div class="pcard"><div class="pc-av">'+av+'<i class="fa-solid fa-user"></i><span class="dot'+(a.online?' on':'')+'"></span></div>'
+    +'<div class="pc-name" onclick="goAuthor('+(a.aid||0)+')">'+esc(a.name)+'</div>'+ (badge(a.role)?'<div style="margin-top:4px">'+badge(a.role)+'</div>':'')
+    +(a.memberSince?'<div class="pc-meta">Member since '+year(a.memberSince)+'</div>':'')+'</div>';
+}
+function replyHtml(rp){
+  return '<div class="post">'+pcard(rp.author)+'<div class="post-main"><div class="post-body">'+esc(rp.message)+'</div><div class="post-time">'+when(rp.ts)+'</div></div></div>';
+}
+function ownerCtl(t){
+  var opts=['open','planned','done','declined'].map(function(s){return '<option value="'+s+'"'+(t.status===s?' selected':'')+'>'+s+'</option>';}).join('');
+  return '<div class="owner-ctl"><select id="stSel" onchange="setStatus()">'+opts+'</select>'
+    +'<button onclick="togglePin()"><i class="fa-solid fa-thumbtack"></i> '+(t.pinned?'Unpin':'Pin')+'</button>'
+    +'<button onclick="delThread()"><i class="fa-solid fa-trash"></i> Delete</button></div>';
+}
+async function vote(dir){
+  if(!BalkanAuth.isIn()) return BalkanAuth.open('in');
+  var send=(CUR.myVote===dir)?0:dir;
+  var r=await BalkanAuth.api('/api/suggestions/'+CUR.id+'/vote',{method:'POST',body:{vote:send}});
+  if(r.ok&&r.data){ CUR.myVote=r.data.myVote;
+    document.getElementById('cUp').textContent=r.data.likes; document.getElementById('cDown').textContent=r.data.dislikes;
+    document.getElementById('vUp').classList.toggle('on',CUR.myVote===1);
+    document.getElementById('vDown').classList.toggle('on',CUR.myVote===-1);
+  }
+}
+async function sendReply(){
+  if(!BalkanAuth.isIn()) return BalkanAuth.open('in');
+  var ta=document.getElementById('repText'), msg=document.getElementById('repMsg'), v=(ta.value||'').trim();
+  if(v.length<2){ msg.className='fmsg bad'; msg.textContent='Write a reply.'; return; }
+  msg.className='fmsg'; msg.textContent='Sending…';
+  var r=await BalkanAuth.api('/api/suggestions/'+CUR.id+'/reply',{method:'POST',body:{message:v}});
+  if(r.ok&&r.data&&r.data.reply){ ta.value=''; msg.textContent='';
+    document.getElementById('reps').insertAdjacentHTML('beforeend', replyHtml(r.data.reply));
+    var rh=app.querySelector('.rhead'); if(rh){ var n=app.querySelectorAll('#reps .post').length; rh.textContent=n+' replies'; }
+  } else { msg.className='fmsg bad'; msg.textContent=(r.data&&r.data.error)||'Could not reply.'; }
+}
+async function setStatus(){ var s=document.getElementById('stSel').value; await BalkanAuth.api('/api/suggestions/'+CUR.id,{method:'PATCH',body:{status:s}}); }
+async function togglePin(){ await BalkanAuth.api('/api/suggestions/'+CUR.id,{method:'PATCH',body:{pinned: !CUR.t.pinned}}); CUR.t.pinned=!CUR.t.pinned; viewThread(CUR.id); }
+async function delThread(){ if(!confirm('Delete this suggestion?')) return; var r=await BalkanAuth.api('/api/suggestions/'+CUR.id,{method:'DELETE'}); if(r.ok) location.href='forum.html'; else alert((r.data&&r.data.error)||'Could not delete.'); }
+
+/* ---------- profile ---------- */
+async function viewProfile(aid){
+  app.innerHTML='<div class="muted">Loading…</div>';
+  var r=await BalkanAuth.api('/api/profile/'+aid);
+  if(!r.ok||!r.data||!r.data.card){ app.innerHTML='<div class="back" onclick="location.href=\'forum.html\'"><i class="fa-solid fa-arrow-left"></i> Back</div><div class="muted">Profile not found.</div>'; return; }
+  var c=r.data.card;
+  var av=(c.hasPhoto&&c.aid)?'<img src="'+API+'/api/avatar?aid='+c.aid+'" alt="" onerror="this.remove()">':'';
+  var html='<div class="back" onclick="history.length>1?history.back():location.href=\'forum.html\'"><i class="fa-solid fa-arrow-left"></i> Back</div>'
+    +'<div class="profile-top">'
+      +'<div class="pbig-av">'+av+'<i class="fa-solid fa-user"></i><span class="dot'+(c.online?' on':'')+'"></span></div>'
+      +'<div class="pinfo"><h1>'+esc(c.name)+badge(c.role)+'</h1>'
+        +'<div style="color:var(--dim2);font-size:12px;font-family:Oswald;letter-spacing:1px">'+(c.online?'<span style="color:var(--green)">● Online</span>':'● Offline')+(c.memberSince?' · Member since '+year(c.memberSince):'')+'</div>'
+        + (c.about?'<div class="about">'+esc(c.about)+'</div>':'')
+        +'<div class="pstats">'
+          +'<div class="pstat"><b>'+c.suggestions+'</b><span>Suggestions</span></div>'
+          +'<div class="pstat"><b>'+c.replyCount+'</b><span>Replies</span></div>'
+          +'<div class="pstat"><b>'+c.likesReceived+'</b><span>Likes</span></div>'
+        +'</div>'
+        + (c.steamid?'<div style="margin-top:16px"><a class="btn btn-ghost" href="players.html?steamid='+encodeURIComponent(c.steamid)+'"><i class="fa-solid fa-ranking-star gold"></i> Game stats</a></div>':'')
+      +'</div></div>';
+  app.innerHTML=html;
+}
+
+window.addEventListener('load', route);
+window.addEventListener('popstate', route);
+</script>
+</body>
+</html>
