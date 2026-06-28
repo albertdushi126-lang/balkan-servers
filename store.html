@@ -172,6 +172,10 @@ nav{display:flex;align-items:center;justify-content:space-between;height:64px}
 .pays .pbtn.disabled{opacity:.45;cursor:not-allowed;transform:none}
 .sheet .after{margin-top:14px;font-size:12.5px;color:var(--dim);text-align:center}
 .err{color:var(--red);font-size:13px;margin-top:8px;display:none}
+.find-results{margin-top:6px}.find-results:empty{display:none}
+.find-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 12px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:8px;margin-top:6px;cursor:pointer;transition:.15s}
+.find-row:hover{background:rgba(232,181,74,.12);border-color:var(--gold)}.find-row b{font-family:Oswald;letter-spacing:.3px}.find-row span{color:var(--dim);font-size:12px}
+.find-hint{color:var(--dim);font-size:12.5px;padding:8px 4px}.find-picked{color:var(--green);font-size:13px;padding:8px 4px;font-family:Oswald;letter-spacing:.4px}
 
 footer{border-top:1px solid var(--line);padding:34px 0;margin-top:30px}.foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;color:var(--dim);font-size:13px}
 
@@ -218,9 +222,11 @@ footer{border-top:1px solid var(--line);padding:34px 0;margin-top:30px}.foot{dis
   <button class="x" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
   <div class="item"><div class="ic"><i id="mIcon" class="fa-solid fa-crown"></i></div>
     <div style="flex:1"><h3 id="mName"></h3><div style="color:var(--dim);font-size:13px" id="mSub"></div></div><div class="p" id="mPrice"></div></div>
-  <div class="field"><label>Your SteamID</label><input id="steamid" placeholder="STEAM_0:1:1234567" autocomplete="off">
-    <div class="err" id="err">Enter a valid SteamID (STEAM_0:1:1234567).</div>
-    <div style="font-size:12px;color:var(--dim);margin-top:7px">In-game console type <b>status</b>, or use <a href="https://steamid.io" target="_blank" rel="noopener" style="color:var(--blue)">steamid.io</a>.</div></div>
+  <div class="field"><label>Find your account by name</label><input id="findName" placeholder="your in-game name" autocomplete="off" oninput="findDebounced(this.value)">
+    <div id="findResults" class="find-results"></div></div>
+  <div class="field"><label>Your SteamID <span style="opacity:.6">(auto-filled from your name, or type it)</span></label><input id="steamid" placeholder="STEAM_0:1:1234567" autocomplete="off">
+    <div class="err" id="err">Enter a valid SteamID — or find your account by name above.</div>
+    <div style="font-size:12px;color:var(--dim);margin-top:7px">Don't know it? Just type your in-game name above. (Or in-game console type <b>status</b>.)</div></div>
   <div class="pays">
     <button class="pbtn pp-paypal" onclick="pay('paypal')"><i class="fa-brands fa-paypal"></i> PayPal</button>
     <button class="pbtn pp-card" onclick="pay('card')"><i class="fa-solid fa-credit-card"></i> Card</button>
@@ -403,6 +409,27 @@ async function pay(method){
 }
 
 function connect(){ window.location.href='steam://connect/'+C.serverIP; }
+
+/* ---- find account by in-game name -> auto-fill SteamID ---- */
+let findT=null, findResults=[];
+function escHtml(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function findDebounced(q){ clearTimeout(findT); findT=setTimeout(function(){ doFind(q); }, 350); }
+async function doFind(q){
+  q=(q||'').trim(); var box=document.getElementById('findResults');
+  if(q.length<2){ box.innerHTML=''; return; }
+  box.innerHTML='<div class="find-hint">Searching…</div>';
+  try{
+    var r=await fetch(API+'/api/find?q='+encodeURIComponent(q)); var d=await r.json();
+    findResults=(d&&d.results)||[];
+    if(!findResults.length){ box.innerHTML='<div class="find-hint">No player with that name yet — play once so the server saves you, or type your SteamID.</div>'; return; }
+    box.innerHTML=findResults.map(function(p,i){ return '<div class="find-row" onclick="pickFind('+i+')"><b>'+escHtml(p.nick)+'</b><span>Lvl '+p.level+' · '+p.kills+' kills</span></div>'; }).join('');
+  }catch(e){ box.innerHTML='<div class="find-hint">Search error — the server may be waking up.</div>'; }
+}
+function pickFind(i){ var p=findResults[i]; if(!p) return;
+  document.getElementById('steamid').value=p.sid;
+  document.getElementById('findResults').innerHTML='<div class="find-picked"><i class="fa-solid fa-circle-check"></i> '+escHtml(p.nick)+' selected</div>';
+  document.getElementById('err').style.display='none';
+}
 
 /* init */
 renderFilters(); renderGrid();

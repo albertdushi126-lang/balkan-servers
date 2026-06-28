@@ -144,6 +144,8 @@ section{padding:20px 0}.shead{margin-bottom:14px}.shead .k{color:var(--gold);fon
 .lb tr:last-child td{border-bottom:0}.lb td.pos{font-family:'Oswald';color:var(--gold);font-size:18px}
 .lb td.nick{font-weight:600;cursor:pointer}.lb td.nick:hover{color:var(--gold)}.lb .tag{font-size:11px;background:var(--panel2);border-radius:20px;padding:2px 9px;color:var(--dim);font-family:'Oswald'}
 .msg{padding:26px;text-align:center;color:var(--dim)}.msg i{font-size:30px;color:var(--line2);display:block;margin-bottom:8px}
+.find-list{padding:6px}.find-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;margin-bottom:8px;cursor:pointer;transition:.15s}
+.find-row:hover{background:rgba(232,181,74,.12);border-color:var(--gold)}.find-row b{font-family:'Oswald';letter-spacing:.3px}.find-row span{color:var(--dim);font-size:12px}
 footer{border-top:1px solid var(--line);padding:30px 0;margin-top:24px}.foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--dim);font-size:13px}
 </style>
 </head>
@@ -164,7 +166,7 @@ footer{border-top:1px solid var(--line);padding:30px 0;margin-top:24px}.foot{dis
   <section><div id="cabinet"></div></section>
   <section>
     <div class="shead"><div class="k">SEARCH</div><h2>Find a player</h2></div>
-    <div class="search"><input id="searchSid" placeholder="STEAM_0:1:1234567" onkeydown="if(event.key==='Enter')doSearch()">
+    <div class="search"><input id="searchSid" placeholder="player name or STEAM_0:1:1234567" onkeydown="if(event.key==='Enter')doSearch()">
       <button class="btn btn-red" onclick="doSearch()"><i class="fa-solid fa-magnifying-glass"></i> Search</button></div>
     <div class="hint">In-game console type <b>status</b>, or use <a href="https://steamid.io" target="_blank" rel="noopener" style="color:var(--blue)">steamid.io</a>.</div>
     <div id="searchPanel" style="margin-top:14px"></div>
@@ -275,7 +277,9 @@ async function renderCabinet(){
     </div>
     <div class="edit" id="editPane">
       <div class="frow"><div class="field"><label>Name</label><input id="ed_name" value="${esc(p.name)}"></div><div class="field"><label>Age</label><input id="ed_age" type="number" value="${esc(p.age)}"></div></div>
-      <div class="frow"><div class="field"><label>In-game nick</label><input id="ed_nick" value="${esc(p.nick)}"></div><div class="field"><label>SteamID (links your game stats)</label><input id="ed_sid" value="${esc(p.steamid)}" placeholder="STEAM_0:1:1234567"></div></div>
+      <div class="frow"><div class="field"><label>In-game nick</label><input id="ed_nick" value="${esc(p.nick)}"></div><div class="field"><label>SteamID (links your game stats)</label><input id="ed_sid" value="${esc(p.steamid)}" placeholder="STEAM_0:1:1234567">
+        <input id="ed_find" placeholder="…or just type your in-game name" autocomplete="off" oninput="findCab(this.value)" style="margin-top:6px">
+        <div id="ed_findRes" class="find-list"></div></div></div>
       <div class="field"><label>About you</label><textarea id="ed_about" maxlength="400" rows="2" style="width:100%;padding:10px 12px;border-radius:9px;background:var(--bg2);border:1px solid var(--line2);color:var(--txt);font-family:'Inter';font-size:14px;outline:none;resize:vertical" placeholder="A short blurb shown on your public profile">${esc(p.about||'')}</textarea></div>
       <button class="btn btn-gold" onclick="saveProfile()"><i class="fa-solid fa-floppy-disk"></i> Save</button><div class="emsg" id="ed_msg"></div>
     </div>
@@ -283,6 +287,18 @@ async function renderCabinet(){
   </div>`;
 }
 function toggleEdit(){ document.getElementById('editPane').classList.toggle('open'); }
+let cabFindT=null, cabFindRes=[];
+function findCab(q){ clearTimeout(cabFindT); cabFindT=setTimeout(function(){ doCabFind(q); }, 350); }
+async function doCabFind(q){ q=(q||'').trim(); const box=document.getElementById('ed_findRes'); if(!box) return;
+  if(q.length<2){ box.innerHTML=''; return; }
+  box.innerHTML='<div class="msg" style="padding:8px 4px;text-align:left">Searching…</div>';
+  const r=await BalkanAuth.api('/api/find?q='+encodeURIComponent(q));
+  cabFindRes=(r.ok&&r.data&&r.data.results)||[];
+  if(!cabFindRes.length){ box.innerHTML='<div class="msg" style="padding:8px 4px;text-align:left">No player with that name yet.</div>'; return; }
+  box.innerHTML=cabFindRes.map(function(p,i){ return '<div class="find-row" onclick="pickCab('+i+')"><b>'+escH(p.nick)+'</b><span>Lvl '+p.level+' · '+p.kills+' kills</span></div>'; }).join('');
+}
+function pickCab(i){ const p=cabFindRes[i]; if(!p) return; document.getElementById('ed_sid').value=p.sid;
+  document.getElementById('ed_findRes').innerHTML='<div class="find-row" style="border-color:var(--green);cursor:default"><b><i class="fa-solid fa-circle-check" style="color:var(--green)"></i> '+escH(p.nick)+'</b><span>selected</span></div>'; }
 async function saveProfile(){
   const m=document.getElementById('ed_msg'); m.textContent='Saving…'; m.className='emsg';
   const sid=document.getElementById('ed_sid').value.trim();
@@ -309,13 +325,22 @@ function onPick(input,kind,max){
 async function saveImg(kind,dataUrl){ const r=await BalkanAuth.api('/api/profile',{method:'PUT',body:{[kind]:dataUrl}}); if(r.ok) renderCabinet(); else alert((r.data&&r.data.error)||'Could not save.'); }
 
 /* ---- search / leaderboard ---- */
+function escH(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 async function doSearch(){
-  const sid=document.getElementById('searchSid').value.trim(), box=document.getElementById('searchPanel');
-  if(!validSteam(sid)){ box.innerHTML='<div class="cab"><div class="msg"><i class="fa-solid fa-ghost"></i>Enter a valid SteamID.</div></div>'; return; }
+  const q=document.getElementById('searchSid').value.trim(), box=document.getElementById('searchPanel');
+  if(!q){ box.innerHTML=''; return; }
   box.innerHTML='<div class="cab"><div class="msg"><i class="fa-solid fa-spinner fa-spin"></i> Loading…</div></div>';
-  const r=await BalkanAuth.api('/api/stats?steamid='+encodeURIComponent(sid));
-  if(!r.ok){ box.innerHTML='<div class="cab"><div class="msg"><i class="fa-solid fa-ghost"></i>'+((r.data&&r.data.error==='player not found')?'No player with that SteamID.':'Error.')+'</div></div>'; return; }
-  box.innerHTML='<div class="cab">'+gameProfile(r.data,false)+'</div>';
+  if(validSteam(q)){
+    const r=await BalkanAuth.api('/api/stats?steamid='+encodeURIComponent(q));
+    if(!r.ok){ box.innerHTML='<div class="cab"><div class="msg"><i class="fa-solid fa-ghost"></i>'+((r.data&&r.data.error==='player not found')?'No player with that SteamID.':'Error.')+'</div></div>'; return; }
+    box.innerHTML='<div class="cab">'+gameProfile(r.data,false)+'</div>'; return;
+  }
+  // not a SteamID -> treat as a name and resolve it
+  const r=await BalkanAuth.api('/api/find?q='+encodeURIComponent(q));
+  const res=(r.ok&&r.data&&r.data.results)||[];
+  if(!res.length){ box.innerHTML='<div class="cab"><div class="msg"><i class="fa-solid fa-ghost"></i>No player with that name. Play once so the server saves you, or type a SteamID.</div></div>'; return; }
+  if(res.length===1){ viewSid(res[0].sid); return; }
+  box.innerHTML='<div class="cab"><div class="find-list">'+res.map(function(p){ return '<div class="find-row" onclick="viewSid(\''+p.sid+'\')"><b>'+escH(p.nick)+'</b><span>Lvl '+p.level+' · '+p.kills+' kills</span></div>'; }).join('')+'</div></div>';
 }
 function viewSid(sid){ const i=document.getElementById('searchSid'); i.value=sid; doSearch(); window.scrollTo({top:i.offsetTop-80,behavior:'smooth'}); }
 async function loadLeaderboard(){
