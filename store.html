@@ -231,6 +231,13 @@ footer{border-top:1px solid var(--line);padding:34px 0;margin-top:30px}.foot{dis
 
 <script>
 const C=CONFIG, cur=C.currency;
+const API='https://balkan-backend.onrender.com';
+// payment result banner (after returning from NOWPayments/PayPal)
+(function(){ var q=new URLSearchParams(location.search); var msg='', ok=false;
+  if(q.get('paid')){ ok=true; msg='✅ Payment received! Your VIP applies in-game after the next map change.'; }
+  else if(q.get('failed')){ msg='Payment was not completed. You can try again.'; }
+  if(msg){ var d=document.createElement('div'); d.style.cssText='position:fixed;top:74px;left:50%;transform:translateX(-50%);z-index:600;'+(ok?'background:var(--green);color:#06200f':'background:var(--red);color:#fff')+';padding:12px 20px;border-radius:10px;font-family:Oswald;letter-spacing:.5px;box-shadow:0 12px 34px rgba(0,0,0,.55);max-width:92%;text-align:center';
+    d.textContent=msg; document.addEventListener('DOMContentLoaded',function(){ document.body.appendChild(d); setTimeout(function(){d.remove();},9000); }); } })();
 
 /* ---------- grid ---------- */
 let activeCat="All";
@@ -283,7 +290,7 @@ function vipDetail(it){
     <div class="tier ${t.featured?'best':''}">${t.featured?'<span class="best-flag">BEST VALUE</span>':''}
       <div class="days">${t.days} DAYS</div><div class="price">${cur}${t.price}</div>
       <div class="per">${(t.price/t.days).toFixed(2)}${cur}/day</div>
-      <button class="btn ${t.featured?'btn-gold':'btn-red'}" onclick="openModal('vip','${t.days} days · VIP',${t.price})">Buy</button>
+      <button class="btn ${t.featured?'btn-gold':'btn-red'}" onclick="openModal('vip','${t.days} days · VIP',${t.price},${t.days})">Buy</button>
     </div>`).join('');
   const perks=it.perks.map(p=>`
     <div class="perk"><div class="pi"><i class="fa-solid ${p.i}"></i></div>
@@ -366,32 +373,33 @@ function swap(el,src){ document.getElementById('mainImg').src=src; document.quer
 
 /* ---------- checkout ---------- */
 let order=null;
-function openModal(id,label,price){
+function openModal(id,label,price,days){
   const it=C.items.find(i=>i.id===id);
-  order={ id:id, label:label, price:price };
+  order={ id:id, label:label, price:price, days:days||0 };
   document.getElementById('mName').textContent=it.name;
   document.getElementById('mSub').textContent=label;
   document.getElementById('mPrice').textContent=cur+price;
   document.getElementById('mIcon').className='fa-solid '+it.icon;
-  [['paypal','pp-paypal'],['card','pp-card'],['crypto','pp-crypto']].forEach(([k,cls])=>{
-    document.querySelector('.'+cls).classList.toggle('disabled', !(C.payments[k]&&C.payments[k]!=="#")); });
+  ['pp-paypal','pp-card','pp-crypto'].forEach(function(cls){ var el=document.querySelector('.'+cls); if(el) el.classList.remove('disabled'); });
   document.getElementById('err').style.display='none';
   document.getElementById('modal').classList.add('open');
 }
 function closeModal(){ document.getElementById('modal').classList.remove('open'); }
 function validSteam(s){ return /^STEAM_[0-5]:[01]:\d+$/i.test((s||'').trim()); }
-function pay(method){
+async function pay(method){
   const sid=document.getElementById('steamid').value.trim();
   if(!validSteam(sid)){ document.getElementById('err').style.display='block'; return; }
-  const url=C.payments[method]; if(!url||url==="#"){ alert('This payment method is not set up yet (CONFIG.payments.'+method+').'); return; }
-  const ref=encodeURIComponent(order.id+'|'+order.label+'|'+sid); let go=url;
-  if(method==='paypal') go=url+(url.includes('paypal.me')?'/'+order.price:'');
-  else if(method==='card') go=url+(url.includes('?')?'&':'?')+'client_reference_id='+ref;
-  try{localStorage.setItem('lastOrder',JSON.stringify({item:order.id,label:order.label,price:order.price,steamid:sid,method,ts:Date.now()}));}catch(e){}
-  if(C.discordWebhook){ fetch(C.discordWebhook,{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({username:'BALKAN-STORE',embeds:[{title:'🛒 New order',color:0xe8b54a,fields:[
-      {name:'Item',value:order.label,inline:true},{name:'Price',value:cur+order.price,inline:true},{name:'SteamID',value:sid},{name:'Method',value:method,inline:true}]}]})}).catch(()=>{}); }
-  window.open(go,'_blank','noopener'); closeModal();
+  // crypto + card -> NOWPayments invoice (it offers crypto and, where available, card); paypal -> PayPal
+  var endpoint = (method==='paypal') ? '/api/pay/paypal' : '/api/pay/nowpayments';
+  var btns=document.querySelectorAll('.pays .pbtn'); btns.forEach(function(b){ b.classList.add('disabled'); });
+  try{
+    var r=await fetch(API+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({item:order.id||'vip',steamid:sid,days:order.days||0,price:order.price})});
+    var d=null; try{ d=await r.json(); }catch(e){}
+    if(r.ok&&d&&d.url){ window.location.href=d.url; return; }
+    alert((d&&d.error)||'Could not start the payment. Please try again.');
+  }catch(e){ alert('Network error — the server may be waking up. Try again in a few seconds.'); }
+  btns.forEach(function(b){ b.classList.remove('disabled'); });
 }
 
 function connect(){ window.location.href='steam://connect/'+C.serverIP; }
