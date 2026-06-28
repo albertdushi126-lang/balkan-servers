@@ -220,6 +220,21 @@ section{padding:42px 0}
 .dash-stat label{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1px}
 .dash-grant{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
 .dash-grant input{background:var(--bg2);border:1px solid var(--line2);border-radius:9px;color:var(--txt);padding:10px 12px;font-size:13px;outline:none;font-family:'Inter'}
+.dash-members{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.mem-head{display:flex;align-items:center;gap:10px;font-family:'Oswald';letter-spacing:1px;font-size:14px;margin-bottom:10px}
+.mem-head .dim{font-family:'Inter';letter-spacing:0;font-size:12px}
+.mem-head input{margin-left:auto;background:var(--bg2);border:1px solid var(--line2);border-radius:9px;color:var(--txt);padding:8px 12px;font-size:13px;outline:none;min-width:200px;font-family:'Inter'}
+.mem-list{max-height:360px;overflow-y:auto;border:1px solid var(--line);border-radius:12px}
+.mem-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line)}
+.mem-row:last-child{border-bottom:0}
+.mem-dot{width:9px;height:9px;border-radius:50%;background:var(--dim2);flex-shrink:0}.mem-dot.on{background:var(--green);box-shadow:0 0 7px var(--green)}
+.mem-id{flex:1;min-width:0}
+.mem-name{font-family:'Oswald';letter-spacing:.5px;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mem-email{font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mem-sub{font-size:11.5px;color:var(--dim2);text-align:right;min-width:120px;white-space:nowrap}
+.mem-act{flex-shrink:0}
+.btnxs{padding:6px 12px;font-size:11px}
+@media(max-width:600px){.mem-sub{display:none}.mem-head input{min-width:120px}}
 .dash-grant input:focus{border-color:var(--gold)}
 .news-list{display:grid}
 .news-item{padding:15px 20px;border-bottom:1px solid var(--line);border-left:3px solid var(--red);display:flex;gap:14px;align-items:flex-start;transition:.15s}
@@ -414,11 +429,16 @@ footer{border-top:1px solid var(--line);padding:40px 0;margin-top:20px}
       <div class="dash-stat"><span class="dash-num" id="dashVips">–</span><label>VIPs</label></div>
     </div>
     <div class="dash-grant">
-      <input id="vipEmail" type="email" placeholder="player@email.com">
-      <input id="vipDays" type="number" min="0" placeholder="days (0 = forever)" style="max-width:160px">
+      <input id="vipEmail" type="email" placeholder="player@email.com (or pick below)">
+      <input id="vipDays" type="number" min="0" placeholder="days (empty=30, 0=forever)" style="max-width:190px">
       <button class="btn btn-gold" onclick="grantVip(true)"><i class="fa-solid fa-crown"></i> Grant VIP</button>
       <button class="btn btn-ghost" onclick="grantVip(false)">Revoke</button>
       <span class="fmsg" id="vipMsg"></span>
+    </div>
+    <div class="dash-members">
+      <div class="mem-head"><i class="fa-solid fa-users gold"></i> Members <span class="dim" id="memCount"></span>
+        <input id="memSearch" placeholder="Search email or nick…" oninput="renderMembers()"></div>
+      <div id="memList" class="mem-list"><div class="dim" style="padding:10px">Loading…</div></div>
     </div>
   </div>
 </div></section>
@@ -643,15 +663,38 @@ async function loadDash(){
   document.getElementById('dashOnline').textContent=r.data.online;
   document.getElementById('dashAccounts').textContent=r.data.accounts;
   document.getElementById('dashVips').textContent=r.data.vips;
+  var ra=await BalkanAuth.api('/api/admin/accounts');
+  if(ra.ok&&ra.data){ window.MEMBERS=ra.data.accounts||[]; renderMembers(); }
+}
+function memBadge(role){ var r=(role==='OWNER'||role==='VIP')?role:''; return r?' <span class="fl '+r+'">'+r+'</span>':''; }
+function memDate(ts){ if(!ts) return ''; try{ return new Date(ts*1000).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'}); }catch(e){ return ''; } }
+function renderMembers(){
+  var list=document.getElementById('memList'); if(!list) return;
+  var all=window.MEMBERS||[]; var q=((document.getElementById('memSearch')||{}).value||'').trim().toLowerCase();
+  var rows=all.filter(function(m){ return !q || (m.email&&m.email.toLowerCase().indexOf(q)>=0) || (m.nick&&m.nick.toLowerCase().indexOf(q)>=0) || (m.name&&m.name.toLowerCase().indexOf(q)>=0); });
+  var cnt=document.getElementById('memCount'); if(cnt) cnt.textContent='· '+all.length+' total';
+  if(!rows.length){ list.innerHTML='<div class="dim" style="padding:10px">No members found.</div>'; return; }
+  list.innerHTML=rows.map(function(m){
+    var act = m.role==='OWNER' ? '<span class="dim" style="font-size:11px">owner</span>'
+      : (m.vip ? '<button class="btn btn-ghost btnxs" onclick="grantVip(false,'+m.aid+')">Revoke</button>'
+               : '<button class="btn btn-gold btnxs" onclick="grantVip(true,'+m.aid+')"><i class="fa-solid fa-crown"></i> Grant VIP</button>');
+    var sub = m.vip ? '<span style="color:var(--gold)">VIP'+(m.vipUntil?(' · till '+memDate(m.vipUntil)):'')+'</span>' : ('joined '+memDate(m.created));
+    return '<div class="mem-row"><span class="mem-dot'+(m.online?' on':'')+'" title="'+(m.online?'online':'offline')+'"></span>'
+      +'<div class="mem-id"><div class="mem-name">'+esc(m.nick||m.name||'—')+memBadge(m.role)+'</div><div class="mem-email">'+esc(m.email)+'</div></div>'
+      +'<div class="mem-sub">'+sub+'</div>'
+      +'<div class="mem-act">'+act+'</div></div>';
+  }).join('');
 }
 document.addEventListener('balkan-auth', loadDash);
-loadDash(); setInterval(function(){ if(window.BalkanAuth&&BalkanAuth.isOwner()) loadDash(); }, 20000);
-async function grantVip(on){
-  var em=(document.getElementById('vipEmail').value||'').trim(), days=parseInt(document.getElementById('vipDays').value,10)||0, m=document.getElementById('vipMsg');
-  if(!em){ setMsg(m,'Enter the player email.',false); return; }
+loadDash(); setInterval(function(){ if(window.BalkanAuth&&BalkanAuth.isOwner()) loadDash(); }, 30000);
+async function grantVip(on, aid){
+  var raw=(document.getElementById('vipDays').value||'').trim();
+  var days = raw==='' ? (on?30:0) : (parseInt(raw,10)||0);
+  var m=document.getElementById('vipMsg'); var body={vip:on,days:days};
+  if(aid){ body.aid=aid; } else { var em=(document.getElementById('vipEmail').value||'').trim(); if(!em){ setMsg(m,'Enter an email or pick a member below.',false); return; } body.email=em; }
   setMsg(m, on?'Granting…':'Revoking…', true);
-  var r=await BalkanAuth.api('/api/admin/vip',{method:'POST',body:{email:em,vip:on,days:days}});
-  if(r.ok){ setMsg(m, on?('VIP granted'+(days?(' for '+days+' days'):' (no expiry)')+' ✓'):'VIP revoked ✓', true); loadDash(); }
+  var r=await BalkanAuth.api('/api/admin/vip',{method:'POST',body:body});
+  if(r.ok){ setMsg(m, on?('VIP granted'+(days?(' · '+days+'d'):' · forever')+' ✓'):'VIP revoked ✓', true); loadDash(); }
   else setMsg(m,(r.data&&r.data.error)||'Failed.',false);
 }
 
