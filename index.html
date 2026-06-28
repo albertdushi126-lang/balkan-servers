@@ -97,7 +97,8 @@ const CONFIG = {
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);overflow-x:hidden;line-height:1.6;
-  background-image:radial-gradient(900px 480px at 78% -6%,rgba(240,169,59,.10),transparent 60%),radial-gradient(700px 420px at 8% 4%,rgba(227,52,47,.07),transparent 60%)}
+  background-image:radial-gradient(900px 480px at 78% -6%,rgba(240,169,59,.10),transparent 60%),radial-gradient(700px 420px at 8% 4%,rgba(227,52,47,.07),transparent 60%),linear-gradient(180deg,rgba(8,9,13,.88),rgba(8,9,13,.93)),url('assets/page-bg.webp');
+  background-repeat:no-repeat;background-position:0 0,0 0,center top,center top;background-size:auto,auto,cover,cover;background-attachment:scroll,scroll,fixed,fixed}
 h1,h2,h3,.display{font-family:'Oswald',sans-serif;letter-spacing:.5px;text-transform:uppercase;font-weight:700}
 a{color:inherit;text-decoration:none}
 img{display:block}
@@ -195,6 +196,7 @@ section{padding:42px 0}
 .shead h2{font-size:clamp(24px,3.6vw,36px);margin-top:3px}
 .shead .more{color:var(--dim);font-size:13px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:16px}
+.card-buy{background:linear-gradient(180deg,rgba(19,22,30,.94) 0%,rgba(19,22,30,.78) 45%,rgba(19,22,30,.96) 100%),url('assets/buy-bg.webp') center/cover no-repeat,var(--panel);position:relative;overflow:hidden}
 .card-pad{padding:20px 22px}
 .card-h{display:flex;align-items:center;gap:9px;font-family:'Oswald';font-size:16px;letter-spacing:1px;padding:16px 20px;border-bottom:1px solid var(--line)}
 .card-h i{color:var(--gold)} .card-h .dim{color:var(--dim);font-size:12px;margin-left:auto;font-family:'Inter';letter-spacing:0}
@@ -208,7 +210,7 @@ section{padding:42px 0}
 .buy-row .bi{flex:1}.buy-row .bi b{font-family:'Oswald';font-size:14px;letter-spacing:.5px}.buy-row .bi span{display:block;color:var(--dim);font-size:12px}
 .buy-row .ago{color:var(--dim2);font-size:11.5px;font-family:'Oswald';letter-spacing:.5px;white-space:nowrap}
 .stat-tiles{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.stat-tile{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 18px;display:flex;align-items:center;gap:14px}
+.stat-tile{background:linear-gradient(135deg,rgba(19,22,30,.93),rgba(19,22,30,.82)),url('assets/tile-bg.webp') center/cover no-repeat,var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 18px;display:flex;align-items:center;gap:14px;overflow:hidden}
 .stat-tile .si{width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,#2a1a06,#3a230a);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:18px;flex-shrink:0}
 .stat-tile b{font-family:'Oswald';font-size:24px;line-height:1}.stat-tile span{display:block;color:var(--dim);font-size:11.5px;letter-spacing:.5px;margin-top:3px}
 
@@ -387,7 +389,7 @@ footer{border-top:1px solid var(--line);padding:40px 0;margin-top:20px}
 <!-- ===== PURCHASES + SEASON STATS ===== -->
 <section><div class="wrap">
   <div class="mid-grid">
-    <div class="card">
+    <div class="card card-buy">
       <div class="card-h"><i class="fa-solid fa-coins"></i> <span data-i18n="buy_t">LATEST PURCHASES</span> <span class="dim" data-i18n="buy_s">support the project ♥</span></div>
       <div id="buyList"></div>
     </div>
