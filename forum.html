@@ -99,6 +99,10 @@ nav{display:flex;align-items:center;gap:16px;height:66px}
 .replybox{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:6px}
 .replybox textarea{width:100%;background:var(--bg2);border:1px solid var(--line2);border-radius:9px;color:var(--txt);padding:11px 13px;font-size:14px;font-family:'Inter';outline:none;resize:vertical;min-height:80px}
 .replybox textarea:focus{border-color:var(--gold)}
+.apg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{margin-bottom:0}.field label{display:block;font-size:12.5px;color:var(--dim);margin-bottom:5px}
+.field textarea{min-height:64px}
+@media(max-width:560px){.apg{grid-template-columns:1fr}}
 .fmsg{font-size:13px;margin-top:8px;min-height:18px}.fmsg.ok{color:var(--green)}.fmsg.bad{color:var(--red)}
 .post-img{max-width:100%;max-height:360px;border-radius:10px;margin-top:10px;border:1px solid var(--line);cursor:zoom-in;display:block}
 .img-pick{display:flex;align-items:center;gap:12px;margin-top:10px}
@@ -273,9 +277,30 @@ async function viewList(sort, catId){
       +'</div></div>';
   }).join('');
 }
+function newAdminApp(cat){
+  var inp='width:100%;background:var(--bg2);border:1px solid var(--line2);border-radius:9px;color:var(--txt);padding:11px 13px;font-size:14px;outline:none;font-family:Inter';
+  app.innerHTML='<div class="back" onclick="location.href=\'forum.html?cat=admin\'"><i class="fa-solid fa-arrow-left"></i> Back</div>'
+    +'<div class="replybox"><h3 style="margin-bottom:4px"><span class="cat-chip"><i class="fa-solid '+cat.icon+'"></i> '+esc(cat.label)+'</span></h3>'
+    +'<div style="color:var(--dim);font-size:13px;margin:8px 0 14px">'+esc(cat.formHint||'Fill this in — your application is posted in this section for the staff to review.')+'</div>'
+    +'<div class="apg">'
+      +'<div class="field"><label>In-game name</label><input id="ap_name" maxlength="32" placeholder="lluna" style="'+inp+'"></div>'
+      +'<div class="field"><label>Age</label><input id="ap_age" type="number" placeholder="18" style="'+inp+'"></div>'
+      +'<div class="field"><label>SteamID</label><input id="ap_steam" maxlength="40" placeholder="STEAM_0:1:1234567" style="'+inp+'"></div>'
+      +'<div class="field"><label>Discord tag</label><input id="ap_disc" maxlength="40" placeholder="name#0000 or @name" style="'+inp+'"></div>'
+      +'<div class="field"><label>Hours/day you can play</label><input id="ap_hours" maxlength="20" placeholder="3-4" style="'+inp+'"></div>'
+      +'<div class="field"><label>Languages</label><input id="ap_lang" maxlength="40" placeholder="Albanian, English" style="'+inp+'"></div>'
+    +'</div>'
+    +'<div class="field" style="margin-top:12px"><label>Past admin experience</label><textarea id="ap_exp" maxlength="600" placeholder="Where, how long, what tools (AMXX)…"></textarea></div>'
+    +'<div class="field" style="margin-top:12px"><label>Why should we pick you?</label><textarea id="ap_why" maxlength="800" placeholder="Tell us about yourself"></textarea></div>'
+    + imgPickerHtml('ns')
+    +'<div style="margin-top:12px"><button class="btn btn-gold" onclick="submitNew(\'admin\')"><i class="fa-solid fa-shield-halved"></i> '+esc(cat.cta||'Send application')+'</button></div>'
+    +'<div class="fmsg" id="nsMsg"></div></div>';
+  PICK.ns=null;
+}
 function newPost(catId){
   if(!BalkanAuth.isIn()) return BalkanAuth.open('in');
   var cat=catById(catId);
+  if(catId==='admin') return newAdminApp(cat);
   var maxLen = 120 - (cat.tag ? cat.tag.length+1 : 0);
   app.innerHTML='<div class="back" onclick="location.href=\'forum.html?cat='+cat.id+'\'"><i class="fa-solid fa-arrow-left"></i> Back</div>'
     +'<div class="replybox"><h3 style="margin-bottom:4px"><span class="cat-chip"><i class="fa-solid '+cat.icon+'"></i> '+esc(cat.label)+'</span></h3>'
@@ -288,10 +313,20 @@ function newPost(catId){
   PICK.ns=null;
 }
 async function submitNew(catId){
-  var cat=catById(catId);
-  var t=(document.getElementById('nsTitle').value||'').trim(), b=(document.getElementById('nsBody').value||'').trim(), m=document.getElementById('nsMsg');
-  if(t.length<4){ m.className='fmsg bad'; m.textContent='Give it a short title.'; return; }
-  if(b.length<8){ m.className='fmsg bad'; m.textContent='Write a few words.'; return; }
+  var cat=catById(catId), m=document.getElementById('nsMsg');
+  var t, b;
+  if(catId==='admin'){
+    var v=function(id){ var e=document.getElementById(id); return e?(e.value||'').trim():''; };
+    var nm=v('ap_name'), why=v('ap_why');
+    if(nm.length<2){ m.className='fmsg bad'; m.textContent='Enter your in-game name.'; return; }
+    if(why.length<8){ m.className='fmsg bad'; m.textContent='Tell us why we should pick you.'; return; }
+    t='Application — '+nm;
+    b='In-game name: '+nm+'\nAge: '+(v('ap_age')||'-')+'\nSteamID: '+(v('ap_steam')||'-')+'\nDiscord: '+(v('ap_disc')||'-')+'\nHours/day: '+(v('ap_hours')||'-')+'\nLanguages: '+(v('ap_lang')||'-')+'\n\nPast admin experience:\n'+(v('ap_exp')||'-')+'\n\nWhy pick me:\n'+why;
+  } else {
+    t=(document.getElementById('nsTitle').value||'').trim(); b=(document.getElementById('nsBody').value||'').trim();
+    if(t.length<4){ m.className='fmsg bad'; m.textContent='Give it a short title.'; return; }
+    if(b.length<8){ m.className='fmsg bad'; m.textContent='Write a few words.'; return; }
+  }
   m.className='fmsg'; m.textContent='Posting…';
   var title = cat.tag ? (cat.tag+' '+t) : t;
   var r=await BalkanAuth.api('/api/suggestions',{method:'POST',body:{title:title,body:b,image:PICK.ns||undefined}});
