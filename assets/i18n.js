@@ -25,23 +25,68 @@
     return (lang === "en") ? src : (e[lang] || src);
   }
 
+  /* ---- machine-translation fallback ---------------------------------------
+     Anything NOT found in the curated dict is auto-translated via Google's
+     auto-detect endpoint (handles mixed languages) and cached in localStorage.
+     Result: EVERY word on EVERY page shows in the chosen language — user posts,
+     chat, and anything added later — with zero manual dictionary upkeep.
+     Opt a node out with class="no-mt" or [data-no-mt] (brand, usernames…). */
+  var MT = {}; try { MT = JSON.parse(localStorage.getItem("balkanMT") || "{}"); } catch (e) {}
+  var MTQ = [], MTIN = {}, MTACT = 0, MTMAX = 6;
+  function mtISO(l) { return l === "al" ? "sq" : l; }
+  function mtSave() { try { localStorage.setItem("balkanMT", JSON.stringify(MT)); } catch (e) {} }
+  function mtTranslatable(s) { return /[A-Za-zА-Яа-яЁёÇçĞğİıŞşÖöÜü]/.test(s) && s.replace(/[^A-Za-zА-Яа-яЁё]/g, "").length >= 2; }
+  function mtPump() {
+    while (MTACT < MTMAX && MTQ.length) {
+      var job = MTQ.shift(); MTACT++;
+      (function (jb) {
+        fetch(jb.u).then(function (r) { return r.json(); }).then(function (j) {
+          if (j && j[0]) {   // valid response — cache it
+            var out = j[0].map(function (s) { return (s && s[0]) ? s[0] : ""; }).join("") || jb.src;
+            MT[jb.key] = out; mtSave(); jb.fin(out);
+          } else { jb.fin(jb.src); }   // error/empty — don't poison the cache, retry next time
+        }).catch(function () { jb.fin(jb.src); }).then(function () { MTACT--; mtPump(); });
+      })(job);
+    }
+  }
+  function mtGet(src, lang, cb) {
+    var key = lang + "" + src;
+    if (MT[key] != null) { cb(MT[key]); return; }
+    if (MTIN[key]) { MTIN[key].push(cb); return; }
+    MTIN[key] = [cb];
+    MTQ.push({ key: key, src: src, u: "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=" + mtISO(lang) + "&dt=t&q=" + encodeURIComponent(src),
+      fin: function (out) { var cbs = MTIN[key] || []; delete MTIN[key]; cbs.forEach(function (f) { try { f(out); } catch (e) {} }); } });
+    mtPump();
+  }
+
   var SKIP = { SCRIPT: 1, STYLE: 1, TEXTAREA: 1, NOSCRIPT: 1, CODE: 1 };
+  // elements whose text is a PROPER NOUN (usernames, zombie / knife / weapon names) —
+  // never translate these. Add class="no-mt" (or [data-no-mt]) to protect anything new.
+  var NOMT = "[data-no-mt],.no-mt,.who,.mem-name,.pc-name,.au,.nick,.nm>b,.cab-id>h2,.find-row>b,.find-picked,.gv,.lb .tag,#grid .card>h3,.detail-info>h1,.whead>h2,.vip-feature .info>h2,#mName,.cls .info>h3,.kn>h4";
+  function setTN(tn, v) { tn.nodeValue = tn.__raw.replace(tn.__en, v); }
   function translateTextNode(tn, lang) {
     var p = tn.parentNode; if (!p || SKIP[p.nodeName]) return;
-    if (p.closest && p.closest("[data-i18n-html]")) return; // handled as innerHTML below
-    if (tn.__en === undefined) { tn.__en = (tn.nodeValue || "").trim(); }
+    if (p.closest && (p.closest("[data-i18n-html]") || p.closest(NOMT))) return;
+    if (tn.__raw === undefined) { tn.__raw = tn.nodeValue || ""; tn.__en = tn.__raw.trim(); }
     var src = tn.__en; if (!src) return;
+    if (lang === "en") { setTN(tn, src); return; }
     var v = tr(src, lang);
-    if (v != null && v !== src) tn.nodeValue = tn.nodeValue.replace(src, v);
-    else if (v === src && lang === "en") tn.nodeValue = tn.nodeValue.replace(tn.nodeValue.trim(), src);
+    if (v != null) { setTN(tn, v); return; }            // curated dict
+    if (!mtTranslatable(src)) return;                    // skip numbers / symbols
+    mtGet(src, lang, function (out) { if (getLang() === lang) setTN(tn, out); });  // machine fallback
   }
   function translateAttrs(el, lang) {
+    if (el.closest && el.closest(NOMT)) return;
     ["placeholder", "title"].forEach(function (a) {
       if (!el.getAttribute || !el.hasAttribute(a)) return;
       var key = "i18n_" + a;
       if (el.dataset[key] === undefined) el.dataset[key] = (el.getAttribute(a) || "").trim();
       var src = el.dataset[key]; if (!src) return;
-      var v = tr(src, lang); if (v != null) el.setAttribute(a, v);
+      if (lang === "en") { el.setAttribute(a, src); return; }
+      var v = tr(src, lang);
+      if (v != null) { el.setAttribute(a, v); return; }
+      if (!mtTranslatable(src)) return;
+      mtGet(src, lang, function (out) { if (getLang() === lang) el.setAttribute(a, out); });
     });
   }
   function translateHtml(el, lang) {
