@@ -33,7 +33,7 @@ a{color:inherit;text-decoration:none}
 .btn-green{background:var(--green);color:#06200f;border:0}.btn-ghost{background:transparent;border:1px solid var(--line2);color:var(--dim)}
 .btn-red{background:var(--red);color:#fff;border:0}
 .fl{font-size:9px;padding:2px 7px;border-radius:5px;margin-left:6px;letter-spacing:1px;font-family:'Oswald';vertical-align:middle}
-.fl.OWNER{background:rgba(227,52,47,.18);color:#ff8c89}.fl.VIP{background:rgba(232,181,74,.18);color:var(--gold)}
+.fl.OWNER{background:rgba(227,52,47,.18);color:#ff8c89}.fl.VIP{background:rgba(232,181,74,.18);color:var(--gold)}.fl.ADMIN{background:rgba(77,141,246,.18);color:#9bc0fb}
 
 header{position:sticky;top:0;z-index:100;background:rgba(8,9,13,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
 nav{display:flex;align-items:center;gap:16px;height:66px}
@@ -106,6 +106,9 @@ nav{display:flex;align-items:center;gap:16px;height:66px}
 .demo-note{background:rgba(232,181,74,.10);border:1px solid rgba(232,181,74,.35);border-radius:10px;padding:11px 13px;font-size:13px;color:var(--txt);margin-bottom:14px;line-height:1.55}
 .demo-note i{color:var(--gold);margin-right:5px}
 .demo-note code{background:var(--bg2);border:1px solid var(--line2);border-radius:5px;padding:1px 6px;font-size:12px;color:var(--gold)}
+.decide{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.decide.done{color:var(--green);font-family:'Oswald';letter-spacing:.5px}.decide.rej{color:var(--red);font-family:'Oswald';letter-spacing:.5px}
+.decide i{margin-right:5px}
 .fmsg{font-size:13px;margin-top:8px;min-height:18px}.fmsg.ok{color:var(--green)}.fmsg.bad{color:var(--red)}
 .post-img{max-width:100%;max-height:360px;border-radius:10px;margin-top:10px;border:1px solid var(--line);cursor:zoom-in;display:block}
 .img-pick{display:flex;align-items:center;gap:12px;margin-top:10px}
@@ -176,7 +179,7 @@ const API = "https://balkan-backend.onrender.com";
 const app = document.getElementById('app');
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
 function connect(){ window.location.href='steam://connect/31.57.151.143:27015'; }
-function badge(role){ var r=(role==='OWNER'||role==='VIP')?role:''; return r?' <span class="fl '+r+'">'+r+'</span>':''; }
+function badge(role){ var r=(role==='OWNER'||role==='ADMIN'||role==='VIP')?role:''; return r?' <span class="fl '+r+'">'+r+'</span>':''; }
 function when(ts){ if(!ts) return ''; var d=new Date(ts*1000); return d.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'}); }
 function year(ts){ return ts? new Date(ts*1000).getFullYear() : ''; }
 function miniAv(a){
@@ -419,6 +422,7 @@ async function viewThread(id){
       +'<div class="vbtn up'+(CUR.myVote===1?' on':'')+'" id="vUp" onclick="vote(1)"><i class="fa-solid fa-thumbs-up"></i> <span data-i18n>Like</span> <b id="cUp">'+t.likes+'</b></div>'
       +'<div class="vbtn down'+(CUR.myVote===-1?' on':'')+'" id="vDown" onclick="vote(-1)"><i class="fa-solid fa-thumbs-down"></i> <span data-i18n>Dislike</span> <b id="cDown">'+t.dislikes+'</b></div>'
     +'</div>'
+    + (owner && pc.cat.id==='admin' ? adminDecidePanel(t) : '')
     + (owner ? ownerCtl(t) : '')
     +'</div></div>';
   // replies
@@ -447,6 +451,26 @@ function ownerCtl(t){
   return '<div class="owner-ctl"><select id="stSel" onchange="setStatus()">'+opts+'</select>'
     +'<button onclick="togglePin()"><i class="fa-solid fa-thumbtack"></i> '+(t.pinned?'Unpin':'Pin')+'</button>'
     +'<button onclick="delThread()"><i class="fa-solid fa-trash"></i> Delete</button></div>';
+}
+function adminDecidePanel(t){
+  if(t.status==='done') return '<div class="decide done"><i class="fa-solid fa-circle-check"></i> Accepted — this player is now an Admin.</div>';
+  if(t.status==='declined') return '<div class="decide rej"><i class="fa-solid fa-circle-xmark"></i> Rejected.</div>';
+  return '<div class="decide"><button class="btn btn-green" onclick="decide(\'accept\')"><i class="fa-solid fa-user-shield"></i> Accept → make Admin</button>'
+    +'<button class="btn btn-ghost" onclick="decide(\'reject\')"><i class="fa-solid fa-xmark"></i> Reject</button>'
+    +'<div class="fmsg" id="decMsg" style="flex-basis:100%"></div></div>';
+}
+async function decide(decision){
+  var m=document.getElementById('decMsg'); if(m){ m.className='fmsg'; m.textContent=(decision==='accept'?'Accepting…':'Rejecting…'); }
+  var r=await BalkanAuth.api('/api/suggestions/'+CUR.id+'/decision',{method:'POST',body:{decision:decision}});
+  if(r.ok&&r.data){
+    if(decision==='accept'){
+      var extra = r.data.gameGranted
+        ? ' In-game moderation flags were delivered — they apply after the next map change.'
+        : ' The ADMIN badge is set, but no SteamID is linked yet — ask them to add their SteamID (in the profile) to get the in-game powers.';
+      alert('Accepted ✔ — this player is now an Admin (mute / gag / kick / slay, NOT ban or map).'+extra);
+    } else { alert('Application rejected.'); }
+    viewThread(CUR.id);
+  } else { var msg=(r.data&&r.data.error)||'Could not save.'; if(m){ m.className='fmsg bad'; m.textContent=msg; } else alert(msg); }
 }
 async function vote(dir){
   if(!BalkanAuth.isIn()) return BalkanAuth.open('in');

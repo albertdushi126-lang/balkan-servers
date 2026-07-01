@@ -50,7 +50,7 @@ a{color:inherit;text-decoration:none}
 .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
 .gold{color:var(--gold)}.accent{color:var(--red)}
 .fl{font-size:10px;padding:2px 7px;border-radius:5px;margin-left:6px;letter-spacing:1px;font-family:'Oswald';vertical-align:middle;text-transform:uppercase}
-.fl.OWNER{background:rgba(227,52,47,.18);color:#ff8c89}.fl.VIP{background:rgba(232,181,74,.18);color:var(--gold)}
+.fl.OWNER{background:rgba(227,52,47,.18);color:#ff8c89}.fl.VIP{background:rgba(232,181,74,.18);color:var(--gold)}.fl.ADMIN{background:rgba(77,141,246,.18);color:#9bc0fb}
 .btn{display:inline-flex;align-items:center;gap:9px;font-family:'Oswald';text-transform:uppercase;letter-spacing:1px;font-size:14px;padding:10px 18px;border-radius:8px;border:1px solid var(--line2);cursor:pointer;transition:.18s;background:var(--panel2);color:var(--txt)}
 .btn:hover{transform:translateY(-2px)}
 .btn-red{background:var(--red);color:#fff;border:0}.btn-gold{background:var(--gold);color:#241a02;border:0}.btn-green{background:var(--green);color:#06200f;border:0}.btn-ghost{background:transparent}
@@ -280,7 +280,7 @@ async function renderCabinet(){
   if(r.status===401){ BalkanAuth.logout(); renderCabinet(); return; }
   if(!r.ok){ box.innerHTML=`<div class="cab"><div class="msg" style="padding:40px"><i class="fa-solid fa-triangle-exclamation"></i> Could not load your cabinet. Try again.</div></div>`; return; }
   const p=r.data.profile, s=r.data.stats;
-  const role=(r.data.role==='OWNER'||r.data.role==='VIP')?r.data.role:''; const rb=role?` <span class="fl ${role}">${role}</span>`:'';
+  const role=(r.data.role==='OWNER'||r.data.role==='ADMIN'||r.data.role==='VIP')?r.data.role:''; const rb=role?` <span class="fl ${role}">${role}</span>`:'';
   const photo=p.photo?`<img src="${p.photo}" alt="me">`:`<div class="ph"><i class="fa-solid fa-user-astronaut"></i></div>`;
   const cover=p.cover?`style="background-image:url('${p.cover}')"`:'';
   box.innerHTML=`<div class="cab">

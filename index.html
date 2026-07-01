@@ -256,7 +256,7 @@ section{padding:42px 0}
 .cmsg .av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .cmsg .cc .who{font-family:'Oswald';font-size:12.5px;letter-spacing:.5px}
 .cmsg .cc .who .fl{font-size:9px;padding:1px 6px;border-radius:5px;margin-left:6px;letter-spacing:1px}
-.fl.OWNER{background:rgba(227,52,47,.18);color:#ff8c89}.fl.VIP{background:rgba(232,181,74,.18);color:var(--gold)}
+.fl.OWNER{background:rgba(227,52,47,.18);color:#ff8c89}.fl.VIP{background:rgba(232,181,74,.18);color:var(--gold)}.fl.ADMIN{background:rgba(77,141,246,.18);color:#9bc0fb}
 .cmsg .cc .tx{font-size:13px;color:var(--dim)}
 .chat-foot{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:8px}
 .chat-foot input{flex:1;background:var(--bg2);border:1px solid var(--line2);border-radius:8px;padding:9px 12px;color:var(--txt);font-size:13px;outline:0;font-family:'Inter'}
@@ -626,7 +626,7 @@ async function enterGiveaway(){
 renderGiveaway();
 
 /* ---- suggestions (live forum teaser) ---- */
-function roleBadge(role){ var r=(role==='OWNER'||role==='VIP')?role:''; return r?' <span class="fl '+r+'">'+r+'</span>':''; }
+function roleBadge(role){ var r=(role==='OWNER'||role==='ADMIN'||role==='VIP')?role:''; return r?' <span class="fl '+r+'">'+r+'</span>':''; }
 function renderSug(items){
   var box=document.getElementById('sugBoard');
   if(!items||!items.length){ box.innerHTML='<div class="sug"><div class="body"><small>No suggestions yet — be the first.</small></div></div>'; return; }
@@ -662,7 +662,7 @@ async function loadDash(){
   var ra=await BalkanAuth.api('/api/admin/accounts');
   if(ra.ok&&ra.data){ window.MEMBERS=ra.data.accounts||[]; renderMembers(); }
 }
-function memBadge(role){ var r=(role==='OWNER'||role==='VIP')?role:''; return r?' <span class="fl '+r+'">'+r+'</span>':''; }
+function memBadge(role){ var r=(role==='OWNER'||role==='ADMIN'||role==='VIP')?role:''; return r?' <span class="fl '+r+'">'+r+'</span>':''; }
 function memDate(ts){ if(!ts) return ''; try{ return new Date(ts*1000).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'}); }catch(e){ return ''; } }
 function renderMembers(){
   var list=document.getElementById('memList'); if(!list) return;
