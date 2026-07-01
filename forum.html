@@ -215,13 +215,13 @@ function postImg(t,id){ return '<img class="post-img" src="'+API+'/api/simg?t='+
    The backend stores only title+body, so a section is encoded as a hidden
    tag at the start of the title (e.g. "[APLIKIM] ...") and filtered here. */
 var CATS=[
-  { id:"suggestions", tag:"", icon:"fa-lightbulb", label:"Sugjerime",
-    h2:"Sugjerime", newBtn:"New suggestion",
+  { id:"suggestions", tag:"", icon:"fa-lightbulb", label:"Suggestions",
+    h2:"Suggestions", newBtn:"New suggestion",
     empty:"No suggestions yet — be the first to post one.",
     formH:"New suggestion", formHint:"Share an idea to improve the server.",
     phTitle:"Title (e.g. Add an ARM weapon)", phBody:"Describe your suggestion…", cta:"Post suggestion" },
-  { id:"admin", tag:"[APLIKIM]", icon:"fa-user-shield", label:"Aplikim për Admin",
-    h2:"Aplikim për Admin", newBtn:"Apply for admin",
+  { id:"admin", tag:"[APLIKIM]", icon:"fa-user-shield", label:"Apply for Admin",
+    h2:"Apply for Admin", newBtn:"Apply for admin",
     empty:"No applications yet — click “Apply for admin” to post yours.",
     formH:"Apply for Admin", formHint:"Tell us about you: in-game name, age, hours on the server, timezone and why you would be a good admin.",
     phTitle:"Your in-game name", phBody:"Name / age / hours played / timezone / past experience / why you?", cta:"Send application" },
