@@ -195,6 +195,15 @@ nav{display:flex;align-items:center;justify-content:space-between;height:64px}
 footer{border-top:1px solid var(--line);padding:34px 0;margin-top:30px}.foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;color:var(--dim);font-size:13px}
 
 @media(max-width:860px){.vip-feature,.detail-top,.weapon .wtop{grid-template-columns:1fr}.tiers{grid-template-columns:1fr}.vip-feature .pic img{height:230px}}
+/* --- mobile header polish --- */
+@media(max-width:720px){
+  html,body{max-width:100%;overflow-x:hidden}
+  header .wrap{padding-left:14px;padding-right:14px}
+  nav{flex-wrap:wrap;height:auto;min-height:56px;padding:8px 0;column-gap:8px;row-gap:8px}
+  .logo{font-size:18px}
+  .nav-cta{gap:8px;flex-wrap:wrap;justify-content:flex-end;align-items:center;margin-left:auto}
+  .nav-cta .btn{padding:9px 13px;font-size:13px}
+}
 </style>
 </head>
 <body>

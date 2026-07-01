@@ -147,6 +147,22 @@ section{padding:20px 0}.shead{margin-bottom:14px}.shead .k{color:var(--gold);fon
 .find-list{padding:6px}.find-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;margin-bottom:8px;cursor:pointer;transition:.15s}
 .find-row:hover{background:rgba(232,181,74,.12);border-color:var(--gold)}.find-row b{font-family:'Oswald';letter-spacing:.3px}.find-row span{color:var(--dim);font-size:12px}
 footer{border-top:1px solid var(--line);padding:30px 0;margin-top:24px}.foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--dim);font-size:13px}
+/* --- mobile header polish --- */
+@media(max-width:720px){
+  html,body{max-width:100%;overflow-x:hidden}
+  header .wrap{padding-left:14px;padding-right:14px}
+  nav{flex-wrap:wrap;height:auto;min-height:56px;padding:8px 0;column-gap:8px;row-gap:8px}
+  .logo{font-size:18px}
+  .nav-cta{gap:8px;flex-wrap:wrap;justify-content:flex-end;align-items:center;margin-left:auto;order:2}
+  .nav-cta .btn{padding:9px 13px;font-size:13px}
+  #balkanAuthUI{flex-wrap:wrap;justify-content:flex-end}
+  /* nav links become a tidy horizontal scroll row */
+  .nav-links{display:flex;order:3;width:100%;gap:8px;margin:0;overflow-x:auto;padding:2px 0 4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .nav-links::-webkit-scrollbar{display:none}
+  .nav-links a{white-space:nowrap;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:7px 14px;font-size:12.5px}
+  /* leaderboard table scrolls instead of stretching the page */
+  .lb{display:block;overflow-x:auto;white-space:nowrap}
+}
 </style>
 </head>
 <body>

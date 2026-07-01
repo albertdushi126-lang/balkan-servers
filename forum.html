@@ -118,7 +118,21 @@ nav{display:flex;align-items:center;gap:16px;height:66px}
 .pstat span{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px}
 
 footer{border-top:1px solid var(--line);padding:30px 0;margin-top:30px}.foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--dim);font-size:13px}
-@media(max-width:680px){.nav-links{display:none}.pcard{flex:0 0 84px;width:84px}.pc-av{width:56px;height:56px;font-size:20px}.post{padding:14px}}
+@media(max-width:680px){.pcard{flex:0 0 84px;width:84px}.pc-av{width:56px;height:56px;font-size:20px}.post{padding:14px}}
+/* --- mobile header polish --- */
+@media(max-width:720px){
+  html,body{max-width:100%;overflow-x:hidden}
+  header .wrap{padding-left:14px;padding-right:14px}
+  nav{flex-wrap:wrap;height:auto;min-height:56px;padding:8px 0;column-gap:8px;row-gap:8px}
+  .logo{font-size:18px}
+  .nav-cta{gap:8px;flex-wrap:wrap;justify-content:flex-end;align-items:center;margin-left:auto;order:2}
+  .nav-cta .btn{padding:9px 13px;font-size:13px}
+  #balkanAuthUI{flex-wrap:wrap;justify-content:flex-end}
+  /* nav links become a tidy horizontal scroll row */
+  .nav-links{display:flex;order:3;width:100%;gap:8px;margin:0;overflow-x:auto;padding:2px 0 4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .nav-links::-webkit-scrollbar{display:none}
+  .nav-links a{white-space:nowrap;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:7px 14px;font-size:12.5px}
+}
 </style>
 </head>
 <body>
