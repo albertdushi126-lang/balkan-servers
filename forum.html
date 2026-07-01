@@ -320,11 +320,32 @@ function newUnbanReq(cat){
     +'<div class="fmsg" id="nsMsg"></div></div>';
   PICK.ns=null;
 }
+function newComplaint(cat){
+  var inp='width:100%;background:var(--bg2);border:1px solid var(--line2);border-radius:9px;color:var(--txt);padding:11px 13px;font-size:14px;outline:none;font-family:Inter';
+  app.innerHTML='<div class="back" onclick="location.href=\'forum.html?cat=complaint\'"><i class="fa-solid fa-arrow-left"></i> Back</div>'
+    +'<div class="replybox"><h3 style="margin-bottom:4px"><span class="cat-chip"><i class="fa-solid '+cat.icon+'"></i> '+esc(cat.label)+'</span></h3>'
+    +'<div style="color:var(--dim);font-size:13px;margin:8px 0 12px">'+esc(cat.formHint||'')+'</div>'
+    +'<div class="demo-note"><i class="fa-solid fa-circle-info"></i> <b>Proof is required.</b> Attach at least ONE of: a <b>demo link</b>, a <b>screenshot / photo</b>, or the <b>console chat log</b> (in game type <code>condump</code> to save the console to <code>cstrike/</code>, then paste it below). <b>Complaints with no proof are rejected.</b></div>'
+    +'<div class="apg">'
+      +'<div class="field"><label style="color:var(--gold)">Which admin? (name) *</label><input id="cp_admin" maxlength="40" placeholder="admin name" style="'+inp+';border-color:var(--gold)"></div>'
+      +'<div class="field"><label>Server</label><input id="cp_server" maxlength="50" placeholder="BALKAN CSO - Special Zombie" style="'+inp+'"></div>'
+      +'<div class="field"><label>When (date / time)</label><input id="cp_when" maxlength="30" placeholder="today ~21:00" style="'+inp+'"></div>'
+      +'<div class="field"><label>Demo link (proof)</label><input id="cp_demo" maxlength="300" placeholder="https://drive.google.com/…" style="'+inp+'"></div>'
+    +'</div>'
+    +'<div class="field" style="margin-top:12px"><label>What happened? *</label><textarea id="cp_what" maxlength="900" placeholder="Describe what the admin did"></textarea></div>'
+    +'<div class="field" style="margin-top:12px"><label>Console / chat log (proof — paste it here)</label><textarea id="cp_logs" maxlength="1500" placeholder="Paste the console chat log (condump)…"></textarea></div>'
+    +'<div style="font-size:12.5px;color:var(--dim);margin:4px 0 8px"><i class="fa-solid fa-image" style="color:var(--gold)"></i> …or attach a screenshot / photo as proof:</div>'
+    + imgPickerHtml('ns')
+    +'<div style="margin-top:12px"><button class="btn btn-gold" onclick="submitNew(\'complaint\')"><i class="fa-solid fa-triangle-exclamation"></i> '+esc(cat.cta||'Send complaint')+'</button></div>'
+    +'<div class="fmsg" id="nsMsg"></div></div>';
+  PICK.ns=null;
+}
 function newPost(catId){
   if(!BalkanAuth.isIn()) return BalkanAuth.open('in');
   var cat=catById(catId);
   if(catId==='admin') return newAdminApp(cat);
   if(catId==='unban') return newUnbanReq(cat);
+  if(catId==='complaint') return newComplaint(cat);
   var maxLen = 120 - (cat.tag ? cat.tag.length+1 : 0);
   app.innerHTML='<div class="back" onclick="location.href=\'forum.html?cat='+cat.id+'\'"><i class="fa-solid fa-arrow-left"></i> Back</div>'
     +'<div class="replybox"><h3 style="margin-bottom:4px"><span class="cat-chip"><i class="fa-solid '+cat.icon+'"></i> '+esc(cat.label)+'</span></h3>'
@@ -354,6 +375,18 @@ async function submitNew(catId){
     if(uy.length<8){ m.className='fmsg bad'; m.textContent='Explain why you should be unbanned.'; return; }
     t='Unban request — '+un;
     b='Name / SteamID: '+un+'\nServer: '+(vu('ub_server')||'-')+'\nWhen: '+(vu('ub_when')||'-')+'\nBanned by: '+(vu('ub_admin')||'-')+'\nBan reason: '+(vu('ub_reason')||'-')+'\n\nDemo: '+demo+'\n\nWhy unban me:\n'+uy;
+  } else if(catId==='complaint'){
+    var vc=function(id){ var e=document.getElementById(id); return e?(e.value||'').trim():''; };
+    var adm=vc('cp_admin'), what=vc('cp_what'), cdemo=vc('cp_demo'), logs=vc('cp_logs');
+    if(adm.length<2){ m.className='fmsg bad'; m.textContent='Which admin is this about?'; return; }
+    if(what.length<8){ m.className='fmsg bad'; m.textContent='Describe what happened.'; return; }
+    var hasDemo=/^https?:\/\/\S{4,}/i.test(cdemo), hasPhoto=!!PICK.ns, hasLogs=logs.length>=10;
+    if(!hasDemo && !hasPhoto && !hasLogs){ m.className='fmsg bad'; m.textContent='Proof is required — attach a photo, a demo link, or paste the console / chat log.'; return; }
+    t='Complaint — '+adm;
+    b='Admin: '+adm+'\nServer: '+(vc('cp_server')||'-')+'\nWhen: '+(vc('cp_when')||'-')+'\n\nWhat happened:\n'+what
+      +(hasDemo?('\n\nDemo: '+cdemo):'')
+      +(hasLogs?('\n\nConsole / chat log:\n'+logs):'')
+      +(hasPhoto?'\n\n(screenshot attached below)':'');
   } else {
     t=(document.getElementById('nsTitle').value||'').trim(); b=(document.getElementById('nsBody').value||'').trim();
     if(t.length<4){ m.className='fmsg bad'; m.textContent='Give it a short title.'; return; }
