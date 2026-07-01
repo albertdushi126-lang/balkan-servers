@@ -20,6 +20,9 @@ const CONFIG = {
   currency : "€",
   payments : { paypal:"https://paypal.me/YOURNAME", card:"#", crypto:"#" },
 
+  // Fixed donation amounts (no custom amounts allowed)
+  donations : [5, 10, 20, 50, 100],
+
   // VIP duration tiers
   vipTiers : [
     { id:"vip15", days:15, price:3 },
@@ -170,6 +173,18 @@ nav{display:flex;align-items:center;justify-content:space-between;height:64px}
 .pays .pbtn{display:flex;align-items:center;justify-content:center;gap:10px;padding:13px;border-radius:9px;border:0;cursor:pointer;font-family:'Oswald';letter-spacing:1px;text-transform:uppercase;font-size:14px;transition:.15s}
 .pays .pbtn:hover{transform:translateY(-2px)}.pp-paypal{background:#0070ba;color:#fff}.pp-card{background:#635bff;color:#fff}.pp-crypto{background:#f7931a;color:#fff}
 .pays .pbtn.disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+/* ----- DONATE banner + modal ----- */
+.donate-banner{display:flex;align-items:center;gap:22px;background:linear-gradient(120deg,rgba(47,191,113,.14),rgba(59,130,246,.08));border:1px solid rgba(47,191,113,.4);border-radius:18px;padding:26px 30px;margin:26px 0;cursor:pointer;transition:.18s;flex-wrap:wrap}
+.donate-banner:hover{transform:translateY(-3px);border-color:var(--green)}
+.donate-banner .dic{width:66px;height:66px;flex:0 0 66px;border-radius:16px;background:rgba(47,191,113,.16);display:flex;align-items:center;justify-content:center;font-size:30px;color:var(--green)}
+.donate-banner .dtxt{flex:1;min-width:220px}
+.donate-banner .dtxt h2{font-size:clamp(22px,3vw,30px)}
+.donate-banner .dtxt p{color:var(--dim);margin-top:6px;font-size:14px}
+.donate-amounts{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:10px;margin-top:6px}
+.damount{font-family:'Oswald';font-size:22px;letter-spacing:.5px;padding:16px 8px;border-radius:11px;border:1px solid var(--line2);background:var(--bg2);color:var(--txt);cursor:pointer;transition:.15s;text-align:center}
+.damount:hover{border-color:var(--green);transform:translateY(-2px)}
+.damount.active{background:var(--green);color:#06200f;border-color:var(--green)}
 .sheet .after{margin-top:14px;font-size:12.5px;color:var(--dim);text-align:center}
 .err{color:var(--red);font-size:13px;margin-top:8px;display:none}
 .find-results{margin-top:6px}.find-results:empty{display:none}
@@ -203,6 +218,16 @@ footer{border-top:1px solid var(--line);padding:34px 0;margin-top:30px}.foot{dis
   </div>
   <div class="filters" id="filters"></div>
   <div id="vipFeatureSlot"></div>
+
+  <div class="donate-banner" onclick="openDonate()">
+    <div class="dic"><i class="fa-solid fa-heart"></i></div>
+    <div class="dtxt">
+      <h2>Donate to keep the <span class="gold">server alive</span></h2>
+      <p>Every donation goes straight into keeping BALKAN-SERVERS online. Pick an amount and pay safely with PayPal, card or crypto — thank you! 🙏</p>
+    </div>
+    <span class="btn btn-green"><i class="fa-solid fa-hand-holding-heart"></i> Donate</span>
+  </div>
+
   <div class="grid" id="grid"></div>
 </div></div>
 
@@ -233,6 +258,23 @@ footer{border-top:1px solid var(--line);padding:34px 0;margin-top:30px}.foot{dis
     <button class="pbtn pp-crypto" onclick="pay('crypto')"><i class="fa-brands fa-bitcoin"></i> Crypto</button>
   </div>
   <div class="after"><i class="fa-solid fa-shield-halved"></i> Applies in-game after the next map change.</div>
+</div></div>
+
+<!-- ===== DONATE MODAL ===== -->
+<div class="modal" id="donateModal"><div class="sheet">
+  <button class="x" onclick="closeDonate()"><i class="fa-solid fa-xmark"></i></button>
+  <div class="item"><div class="ic"><i class="fa-solid fa-heart"></i></div>
+    <div style="flex:1"><h3>Donate to keep the server alive</h3><div style="color:var(--dim);font-size:13px">Pick an amount, then choose how to pay.</div></div></div>
+  <div class="field"><label>Choose an amount</label>
+    <div class="donate-amounts" id="donateAmounts"></div>
+    <div class="err" id="donateErr">Please pick an amount first.</div>
+  </div>
+  <div class="pays" id="donatePays" style="display:none">
+    <button class="pbtn pp-paypal" onclick="payDonation('paypal')"><i class="fa-brands fa-paypal"></i> PayPal</button>
+    <button class="pbtn pp-card" onclick="payDonation('card')"><i class="fa-solid fa-credit-card"></i> Card</button>
+    <button class="pbtn pp-crypto" onclick="payDonation('crypto')"><i class="fa-brands fa-bitcoin"></i> Crypto</button>
+  </div>
+  <div class="after"><i class="fa-solid fa-heart" style="color:var(--green)"></i> Thank you for supporting BALKAN-SERVERS!</div>
 </div></div>
 
 <script>
@@ -408,6 +450,41 @@ async function pay(method){
   btns.forEach(function(b){ b.classList.remove('disabled'); });
 }
 
+/* ---------- donations (fixed amounts, no SteamID) ---------- */
+let donateAmount=null;
+function renderDonateAmounts(){
+  document.getElementById('donateAmounts').innerHTML =
+    (C.donations||[]).map(function(a){ return '<button type="button" class="damount" onclick="pickDonateAmount('+a+',this)">'+cur+a+'</button>'; }).join('');
+}
+function openDonate(){
+  donateAmount=null;
+  document.querySelectorAll('.damount').forEach(function(el){ el.classList.remove('active'); });
+  document.getElementById('donatePays').style.display='none';
+  document.getElementById('donateErr').style.display='none';
+  document.getElementById('donateModal').classList.add('open');
+}
+function closeDonate(){ document.getElementById('donateModal').classList.remove('open'); }
+function pickDonateAmount(a,el){
+  donateAmount=a;
+  document.querySelectorAll('.damount').forEach(function(x){ x.classList.remove('active'); });
+  el.classList.add('active');
+  document.getElementById('donatePays').style.display='grid';
+  document.getElementById('donateErr').style.display='none';
+}
+async function payDonation(method){
+  if(!donateAmount){ document.getElementById('donateErr').style.display='block'; return; }
+  var endpoint=(method==='paypal') ? '/api/pay/paypal' : '/api/pay/nowpayments';
+  var btns=document.querySelectorAll('#donatePays .pbtn'); btns.forEach(function(b){ b.classList.add('disabled'); });
+  try{
+    var r=await fetch(API+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({item:'donate',steamid:'',days:0,price:donateAmount})});
+    var d=null; try{ d=await r.json(); }catch(e){}
+    if(r.ok&&d&&d.url){ window.location.href=d.url; return; }
+    alert((d&&d.error)||'Could not start the donation. Please try again.');
+  }catch(e){ alert('Network error — the server may be waking up. Try again in a few seconds.'); }
+  btns.forEach(function(b){ b.classList.remove('disabled'); });
+}
+
 function connect(){ window.location.href='steam://connect/'+C.serverIP; }
 
 /* ---- find account by in-game name -> auto-fill SteamID ---- */
@@ -432,7 +509,7 @@ function pickFind(i){ var p=findResults[i]; if(!p) return;
 }
 
 /* init */
-renderFilters(); renderGrid();
+renderFilters(); renderGrid(); renderDonateAmounts();
 if(location.hash && C.items.find(i=>i.id===location.hash.slice(1))) openDetail(location.hash.slice(1));
 </script>
 </body>
