@@ -50,6 +50,10 @@ nav{display:flex;align-items:center;gap:16px;height:66px}
 .tabs{display:flex;gap:8px;margin:18px 0}
 .tab{font-family:'Oswald';letter-spacing:1px;font-size:13px;text-transform:uppercase;padding:9px 18px;border-radius:30px;border:1px solid var(--line2);background:var(--panel);color:var(--dim);cursor:pointer}
 .tab.on{background:var(--gold);color:#241a02;border-color:var(--gold)}
+.tabs{flex-wrap:wrap}
+.cat-tabs .tab{display:inline-flex;align-items:center;gap:7px}
+.cat-tabs .tab i{font-size:12px}
+.cat-chip{display:inline-flex;align-items:center;gap:6px;font-family:'Oswald';letter-spacing:.5px;font-size:11px;text-transform:uppercase;padding:3px 10px;border-radius:20px;background:var(--panel2);border:1px solid var(--line2);color:var(--gold)}
 
 /* list */
 .thread{display:flex;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:12px;transition:.15s}
@@ -203,54 +207,94 @@ function resizeImg(file,max,cb){
 }
 function postImg(t,id){ return '<img class="post-img" src="'+API+'/api/simg?t='+t+'&id='+id+'" alt="" onerror="this.remove()" onclick="window.open(this.src)">'; }
 
+/* ---------- forum sections (rubrics) ----------
+   The backend stores only title+body, so a section is encoded as a hidden
+   tag at the start of the title (e.g. "[APLIKIM] ...") and filtered here. */
+var CATS=[
+  { id:"suggestions", tag:"", icon:"fa-lightbulb", label:"Sugjerime",
+    h2:"Sugjerime", newBtn:"New suggestion",
+    empty:"No suggestions yet — be the first to post one.",
+    formH:"New suggestion", formHint:"Share an idea to improve the server.",
+    phTitle:"Title (e.g. Add an ARM weapon)", phBody:"Describe your suggestion…", cta:"Post suggestion" },
+  { id:"admin", tag:"[APLIKIM]", icon:"fa-user-shield", label:"Aplikim për Admin",
+    h2:"Aplikim për Admin", newBtn:"Apply for admin",
+    empty:"No applications yet — click “Apply for admin” to post yours.",
+    formH:"Apply for Admin", formHint:"Tell us about you: in-game name, age, hours on the server, timezone and why you would be a good admin.",
+    phTitle:"Your in-game name", phBody:"Name / age / hours played / timezone / past experience / why you?", cta:"Send application" },
+  { id:"unban", tag:"[UNBAN]", icon:"fa-unlock", label:"Request Unban",
+    h2:"Request an Unban", newBtn:"Request unban",
+    empty:"No unban requests yet.",
+    formH:"Request an Unban", formHint:"Give your name/SteamID, which server, when and why you were banned, and why you should be unbanned.",
+    phTitle:"Your in-game name or SteamID", phBody:"Server / date of ban / admin who banned you / your side of the story…", cta:"Send request" },
+  { id:"complaint", tag:"[ANKESA]", icon:"fa-triangle-exclamation", label:"Complaint for Admins",
+    h2:"Complaint for Admins", newBtn:"New complaint",
+    empty:"No complaints yet.",
+    formH:"Complaint for an Admin", formHint:"Which admin, what happened, when and on which server. Add proof/screenshots if you can.",
+    phTitle:"Which admin? (name)", phBody:"What happened, when, which server + proof…", cta:"Send complaint" }
+];
+function catById(id){ for(var i=0;i<CATS.length;i++){ if(CATS[i].id===id) return CATS[i]; } return CATS[0]; }
+function parseCat(title){ title=title||''; for(var i=0;i<CATS.length;i++){ var c=CATS[i]; if(c.tag && title.indexOf(c.tag)===0){ return {cat:c, title:title.slice(c.tag.length).trim()}; } } return {cat:CATS[0], title:title}; }
+
 /* ---------- routing ---------- */
 function route(){
   var q=new URLSearchParams(location.search);
   if(q.get('profile')) return viewProfile(parseInt(q.get('profile'),10));
   if(q.get('id')) return viewThread(parseInt(q.get('id'),10));
-  return viewList(q.get('sort')||'top');
+  return viewList(q.get('sort')||'top', q.get('cat')||'suggestions');
 }
 
 /* ---------- list ---------- */
-async function viewList(sort){
+async function viewList(sort, catId){
   sort = (sort==='new')?'new':'top';
-  app.innerHTML='<div class="phead"><div><div class="k">COMMUNITY</div><h1>Suggestions Forum</h1></div>'
-    +'<button class="btn btn-gold" onclick="newSuggestion()"><i class="fa-solid fa-plus"></i> New suggestion</button></div>'
-    +'<div class="tabs"><div class="tab '+(sort==='top'?'on':'')+'" onclick="location.href=\'forum.html?sort=top\'">Top</div>'
-    +'<div class="tab '+(sort==='new'?'on':'')+'" onclick="location.href=\'forum.html?sort=new\'">New</div></div>'
+  var cat = catById(catId);
+  var catTabs = CATS.map(function(c){
+    return '<div class="tab '+(c.id===cat.id?'on':'')+'" onclick="location.href=\'forum.html?cat='+c.id+'&sort='+sort+'\'"><i class="fa-solid '+c.icon+'"></i> '+esc(c.label)+'</div>';
+  }).join('');
+  app.innerHTML='<div class="phead"><div><div class="k">COMMUNITY</div><h1>'+esc(cat.h2)+'</h1></div>'
+    +'<button class="btn btn-gold" onclick="newPost(\''+cat.id+'\')"><i class="fa-solid fa-plus"></i> '+esc(cat.newBtn)+'</button></div>'
+    +'<div class="tabs cat-tabs">'+catTabs+'</div>'
+    +'<div class="tabs"><div class="tab '+(sort==='top'?'on':'')+'" onclick="location.href=\'forum.html?cat='+cat.id+'&sort=top\'">Top</div>'
+    +'<div class="tab '+(sort==='new'?'on':'')+'" onclick="location.href=\'forum.html?cat='+cat.id+'&sort=new\'">New</div></div>'
     +'<div id="list"><div class="muted">Loading…</div></div>';
-  var r=await BalkanAuth.api('/api/suggestions?sort='+sort+'&limit=40');
+  var r=await BalkanAuth.api('/api/suggestions?sort='+sort+'&limit=100');
   var box=document.getElementById('list');
   if(!r.ok||!r.data){ box.innerHTML='<div class="muted">Could not load the forum.</div>'; return; }
-  if(!r.data.items.length){ box.innerHTML='<div class="muted">No suggestions yet — be the first to post one.</div>'; return; }
-  box.innerHTML=r.data.items.map(function(t){
+  var items=(r.data.items||[]).filter(function(t){ return parseCat(t.title).cat.id===cat.id; });
+  if(!items.length){ box.innerHTML='<div class="muted">'+esc(cat.empty)+'</div>'; return; }
+  box.innerHTML=items.map(function(t){
+    var pc=parseCat(t.title);
     return '<div class="thread">'
       +'<div class="tvote"><b>'+(t.likes-t.dislikes)+'</b><span>votes</span></div>'
       +'<div class="tbody" onclick="location.href=\'forum.html?id='+t.id+'\'">'
-        +'<h3>'+(t.pinned?'<i class="fa-solid fa-thumbtack pinned"></i> ':'')+esc(t.title)+' <span class="pill '+esc(t.status)+'">'+esc(t.status)+'</span></h3>'
+        +'<h3>'+(t.pinned?'<i class="fa-solid fa-thumbtack pinned"></i> ':'')+esc(pc.title)+' <span class="pill '+esc(t.status)+'">'+esc(t.status)+'</span></h3>'
         +'<div class="snip">'+esc(t.snippet||'')+'</div>'
         +(t.hasImage?'<img class="thumb-mini" src="'+API+'/api/simg?t=s&id='+t.id+'" alt="" onerror="this.remove()">':'')
         +'<div class="tmeta">'+authorLine(t.author)+'<span><i class="fa-solid fa-thumbs-up"></i> '+t.likes+'</span><span><i class="fa-solid fa-thumbs-down"></i> '+t.dislikes+'</span><span><i class="fa-solid fa-comment"></i> '+t.replyCount+' replies</span></div>'
       +'</div></div>';
   }).join('');
 }
-function newSuggestion(){
+function newPost(catId){
   if(!BalkanAuth.isIn()) return BalkanAuth.open('in');
-  app.innerHTML='<div class="back" onclick="route()"><i class="fa-solid fa-arrow-left"></i> Back</div>'
-    +'<div class="replybox"><h3 style="margin-bottom:12px">New suggestion</h3>'
-    +'<div style="margin-bottom:10px"><input id="nsTitle" maxlength="120" placeholder="Title (e.g. Add an ARM weapon)" style="width:100%;background:var(--bg2);border:1px solid var(--line2);border-radius:9px;color:var(--txt);padding:11px 13px;font-size:14px;outline:none;font-family:Inter"></div>'
-    +'<textarea id="nsBody" placeholder="Describe your suggestion…"></textarea>'
+  var cat=catById(catId);
+  var maxLen = 120 - (cat.tag ? cat.tag.length+1 : 0);
+  app.innerHTML='<div class="back" onclick="location.href=\'forum.html?cat='+cat.id+'\'"><i class="fa-solid fa-arrow-left"></i> Back</div>'
+    +'<div class="replybox"><h3 style="margin-bottom:4px"><span class="cat-chip"><i class="fa-solid '+cat.icon+'"></i> '+esc(cat.label)+'</span></h3>'
+    +'<div style="color:var(--dim);font-size:13px;margin:8px 0 12px">'+esc(cat.formHint)+'</div>'
+    +'<div style="margin-bottom:10px"><input id="nsTitle" maxlength="'+maxLen+'" placeholder="'+esc(cat.phTitle)+'" style="width:100%;background:var(--bg2);border:1px solid var(--line2);border-radius:9px;color:var(--txt);padding:11px 13px;font-size:14px;outline:none;font-family:Inter"></div>'
+    +'<textarea id="nsBody" placeholder="'+esc(cat.phBody)+'"></textarea>'
     + imgPickerHtml('ns')
-    +'<div style="margin-top:12px"><button class="btn btn-gold" onclick="submitNew()"><i class="fa-solid fa-paper-plane"></i> Post suggestion</button></div>'
+    +'<div style="margin-top:12px"><button class="btn btn-gold" onclick="submitNew(\''+cat.id+'\')"><i class="fa-solid fa-paper-plane"></i> '+esc(cat.cta)+'</button></div>'
     +'<div class="fmsg" id="nsMsg"></div></div>';
   PICK.ns=null;
 }
-async function submitNew(){
+async function submitNew(catId){
+  var cat=catById(catId);
   var t=(document.getElementById('nsTitle').value||'').trim(), b=(document.getElementById('nsBody').value||'').trim(), m=document.getElementById('nsMsg');
   if(t.length<4){ m.className='fmsg bad'; m.textContent='Give it a short title.'; return; }
   if(b.length<8){ m.className='fmsg bad'; m.textContent='Write a few words.'; return; }
   m.className='fmsg'; m.textContent='Posting…';
-  var r=await BalkanAuth.api('/api/suggestions',{method:'POST',body:{title:t,body:b,image:PICK.ns||undefined}});
+  var title = cat.tag ? (cat.tag+' '+t) : t;
+  var r=await BalkanAuth.api('/api/suggestions',{method:'POST',body:{title:title,body:b,image:PICK.ns||undefined}});
   if(r.ok&&r.data&&r.data.id) location.href='forum.html?id='+r.data.id;
   else { m.className='fmsg bad'; m.textContent=(r.data&&r.data.error)||'Could not post.'; }
 }
@@ -265,10 +309,11 @@ async function viewThread(id){
   var t=r.data.thread, reps=r.data.replies||[];
   var owner = window.BalkanAuth && BalkanAuth.isOwner();
   var canDelete = owner; // author check is server-side; owner always can
-  var html='<div class="back" onclick="location.href=\'forum.html\'"><i class="fa-solid fa-arrow-left"></i> Back to forum</div>';
+  var pc=parseCat(t.title);
+  var html='<div class="back" onclick="location.href=\'forum.html?cat='+pc.cat.id+'\'"><i class="fa-solid fa-arrow-left"></i> Back to '+esc(pc.cat.label)+'</div>';
   // OP
   html+='<div class="post op">'+pcard(t.author)
-    +'<div class="post-main"><h2>'+(t.pinned?'<i class="fa-solid fa-thumbtack pinned"></i> ':'')+esc(t.title)+' <span class="pill '+esc(t.status)+'">'+esc(t.status)+'</span></h2>'
+    +'<div class="post-main"><div style="margin-bottom:6px"><span class="cat-chip"><i class="fa-solid '+pc.cat.icon+'"></i> '+esc(pc.cat.label)+'</span></div><h2>'+(t.pinned?'<i class="fa-solid fa-thumbtack pinned"></i> ':'')+esc(pc.title)+' <span class="pill '+esc(t.status)+'">'+esc(t.status)+'</span></h2>'
     +'<div class="post-body">'+esc(t.body)+'</div>'+(t.hasImage?postImg('s',t.id):'')+'<div class="post-time">'+when(t.ts)+'</div>'
     +'<div class="votebar">'
       +'<div class="vbtn up'+(CUR.myVote===1?' on':'')+'" id="vUp" onclick="vote(1)"><i class="fa-solid fa-thumbs-up"></i> <span data-i18n>Like</span> <b id="cUp">'+t.likes+'</b></div>'
